@@ -126,7 +126,7 @@ mygetline(char p[], char s[], unsigned size, int firstchar, BOOL iscaseless)
      * At the end of the function, we'll pop off any remaining characters
      * onto the end of 's'
      */
-    sright = calloc(sizeof(char), size );
+    sright = reinterpret_cast<char*>(calloc(sizeof(char), size ));
 
     strcpy ( s, p);
     i += strlen(p);

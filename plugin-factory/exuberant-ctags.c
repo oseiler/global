@@ -96,7 +96,7 @@ start_ctags(const struct parser_param *param)
 
 	if (strlen(EXUBERANT_CTAGS) == 0 || !strcmp(EXUBERANT_CTAGS, "no"))
 		param->die(ctagsnotfound);
-	argv[1] = malloc(sizeof(LANGMAP_OPTION) + strlen(param->langmap));
+	argv[1] = reinterpret_cast<char*>(malloc(sizeof(LANGMAP_OPTION) + strlen(param->langmap)));
 	if (argv[1] == NULL)
 		param->die("short of memory.");
 	memcpy(argv[1], LANGMAP_OPTION, sizeof(LANGMAP_OPTION) - 1);
@@ -129,7 +129,7 @@ start_ctags(const struct parser_param *param)
 		param->die("fdopen failed.");
 
 	bufsize = INITIAL_BUFSIZE;
-	linebuf = malloc(bufsize);
+	linebuf = reinterpret_cast<char*>(malloc(bufsize));
 	if (linebuf == NULL)
 		param->die("short of memory.");
 }
@@ -166,7 +166,7 @@ get_line(const struct parser_param *param)
 		 || feof(ip))
 			break;
 		bufsize *= 2;
-		linebuf = realloc(linebuf, bufsize);
+		linebuf = reinterpret_cast<char*>(realloc(linebuf, bufsize));
 		if (linebuf == NULL)
 			param->die("short of memory.");
 	}

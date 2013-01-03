@@ -738,7 +738,7 @@ struct put_func_data {
 static void
 put_syms(int type, const char *tag, int lno, const char *path, const char *line_image, void *arg)
 {
-	const struct put_func_data *data = arg;
+	const struct put_func_data *data = reinterpret_cast<put_func_data*>(arg);
 	GTOP *gtop;
 
 	switch (type) {

@@ -91,7 +91,7 @@ check_realloc(void *area, size_t size)
 char *
 check_strdup(const char *string)
 {
-	char *p = check_malloc(strlen(string) + 1);
+	char *p = reinterpret_cast<char*>(check_malloc(strlen(string) + 1));
 	strcpy(p, string);
 	return p;
 }

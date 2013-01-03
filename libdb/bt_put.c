@@ -67,12 +67,7 @@ static EPG *bt_fast(BTREE *, const DBT *, const DBT *, int *);
  *	#RET_ERROR, #RET_SUCCESS and #RET_SPECIAL if the key is already in the
  *	tree and #R_NOOVERWRITE specified.
  */
-int
-__bt_put(dbp, key, data, flags)
-	const DB *dbp;
-	DBT *key;
-	const DBT *data;
-	u_int flags;
+int __bt_put(const DB *dbp, DBT *key, const DBT *data, u_int flags)
 {
 	BTREE *t;
 	DBT tkey, tdata;
@@ -84,7 +79,7 @@ __bt_put(dbp, key, data, flags)
 	int dflags, exact, status;
 	char *dest, db[NOVFLSIZE], kb[NOVFLSIZE];
 
-	t = dbp->internal;
+	t = reinterpret_cast<BTREE*>(dbp->internal);
 
 	/* Toss any page pinned across calls. */
 	if (t->bt_pinned != NULL) {
@@ -155,17 +150,17 @@ storekey:		if (__ovfl_put(t, key, &pg) == RET_ERROR)
 
 	/* Replace the cursor. */
 	if (flags == R_CURSOR) {
-		if ((h = mpool_get(t->bt_mp, t->bt_cursor.pg.pgno, 0)) == NULL)
+		if ((h = reinterpret_cast<PAGE*>(mpool_get(t->bt_mp, t->bt_cursor.pg.pgno, 0))) == NULL)
 			return (RET_ERROR);
 		index = t->bt_cursor.pg.index;
-		goto delete;
+		goto delete_;
 	}
 
 	/*
 	 * Find the key to delete, or, the location at which to insert.
 	 * Bt_fast and __bt_search both pin the returned page.
 	 */
-	if (t->bt_order == NOT || (e = bt_fast(t, key, data, &exact)) == NULL)
+	if (t->bt_order == BTREE::NOT || (e = bt_fast(t, key, data, &exact)) == NULL)
 		if ((e = __bt_search(t, key, &exact)) == NULL)
 			return (RET_ERROR);
 	h = e->page;
@@ -191,7 +186,7 @@ storekey:		if (__ovfl_put(t, key, &pg) == RET_ERROR)
 		 * Note, the delete may empty the page, so we need to put a
 		 * new entry into the page immediately.
 		 */
-delete:		if (__bt_dleaf(t, key, h, index) == RET_ERROR) {
+delete_:	if (__bt_dleaf(t, key, h, index) == RET_ERROR) {
 			mpool_put(t->bt_mp, h, 0);
 			return (RET_ERROR);
 		}
@@ -227,16 +222,16 @@ delete:		if (__bt_dleaf(t, key, h, index) == RET_ERROR) {
 	    t->bt_cursor.pg.pgno == h->pgno && t->bt_cursor.pg.index >= index)
 		++t->bt_cursor.pg.index;
 
-	if (t->bt_order == NOT) {
+	if (t->bt_order == BTREE::NOT) {
 		if (h->nextpg == P_INVALID) {
 			if (index == NEXTINDEX(h) - 1) {
-				t->bt_order = FORWARD;
+				t->bt_order = BTREE::FORWARD;
 				t->bt_last.index = index;
 				t->bt_last.pgno = h->pgno;
 			}
 		} else if (h->prevpg == P_INVALID) {
 			if (index == 0) {
-				t->bt_order = BACK;
+				t->bt_order = BTREE::BACK;
 				t->bt_last.index = 0;
 				t->bt_last.pgno = h->pgno;
 			}
@@ -264,18 +259,14 @@ u_long bt_cache_hit, bt_cache_miss;
  *
  * @return #EPG for new record or @CODE{NULL} if not found.
  */
-static EPG *
-bt_fast(t, key, data, exactp)
-	BTREE *t;
-	const DBT *key, *data;
-	int *exactp;
+EPG *bt_fast(BTREE *t, const DBT *key, const DBT *data, int *exactp)
 {
 	PAGE *h;
 	u_int32_t nbytes;
 	int cmp;
 
-	if ((h = mpool_get(t->bt_mp, t->bt_last.pgno, 0)) == NULL) {
-		t->bt_order = NOT;
+	if ((h = reinterpret_cast<PAGE*>(mpool_get(t->bt_mp, t->bt_last.pgno, 0))) == NULL) {
+		t->bt_order = BTREE::NOT;
 		return (NULL);
 	}
 	t->bt_cur.page = h;
@@ -289,7 +280,7 @@ bt_fast(t, key, data, exactp)
 	if (h->upper - h->lower < nbytes + sizeof(indx_t))
 		goto miss;
 
-	if (t->bt_order == FORWARD) {
+	if (t->bt_order == BTREE::FORWARD) {
 		if (t->bt_cur.page->nextpg != P_INVALID)
 			goto miss;
 		if (t->bt_cur.index != NEXTINDEX(h) - 1)
@@ -316,7 +307,7 @@ miss:
 #ifdef STATISTICS
 	++bt_cache_miss;
 #endif
-	t->bt_order = NOT;
+	t->bt_order = BTREE::NOT;
 	mpool_put(t->bt_mp, h, 0);
 	return (NULL);
 }

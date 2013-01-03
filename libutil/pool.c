@@ -58,7 +58,7 @@ pool_open(void)
 	POOL *pool = (POOL *)check_calloc(sizeof(POOL), 1);
 
 	obstack_init(&pool->obstack);
-	pool->first_object = obstack_alloc(&pool->obstack, 1);
+	pool->first_object = reinterpret_cast<char*>(obstack_alloc(&pool->obstack, 1));
 	return pool;
 }
 /**
@@ -86,7 +86,7 @@ pool_strdup(POOL *pool, const char *string, int size)
 {
 	if (size == 0)
 		size = strlen(string);
-	return obstack_copy0(&pool->obstack, string, size);
+	return reinterpret_cast<char*>(obstack_copy0(&pool->obstack, string, size));
 }
 /**
  * pool_strdup_withterm: memory pool version of @NAME{strdup()}
@@ -101,7 +101,7 @@ pool_strdup_withterm(POOL *pool, const char *string, int term)
 {
 	const char *p = strchr(string, term);
 	int size = p ? p - string : strlen(string);
-	return obstack_copy0(&pool->obstack, string, size);
+	return reinterpret_cast<char*>(obstack_copy0(&pool->obstack, string, size));
 }
 /**
  * pool_reset: reset memory pool

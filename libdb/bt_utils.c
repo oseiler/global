@@ -65,12 +65,7 @@ static char sccsid[] = "@(#)bt_utils.c	8.8 (Berkeley) 7/20/94";
  * @return
  *	#RET_SUCCESS, #RET_ERROR.
  */
-int
-__bt_ret(t, e, key, rkey, data, rdata, copy)
-	BTREE *t;
-	EPG *e;
-	DBT *key, *rkey, *data, *rdata;
-	int copy;
+int __bt_ret(BTREE *t, EPG *e, DBT *key, DBT *rkey, DBT *data, DBT *rdata, int copy)
 {
 	BLEAF *bl;
 	void *p;
@@ -150,11 +145,7 @@ dataonly:
  *	= 0 if @a k1 is = record <br>
  *	\> 0 if @a k1 is \> record
  */
-int
-__bt_cmp(t, k1, e)
-	BTREE *t;
-	const DBT *k1;
-	EPG *e;
+int __bt_cmp(BTREE *t, const DBT *k1, EPG *e)
 {
 	BINTERNAL *bi;
 	BLEAF *bl;
@@ -212,9 +203,7 @@ __bt_cmp(t, k1, e)
  *	= 0 if @a a is = @a b <br>
  *	\> 0 if @a a is \> @a b
  */
-int
-__bt_defcmp(a, b)
-	const DBT *a, *b;
+int __bt_defcmp(const DBT *a, const DBT *b)
 {
 	register size_t len;
 	register u_char *p1, *p2;
@@ -226,7 +215,7 @@ __bt_defcmp(a, b)
 	 * larger than a size_t, and there is no such thing.
 	 */
 	len = MIN(a->size, b->size);
-	for (p1 = a->data, p2 = b->data; len--; ++p1, ++p2)
+	for (p1 = reinterpret_cast<u_char*>(a->data), p2 = reinterpret_cast<u_char*>(b->data); len--; ++p1, ++p2)
 		if (*p1 != *p2)
 			return ((int)*p1 - (int)*p2);
 	return ((int)a->size - (int)b->size);
@@ -241,16 +230,14 @@ __bt_defcmp(a, b)
  * @return
  *	Number of bytes needed to distinguish @a b from @a a.
  */
-size_t
-__bt_defpfx(a, b)
-	const DBT *a, *b;
+size_t __bt_defpfx(const DBT *a, const DBT *b)
 {
 	register u_char *p1, *p2;
 	register size_t cnt, len;
 
 	cnt = 1;
 	len = MIN(a->size, b->size);
-	for (p1 = a->data, p2 = b->data; len--; ++p1, ++p2, ++cnt)
+	for (p1 = reinterpret_cast<u_char*>(a->data), p2 = reinterpret_cast<u_char*>(b->data); len--; ++p1, ++p2, ++cnt)
 		if (*p1 != *p2)
 			return (cnt);
 

@@ -427,7 +427,7 @@ has_symlinkloop(const char *dir)
 	p = locatestring(rootdir, real, MATCH_AT_FIRST);
 	if (p && (*p == '/' || *p == '\0' || !strcmp(real, "/")))
 		return 1;
-	sp = varray_assign(stack, 0, 0);
+	sp = reinterpret_cast<stack_entry*>(varray_assign(stack, 0, 0));
 #ifdef SLOOPDEBUG
 	fprintf(stderr, "TEST-2\n");
 #endif
@@ -523,7 +523,7 @@ find_open(const char *start)
 	 */
 	stack = varray_open(sizeof(struct stack_entry), 50);
 	current_entry = 0;
-	curp = varray_assign(stack, current_entry, 1);
+	curp = reinterpret_cast<stack_entry*>(varray_assign(stack, current_entry, 1));
 	strlimcpy(dir, start, sizeof(dir));
 	curp->dirp = dir + strlen(dir);
 	curp->sb = strbuf_open(0);
@@ -606,7 +606,7 @@ find_read_traverse(void)
 {
 	static char val[MAXPATHLEN];
 	char path[MAXPATHLEN];
-	struct stack_entry *curp = varray_assign(stack, current_entry, 1);
+	struct stack_entry *curp = reinterpret_cast<stack_entry*>(varray_assign(stack, current_entry, 1));
 
 	for (;;) {
 		while (curp->p < curp->end) {
@@ -673,7 +673,7 @@ find_read_traverse(void)
 				/*
 				 * Push stack.
 				 */
-				curp = varray_assign(stack, ++current_entry, 1);
+				curp = reinterpret_cast<stack_entry*>(varray_assign(stack, ++current_entry, 1));
 				curp->dirp = dirp + strlen(dirp);
 				curp->real = getrealpath(dir);
 				curp->sb = sb;
@@ -690,7 +690,7 @@ find_read_traverse(void)
 		/*
 		 * Pop stack.
 		 */
-		curp = varray_assign(stack, --current_entry, 0);
+		curp = reinterpret_cast<stack_entry*>(varray_assign(stack, --current_entry, 0));
 		*(curp->dirp) = 0;
 	}
 	find_eof = 1;

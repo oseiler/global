@@ -73,7 +73,7 @@ open_input_file(const char *path)
 
 	if (fp == NULL)
 		die("cannot open file '%s'.", path);
-	fileop = check_calloc(sizeof(FILEOP), 1);
+	fileop = reinterpret_cast<FILEOP*>(check_calloc(sizeof(FILEOP), 1));
 	fileop->fp = fp;
 	strlimcpy(fileop->path, path, sizeof(fileop->path));
 	fileop->type = FILEOP_INPUT;
@@ -105,7 +105,7 @@ open_output_file(const char *path, int compress)
 		if (fp == NULL)
 			die("cannot create file '%s'.", path);
 	}
-	fileop = check_calloc(sizeof(FILEOP), 1);
+	fileop = reinterpret_cast<FILEOP*>(check_calloc(sizeof(FILEOP), 1));
 	strlimcpy(fileop->path, path, sizeof(fileop->path));
 	if (compress)
 		strlimcpy(fileop->command, command, sizeof(fileop->command));

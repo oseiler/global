@@ -53,10 +53,7 @@ static char sccsid[] = "@(#)bt_page.c	8.3 (Berkeley) 7/14/94";
  * @par Side-effect:
  *	#mpool_put's the page.
  */
-int
-__bt_free(t, h)
-	BTREE *t;
-	PAGE *h;
+int __bt_free(BTREE *t, PAGE *h)
 {
 	/* Insert the page at the head of the free list. */
 	h->prevpg = P_INVALID;
@@ -77,19 +74,16 @@ __bt_free(t, h)
  *
  * @return Pointer to a page, @CODE{NULL} on error.
  */
-PAGE *
-__bt_new(t, npg)
-	BTREE *t;
-	pgno_t *npg;
+PAGE *__bt_new(BTREE *t, pgno_t *npg)
 {
 	PAGE *h;
 
 	if (t->bt_free != P_INVALID &&
-	    (h = mpool_get(t->bt_mp, t->bt_free, 0)) != NULL) {
+	    (h = reinterpret_cast<PAGE*>(mpool_get(t->bt_mp, t->bt_free, 0))) != NULL) {
 		*npg = t->bt_free;
 		t->bt_free = h->nextpg;
 		F_SET(t, B_METADIRTY);
 		return (h);
 	}
-	return (mpool_new(t->bt_mp, npg));
+	return reinterpret_cast<PAGE*>(mpool_new(t->bt_mp, npg));
 }

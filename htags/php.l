@@ -127,7 +127,7 @@ WORD		{ALPHA}{ALPHANUM}*
 		 * include   'aaa/bbb.h';
 		 *        ^
 		 */
-		while ((c = input()) && c != EOF && c != '\n' && isspace(c))
+		while ((c = yyinput()) && c != EOF && c != '\n' && isspace(c))
 			echoc(c);
 		if (c == EOF)
 			c = '\n';
@@ -138,7 +138,7 @@ WORD		{ALPHA}{ALPHANUM}*
 			int sep = 0;
 
 			if (c == LEFT_BRACE) {
-				c = input();
+				c = yyinput();
 				if (c == EOF)
 					c = '\n';
 			}
@@ -147,7 +147,7 @@ WORD		{ALPHA}{ALPHANUM}*
 			echoc(c);
 
 			/* pick up path name */
-			while ((c = input()) && c != EOF && c != '\n' && c != sep)
+			while ((c = yyinput()) && c != EOF && c != '\n' && c != sep)
 				*p++ = c;
 			*p = '\0';
 			if (c == EOF)

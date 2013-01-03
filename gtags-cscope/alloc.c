@@ -57,7 +57,7 @@ char	*calloc(), *malloc(), *realloc(), *strcpy();
 char *
 my_strdup(char *s)
 {
-	return(strcpy(mymalloc(strlen(s) + 1), s));
+	return(strcpy(reinterpret_cast<char*>(mymalloc(strlen(s) + 1)), s));
 }
 
 

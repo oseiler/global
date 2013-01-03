@@ -116,7 +116,7 @@
 
 #undef PUT
 #define PUT(type, tag, lno) do {					\
-	const char *line_image = linetable_get(lno, NULL);		\
+	char *line_image = linetable_get(lno, NULL);			\
 	char *nl = strchr(line_image, '\n');				\
 	if (nl != NULL)							\
 		*nl = '\0';						\

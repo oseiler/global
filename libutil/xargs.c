@@ -283,7 +283,7 @@ xargs_open_generic(const char *command, int max_args)
 {
 	XARGS *xp;
 
-	xp  = check_calloc(sizeof(XARGS), 1);
+	xp  = reinterpret_cast<XARGS*>(check_calloc(sizeof(XARGS), 1));
 	xp->command = check_strdup(command);
 	xp->type = 0;
 	xp->pipe = NULL;

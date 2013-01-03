@@ -369,7 +369,7 @@ print_directory(int level, char *basedir)
 		op = get_descripter(fileop);
 		print_directory_header(op, level, basedir);
 		if (tree_view) {
-			char *target = (Fflag) ? "mains" : "_top";
+			const char *target = (Fflag) ? "mains" : "_top";
 
 			strbuf_puts(files, dir_begin);
 			strbuf_puts(files, gen_href_begin_with_title_target("files", path2fid(basedir), HTML, NULL, NULL, target));
@@ -393,7 +393,7 @@ print_directory(int level, char *basedir)
 		 * Path is inside of basedir.
 		 */
 		else {
-			char *slash = strchr(local, '/');
+			const char *slash = strchr(local, '/');
 
 			if (table_flist && flist_items++ % flist_fields == 0)
 				PUT(fline_begin);
@@ -438,7 +438,7 @@ print_directory(int level, char *basedir)
 
 				if (tree_view) {
 					int size = filesize(path);
-					char *target = (Fflag) ? "mains" : "_top";
+					const char *target = (Fflag) ? "mains" : "_top";
 					char tips[80];
 
 					if (size > 1)
@@ -597,7 +597,7 @@ static const char *
 print_file_name(int level, const char *path)
 {
 	STATIC_STRBUF(sb);
-	char *target = (Fflag) ? "mains" : "_top";
+	const char *target = (Fflag) ? "mains" : "_top";
 	int size = filesize(path);
 	char tips[80];
 
@@ -803,7 +803,7 @@ makeincludeindex(void)
 	STRBUF *input = strbuf_open(0);
 	char *ctags_x;
 	struct data *inc;
-	char *target = (Fflag) ? "mains" : "_top";
+	const char *target = (Fflag) ? "mains" : "_top";
 	char command[MAXFILLEN];
 
 	/*

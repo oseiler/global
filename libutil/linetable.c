@@ -124,7 +124,7 @@ linetable_put(int offset, int lineno)
 
 	if (lineno <= 0)
 		die("linetable_put: line number must >= 1 (lineno = %d)", lineno);
-	entry = varray_assign(vb, lineno - 1, 1);
+	entry = reinterpret_cast<int*>(varray_assign(vb, lineno - 1, 1));
 	*entry = offset;
 }
 /**

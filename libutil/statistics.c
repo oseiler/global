@@ -140,7 +140,7 @@ statistics_time_start(const char *fmt, ...)
 	strbuf_vsprintf(sb, fmt, ap);
 	va_end(ap);
 
-	t = check_malloc(offsetof(STATISTICS_TIME, name) + strbuf_getlen(sb) + 1);
+	t = reinterpret_cast<STATISTICS_TIME*>(check_malloc(offsetof(STATISTICS_TIME, name) + strbuf_getlen(sb) + 1));
 
 	t->name_len = strbuf_getlen(sb);
 	strcpy(t->name, strbuf_value(sb));
@@ -265,7 +265,7 @@ print_header_list(void **ppriv)
 
 	memset(&max_width, 0, sizeof(max_width));
 	get_max_width(&max_width);
-	*ppriv = dots = check_malloc(sizeof(max_width) + max_width.name + MIN_DOTS_LEN + 1);
+	*ppriv = dots = reinterpret_cast<char*>(check_malloc(sizeof(max_width) + max_width.name + MIN_DOTS_LEN + 1));
 	memcpy(dots, &max_width, sizeof(max_width));
 	dots += sizeof(max_width);
 	memset(dots, '.', max_width.name + MIN_DOTS_LEN);
@@ -277,7 +277,7 @@ print_header_list(void **ppriv)
 static void
 print_time_list(const STATISTICS_TIME *t, void *priv)
 {
-	const struct printing_width *max_width = priv;
+	const struct printing_width *max_width = reinterpret_cast<printing_width*>(priv);
 	const char *dots = (const char *)&max_width[1];
 
 #if CPU_TIME_AVAILABLE
@@ -334,7 +334,7 @@ print_header_table(void **ppriv)
 		bar_len = max_width.percent;
 #endif
 
-	*ppriv = bar = check_malloc(sizeof(max_width) + bar_len + 1);
+	*ppriv = bar = reinterpret_cast<char*>(check_malloc(sizeof(max_width) + bar_len + 1));
 	memcpy(bar, &max_width, sizeof(max_width));
 	bar += sizeof(max_width);
 	memset(bar, '-', bar_len);
@@ -368,7 +368,7 @@ print_header_table(void **ppriv)
 static void
 print_time_table(const STATISTICS_TIME *t, void *priv)
 {
-	const struct printing_width *max_width = priv;
+	const struct printing_width *max_width = reinterpret_cast<printing_width*>(priv);
 	const char *bar = (const char *)&max_width[1];
 
 	if (t == T_all) {

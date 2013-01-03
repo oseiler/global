@@ -88,7 +88,7 @@ compare_lineno(const void *s1, const void *s2)
 static int
 compare_tags(const void *v1, const void *v2)
 {
-	const GTP *e1 = v1, *e2 = v2;
+	const GTP *e1 = reinterpret_cast<const GTP*>(v1), *e2 = reinterpret_cast<const GTP*>(v2);
 	int ret;
 
 	if ((ret = strcmp(e1->path, e2->path)) != 0)
@@ -686,7 +686,7 @@ gtags_first(GTOP *gtop, const char *pattern, int flags)
 		gtop->path_array = (char **)check_malloc(gtop->path_hash->entries * sizeof(char *));
 		i = 0;
 		for (entry = strhash_first(gtop->path_hash); entry != NULL; entry = strhash_next(gtop->path_hash))
-			gtop->path_array[i++] = entry->value;
+			gtop->path_array[i++] = reinterpret_cast<char*>(entry->value);
 		if (i != gtop->path_hash->entries)
 			die("Something is wrong. 'i = %lu, entries = %lu'" , i, gtop->path_hash->entries);
 		if (!(gtop->flags & GTOP_NOSORT))
@@ -823,7 +823,7 @@ flush_pool(GTOP *gtop, const char *s_fid)
 	 */
 	for (entry = strhash_first(gtop->path_hash); entry; entry = strhash_next(gtop->path_hash)) {
 		VARRAY *vb = (VARRAY *)entry->value;
-		int *lno_array = varray_assign(vb, 0, 0);
+		int *lno_array = reinterpret_cast<int*>(varray_assign(vb, 0, 0));
 		const char *key = entry->name;
 
 		/*
@@ -979,7 +979,7 @@ segment_read(GTOP *gtop)
 			dbop_unread(gtop->dbop);
 			break;
 		}
-		gtp = varray_append(gtop->vb);
+		gtp = reinterpret_cast<GTP*>(varray_append(gtop->vb));
 		gtp->tagline = pool_strdup(gtop->segment_pool, tagline, 0);
 		gtp->tag = (const char *)gtop->cur_tagname;
 		/*
@@ -999,7 +999,7 @@ segment_read(GTOP *gtop)
 	/*
 	 * Sort tag lines.
 	 */
-	gtop->gtp_array = varray_assign(gtop->vb, 0, 0);
+	gtop->gtp_array = reinterpret_cast<GTP*>(varray_assign(gtop->vb, 0, 0));
 	gtop->gtp_count = gtop->vb->length;
 	gtop->gtp_index = 0;
 	if (!(gtop->flags & GTOP_NOSORT))

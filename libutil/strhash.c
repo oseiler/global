@@ -123,7 +123,7 @@ strhash_assign(STRHASH *sh, const char *name, int force)
 	 * If not found, allocate an entry.
 	 */
 	if (entry == NULL && force) {
-		entry = pool_malloc(sh->pool, sizeof(struct sh_entry));
+		entry = reinterpret_cast<sh_entry*>(pool_malloc(sh->pool, sizeof(struct sh_entry)));
 		entry->name = pool_strdup(sh->pool, name, 0);
 		entry->value = NULL;
 		SLIST_INSERT_HEAD(head, entry, ptr);

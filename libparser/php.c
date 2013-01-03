@@ -781,7 +781,7 @@ debug_print(const char *s, ...)
 
 #undef PUT
 #define PUT(type, tag, lno) do {					\
-	const char *line_image = linetable_get(lno, NULL);		\
+	char *line_image = linetable_get(lno, NULL);			\
 	char *nl = strchr(line_image, '\n');				\
 	if (nl != NULL)							\
 		*nl = '\0';						\
@@ -1149,10 +1149,10 @@ YY_RULE_SETUP
 				int c;
 
 				DBG_PRINT("</*");
-				while ((c = input()) != EOF) {
+				while ((c = yyinput()) != EOF) {
 					DBG_PRINT("%c", c);
 					if (c == '*') {
-						while ((c = input()) != EOF && c == '*')
+						while ((c = yyinput()) != EOF && c == '*')
 							DBG_PRINT("%c", c);
 						DBG_PRINT("%c", c);
 						if (c == EOF || c == '/')

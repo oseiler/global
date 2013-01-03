@@ -904,7 +904,7 @@ YY_RULE_SETUP
 		int c = 0;
 
 		put_reserved_word(LEXTEXT);
-		while ((c = input()) && c != EOF && c != '\n' && c != ';')
+		while ((c = yyinput()) && c != EOF && c != '\n' && c != ';')
 			echoc(c);
 		if (c == EOF)
 			c = '\n';

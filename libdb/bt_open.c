@@ -99,11 +99,7 @@ static int tmp(void);
  * @return @CODE{NULL} on failure, pointer to #DB on success.
  *
  */
-DB *
-__bt_open(fname, flags, mode, openinfo, dflags)
-	const char *fname;
-	int flags, mode, dflags;
-	const BTREEINFO *openinfo;
+DB *__bt_open(const char *fname, int flags, int mode, const BTREEINFO *openinfo, int dflags)
 {
 	struct stat sb;
 	BTMETA m;
@@ -177,7 +173,7 @@ __bt_open(fname, flags, mode, openinfo, dflags)
 	memset(t, 0, sizeof(BTREE));
 	t->bt_fd = -1;			/* Don't close unopened fd on error. */
 	t->bt_lorder = b.lorder;
-	t->bt_order = NOT;
+	t->bt_order = BTREE::NOT;
 	t->bt_cmp = b.compare;
 	t->bt_pfx = b.prefix;
 	t->bt_rfd = -1;
@@ -366,14 +362,12 @@ err:	if (t) {
  *
  * @return #RET_ERROR, #RET_SUCCESS
  */
-static int
-nroot(t)
-	BTREE *t;
+int nroot(BTREE *t)
 {
 	PAGE *meta, *root;
 	pgno_t npg;
 
-	if ((meta = mpool_get(t->bt_mp, 0, 0)) != NULL) {
+	if ((meta = reinterpret_cast<PAGE*>(mpool_get(t->bt_mp, 0, 0))) != NULL) {
 		mpool_put(t->bt_mp, meta, 0);
 		return (RET_SUCCESS);
 	}
@@ -381,10 +375,10 @@ nroot(t)
 		return (RET_ERROR);
 	errno = 0;
 
-	if ((meta = mpool_new(t->bt_mp, &npg)) == NULL)
+	if ((meta = reinterpret_cast<PAGE*>(mpool_new(t->bt_mp, &npg))) == NULL)
 		return (RET_ERROR);
 
-	if ((root = mpool_new(t->bt_mp, &npg)) == NULL)
+	if ((root = reinterpret_cast<PAGE*>(mpool_new(t->bt_mp, &npg))) == NULL)
 		return (RET_ERROR);
 
 	if (npg != P_ROOT)
@@ -400,8 +394,7 @@ nroot(t)
 	return (RET_SUCCESS);
 }
 
-static int
-tmp(void)
+int tmp(void)
 {
 	sigset_t set, oset;
 	int fd;
@@ -430,8 +423,7 @@ tmp(void)
 	return(fd);
 }
 
-static int
-byteorder(void)
+int byteorder(void)
 {
 	u_int32_t x;
 	u_char *p;
@@ -448,13 +440,11 @@ byteorder(void)
 	}
 }
 
-int
-__bt_fd(dbp)
-        const DB *dbp;
+int __bt_fd(const DB *dbp)
 {
 	BTREE *t;
 
-	t = dbp->internal;
+	t = reinterpret_cast<BTREE*>(dbp->internal);
 
 	/* Toss any page pinned across calls. */
 	if (t->bt_pinned != NULL) {

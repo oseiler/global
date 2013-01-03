@@ -62,18 +62,14 @@ static int __bt_stkacq(BTREE *, PAGE **, CURSOR *);
  *
  * @return #RET_SPECIAL if the key is not found.
  */
-int
-__bt_delete(dbp, key, flags)
-	const DB *dbp;
-	const DBT *key;
-	u_int flags;
+int __bt_delete(const DB *dbp, const DBT *key, u_int flags)
 {
 	BTREE *t;
 	CURSOR *c;
 	PAGE *h;
 	int status;
 
-	t = dbp->internal;
+	t = reinterpret_cast<BTREE*>(dbp->internal);
 
 	/* Toss any page pinned across calls. */
 	if (t->bt_pinned != NULL) {
@@ -100,7 +96,7 @@ __bt_delete(dbp, key, flags)
 		if (F_ISSET(c, CURS_INIT)) {
 			if (F_ISSET(c, CURS_ACQUIRE | CURS_AFTER | CURS_BEFORE))
 				return (RET_SPECIAL);
-			if ((h = mpool_get(t->bt_mp, c->pg.pgno, 0)) == NULL)
+			if ((h = reinterpret_cast<PAGE*>(mpool_get(t->bt_mp, c->pg.pgno, 0))) == NULL)
 				return (RET_ERROR);
 
 			/*
@@ -141,11 +137,7 @@ __bt_delete(dbp, key, flags)
  *
  * @return 0 on success, 1 on failure
  */
-static int
-__bt_stkacq(t, hp, c)
-	BTREE *t;
-	PAGE **hp;
-	CURSOR *c;
+int __bt_stkacq(BTREE *t, PAGE **hp, CURSOR *c)
 {
 	BINTERNAL *bi;
 	EPG *e;
@@ -184,7 +176,7 @@ __bt_stkacq(t, hp, c)
 		/* Move up the stack. */
 		for (level = 0; (parent = BT_POP(t)) != NULL; ++level) {
 			/* Get the parent page. */
-			if ((h = mpool_get(t->bt_mp, parent->pgno, 0)) == NULL)
+			if ((h = reinterpret_cast<PAGE*>(mpool_get(t->bt_mp, parent->pgno, 0))) == NULL)
 				return (1);
 
 			/* Move to the next index. */
@@ -207,12 +199,12 @@ __bt_stkacq(t, hp, c)
 			mpool_put(t->bt_mp, h, 0);
 
 			/* Get the next level down. */
-			if ((h = mpool_get(t->bt_mp, pgno, 0)) == NULL)
+			if ((h = reinterpret_cast<PAGE*>(mpool_get(t->bt_mp, pgno, 0))) == NULL)
 				return (1);
 			index = 0;
 		}
 		mpool_put(t->bt_mp, h, 0);
-		if ((h = mpool_get(t->bt_mp, nextpg, 0)) == NULL)
+		if ((h = reinterpret_cast<PAGE*>(mpool_get(t->bt_mp, nextpg, 0))) == NULL)
 			return (1);
 	}
 
@@ -239,7 +231,7 @@ __bt_stkacq(t, hp, c)
 		/* Move up the stack. */
 		for (level = 0; (parent = BT_POP(t)) != NULL; ++level) {
 			/* Get the parent page. */
-			if ((h = mpool_get(t->bt_mp, parent->pgno, 0)) == NULL)
+			if ((h = reinterpret_cast<PAGE*>(mpool_get(t->bt_mp, parent->pgno, 0))) == NULL)
 				return (1);
 
 			/* Move to the next index. */
@@ -261,20 +253,20 @@ __bt_stkacq(t, hp, c)
 			mpool_put(t->bt_mp, h, 0);
 
 			/* Get the next level down. */
-			if ((h = mpool_get(t->bt_mp, pgno, 0)) == NULL)
+			if ((h = reinterpret_cast<PAGE*>(mpool_get(t->bt_mp, pgno, 0))) == NULL)
 				return (1);
 
 			index = NEXTINDEX(h) - 1;
 			BT_PUSH(t, pgno, index);
 		}
 		mpool_put(t->bt_mp, h, 0);
-		if ((h = mpool_get(t->bt_mp, prevpg, 0)) == NULL)
+		if ((h = reinterpret_cast<PAGE*>(mpool_get(t->bt_mp, prevpg, 0))) == NULL)
 			return (1);
 	}
 	
 
 ret:	mpool_put(t->bt_mp, h, 0);
-	return ((*hp = mpool_get(t->bt_mp, c->pg.pgno, 0)) == NULL);
+	return ((*hp = reinterpret_cast<PAGE*>(mpool_get(t->bt_mp, c->pg.pgno, 0))) == NULL);
 }
 
 /**
@@ -286,10 +278,7 @@ ret:	mpool_put(t->bt_mp, h, 0);
  *
  * @return #RET_ERROR, #RET_SUCCESS and #RET_SPECIAL if the key not found.
  */
-static int
-__bt_bdelete(t, key)
-	BTREE *t;
-	const DBT *key;
+int __bt_bdelete(BTREE *t, const DBT *key)
 {
 	EPG *e;
 	PAGE *h;
@@ -371,10 +360,7 @@ loop:	if ((e = __bt_search(t, key, &exact)) == NULL)
  * @par Side-effects:
  *	#mpool_put's the page
  */
-static int
-__bt_pdelete(t, h)
-	BTREE *t;
-	PAGE *h;
+int __bt_pdelete(BTREE *t, PAGE *h)
 {
 	BINTERNAL *bi;
 	PAGE *pg;
@@ -397,7 +383,7 @@ __bt_pdelete(t, h)
 	 */
 	while ((parent = BT_POP(t)) != NULL) {
 		/* Get the parent page. */
-		if ((pg = mpool_get(t->bt_mp, parent->pgno, 0)) == NULL)
+		if ((pg = reinterpret_cast<PAGE*>(mpool_get(t->bt_mp, parent->pgno, 0))) == NULL)
 			return (RET_ERROR);
 		
 		index = parent->index;
@@ -465,12 +451,7 @@ __bt_pdelete(t, h)
  *
  * @return #RET_SUCCESS, #RET_ERROR.
  */
-int
-__bt_dleaf(t, key, h, index)
-	BTREE *t;
-	const DBT *key;
-	PAGE *h;
-	u_int index;
+int __bt_dleaf(BTREE *t, const DBT *key, PAGE *h, u_int index)
 {
 	BLEAF *bl;
 	indx_t cnt, *ip, offset;
@@ -528,12 +509,7 @@ __bt_dleaf(t, key, h, index)
  *
  * @return #RET_SUCCESS, #RET_ERROR.
  */
-static int
-__bt_curdel(t, key, h, index)
-	BTREE *t;
-	const DBT *key;
-	PAGE *h;
-	u_int index;
+int __bt_curdel(BTREE *t, const DBT *key, PAGE *h, u_int index)
 {
 	CURSOR *c;
 	EPG e;
@@ -583,7 +559,7 @@ __bt_curdel(t, key, h, index)
 		}
 		/* Check previous key if at the beginning of the page. */
 		if (index == 0 && h->prevpg != P_INVALID) {
-			if ((pg = mpool_get(t->bt_mp, h->prevpg, 0)) == NULL)
+			if ((pg = reinterpret_cast<PAGE*>(mpool_get(t->bt_mp, h->prevpg, 0))) == NULL)
 				return (RET_ERROR);
 			e.page = pg;
 			e.index = NEXTINDEX(pg) - 1;
@@ -595,7 +571,7 @@ __bt_curdel(t, key, h, index)
 		}
 		/* Check next key if at the end of the page. */
 		if (index == NEXTINDEX(h) - 1 && h->nextpg != P_INVALID) {
-			if ((pg = mpool_get(t->bt_mp, h->nextpg, 0)) == NULL)
+			if ((pg = reinterpret_cast<PAGE*>(mpool_get(t->bt_mp, h->nextpg, 0))) == NULL)
 				return (RET_ERROR);
 			e.page = pg;
 			e.index = 0;
@@ -626,21 +602,18 @@ dup2:				c->pg.pgno = e.page->pgno;
  *	@param t	tree
  *	@param h	page to be deleted
  */
-static int
-__bt_relink(t, h)
-	BTREE *t;
-	PAGE *h;
+int __bt_relink(BTREE *t, PAGE *h)
 {
 	PAGE *pg;
 
 	if (h->nextpg != P_INVALID) {
-		if ((pg = mpool_get(t->bt_mp, h->nextpg, 0)) == NULL)
+		if ((pg = reinterpret_cast<PAGE*>(mpool_get(t->bt_mp, h->nextpg, 0))) == NULL)
 			return (RET_ERROR);
 		pg->prevpg = h->prevpg;
 		mpool_put(t->bt_mp, pg, MPOOL_DIRTY);
 	}
 	if (h->prevpg != P_INVALID) {
-		if ((pg = mpool_get(t->bt_mp, h->prevpg, 0)) == NULL)
+		if ((pg = reinterpret_cast<PAGE*>(mpool_get(t->bt_mp, h->prevpg, 0))) == NULL)
 			return (RET_ERROR);
 		pg->nextpg = h->nextpg;
 		mpool_put(t->bt_mp, pg, MPOOL_DIRTY);

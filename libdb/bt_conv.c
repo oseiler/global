@@ -42,7 +42,7 @@ static char sccsid[] = "@(#)bt_conv.c	8.5 (Berkeley) 8/17/94";
 #include "db.h"
 #include "btree.h"
 
-static void mswap(PAGE *);
+void mswap(PAGE *);
 
 /**
  * __BT_BPGIN --
@@ -53,11 +53,7 @@ static void mswap(PAGE *);
  *	@param pg	page number
  *	@param pp	page to convert
  */
-void
-__bt_pgin(t, pg, pp)
-	void *t;
-	pgno_t pg;
-	void *pp;
+void __bt_pgin(void *t, pgno_t pg, void *pp)
 {
 	PAGE *h;
 	indx_t i, top;
@@ -67,11 +63,11 @@ __bt_pgin(t, pg, pp)
 	if (!F_ISSET(((BTREE *)t), B_NEEDSWAP))
 		return;
 	if (pg == P_META) {
-		mswap(pp);
+		mswap(reinterpret_cast<PAGE*>(pp));
 		return;
 	}
 
-	h = pp;
+	h = reinterpret_cast<PAGE*>(pp);
 	M_32_SWAP(h->pgno);
 	M_32_SWAP(h->prevpg);
 	M_32_SWAP(h->nextpg);
@@ -130,11 +126,7 @@ __bt_pgin(t, pg, pp)
  *	@param pg	page number
  *	@param pp	page to convert
  */
-void
-__bt_pgout(t, pg, pp)
-	void *t;
-	pgno_t pg;
-	void *pp;
+void __bt_pgout(void *t, pgno_t pg, void *pp)
 {
 	PAGE *h;
 	indx_t i, top;
@@ -144,11 +136,11 @@ __bt_pgout(t, pg, pp)
 	if (!F_ISSET(((BTREE *)t), B_NEEDSWAP))
 		return;
 	if (pg == P_META) {
-		mswap(pp);
+		mswap(reinterpret_cast<PAGE*>(pp));
 		return;
 	}
 
-	h = pp;
+	h = reinterpret_cast<PAGE*>(pp);
 	top = NEXTINDEX(h);
 	if ((h->flags & P_TYPE) == P_BINTERNAL)
 		for (i = 0; i < top; i++) {
@@ -203,9 +195,7 @@ __bt_pgout(t, pg, pp)
  *
  *	@param pg	page to convert
  */
-static void
-mswap(pg)
-	PAGE *pg;
+void mswap(PAGE *pg)
 {
 	char *p;
 

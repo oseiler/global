@@ -77,7 +77,7 @@ put_inc(const char *file, const char *path, int id)
 	struct data *data;
 
 	entry = strhash_assign(head_inc, HASH_KEY(file), 1);
-	data = entry->value;
+	data = reinterpret_cast<struct data*>(entry->value);
 	if (data == NULL) {
 		data = (struct data *)check_malloc(sizeof(struct data));
 #if defined(_WIN32) || defined(__DJGPP__)
@@ -106,7 +106,7 @@ get_inc(const char *name)
 {
 	struct sh_entry *entry = strhash_assign(head_inc, HASH_KEY(name), 0);
 
-	return entry ? entry->value : NULL;
+	return entry ? reinterpret_cast<data*>(entry->value) : NULL;
 }
 /**
  * first_inc: get the first include file.
@@ -118,7 +118,7 @@ first_inc(void)
 {
 	struct sh_entry *entry = strhash_first(head_inc);
 
-	return entry ? entry->value : NULL;
+	return entry ? reinterpret_cast<data*>(entry->value) : NULL;
 }
 /**
  * next_inc: get the next include file.
@@ -130,7 +130,7 @@ next_inc(void)
 {
 	struct sh_entry *entry = strhash_next(head_inc);
 
-	return entry ? entry->value : NULL;
+	return entry ? reinterpret_cast<data*>(entry->value) : NULL;
 }
 
 

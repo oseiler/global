@@ -43,12 +43,7 @@ static char sccsid[] = "@(#)db.c	8.4 (Berkeley) 2/21/94";
 
 #include "db.h"
 
-DB *
-dbopen(fname, flags, mode, type, openinfo)
-	const char *fname;
-	int flags, mode;
-	DBTYPE type;
-	const void *openinfo;
+DB *dbopen(const char *fname, int flags, int mode, DBTYPE type, const void *openinfo)
 {
 
 #define	DB_FLAGS	(DB_LOCK | DB_SHMEM | DB_TXN)
@@ -59,8 +54,7 @@ dbopen(fname, flags, mode, type, openinfo)
 	if ((flags & ~(USE_OPEN_FLAGS | DB_FLAGS)) == 0)
 		switch (type) {
 		case DB_BTREE:
-			return (__bt_open(fname, (flags & USE_OPEN_FLAGS) | O_BINARY,
-			    mode, openinfo, flags & DB_FLAGS));
+			return (__bt_open(fname, (flags & USE_OPEN_FLAGS) | O_BINARY, mode, reinterpret_cast<const BTREEINFO*>(openinfo), flags & DB_FLAGS));
 		/*
 		case DB_HASH:
 			return (__hash_open(fname, (flags & USE_OPEN_FLAGS) | O_BINARY,
@@ -74,8 +68,7 @@ dbopen(fname, flags, mode, type, openinfo)
 	return (NULL);
 }
 
-static int
-__dberr(void)
+int __dberr(void)
 {
 	return (RET_ERROR);
 }
@@ -85,15 +78,13 @@ __dberr(void)
  *
  *	@param dbp	pointer to the #DB structure.
  */
-void
-__dbpanic(dbp)
-	DB *dbp;
+void __dbpanic(DB *dbp)
 {
 	/* The only thing that can succeed is a close. */
-	dbp->del = (int (*)())__dberr;
-	dbp->fd = (int (*)())__dberr;
-	dbp->get = (int (*)())__dberr;
-	dbp->put = (int (*)())__dberr;
-	dbp->seq = (int (*)())__dberr;
-	dbp->sync = (int (*)())__dberr;
+	dbp->del = reinterpret_cast<int (*)(const __db*, const DBT*, u_int)>(__dberr);
+	dbp->fd = reinterpret_cast<int (*)(const __db*)>(__dberr);
+	dbp->get = reinterpret_cast<int (*)(const __db*, const DBT*, DBT*, u_int)>(__dberr);
+	dbp->put = reinterpret_cast<int (*)(const __db*, DBT*, const DBT*, u_int)>(__dberr);
+	dbp->seq = reinterpret_cast<int (*)(const __db*, DBT*, DBT*, u_int)>(__dberr);
+	dbp->sync = reinterpret_cast<int (*)(const __db*, u_int)>(__dberr);
 }

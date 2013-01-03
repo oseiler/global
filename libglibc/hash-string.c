@@ -23,9 +23,7 @@
 /* Defines the so called `hashpjw' function by P.J. Weinberger
    [see Aho/Sethi/Ullman, COMPILERS: Principles, Techniques and Tools,
    1986, 1987 Bell Telephone Laboratories, Inc.]  */
-unsigned long int
-__hash_string (str_param)
-     const char *str_param;
+unsigned long int __hash_string(const char *str_param)
 {
   unsigned long int hval, g;
   const char *str = str_param;

@@ -158,7 +158,7 @@ load_plugin_parser(const char *pluginspec)
 		die("cannot initialize libltdl.");
 	p = pluginspec_saved;
 	while (*p != '\0') {
-		pent = check_malloc(sizeof(*pent));
+		pent = reinterpret_cast<plugin_entry*>(check_malloc(sizeof(*pent)));
 		pent->entry.lang_name = p;
 		p = strchr(p, ':');
 		if (p == NULL)
@@ -170,7 +170,7 @@ load_plugin_parser(const char *pluginspec)
 		p = strchr(p, ',');
 		if (p != NULL)
 			*p++ = '\0';
-		q = strchr(lt_dl_name, ':');
+		q = const_cast<char*>(strchr(lt_dl_name, ':'));
 		if (q == NULL) {
 			parser_name = "parser";
 		} else {
@@ -183,7 +183,7 @@ load_plugin_parser(const char *pluginspec)
 		if (pent->handle == NULL)
 			die_with_code(2, "cannot open shared object '%s'.", lt_dl_name);
 		pent->entry.lt_dl_name = lt_dl_name;
-		pent->entry.parser = lt_dlsym(pent->handle, parser_name);
+		pent->entry.parser = reinterpret_cast<void(*)(const parser_param*)>(lt_dlsym(pent->handle, parser_name));
 		if (pent->entry.parser == NULL)
 			die_with_code(2, "cannot find symbol '%s' in '%s'.", parser_name, lt_dl_name);
 		pent->entry.parser_name = parser_name;

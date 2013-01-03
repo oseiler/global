@@ -73,11 +73,7 @@ static int  mpool_write(MPOOL *, BKT *);
  *	@param pagesize
  *	@param maxcache
  */
-MPOOL *
-mpool_open(key, fd, pagesize, maxcache)
-	void *key;
-	int fd;
-	pgno_t pagesize, maxcache;
+MPOOL *mpool_open(void *key, int fd, pgno_t pagesize, pgno_t maxcache)
 {
 	struct stat sb;
 	MPOOL *mp;
@@ -118,12 +114,7 @@ mpool_open(key, fd, pagesize, maxcache)
  *	@param pgout
  *	@param pgcookie
  */
-void
-mpool_filter(mp, pgin, pgout, pgcookie)
-	MPOOL *mp;
-	void (*pgin)(void *, pgno_t, void *);
-	void (*pgout)(void *, pgno_t, void *);
-	void *pgcookie;
+void mpool_filter(MPOOL *mp, void (*pgin)(void *, pgno_t, void *), void (*pgout)(void *, pgno_t, void *), void *pgcookie)
 {
 	mp->pgin = pgin;
 	mp->pgout = pgout;
@@ -137,12 +128,9 @@ mpool_filter(mp, pgin, pgout, pgcookie)
  *	@param mp
  *	@param pgnoaddr
  */
-void *
-mpool_new(mp, pgnoaddr)
-	MPOOL *mp;
-	pgno_t *pgnoaddr;
+void *mpool_new(MPOOL *mp, pgno_t *pgnoaddr)
 {
-	struct _hqh *head;
+	struct MPOOL::_hqh *head;
 	BKT *bp;
 
 	if (mp->npages == MAX_PAGE_NUMBER) {
@@ -176,13 +164,9 @@ mpool_new(mp, pgnoaddr)
  *	@param pgno
  *	@param flags
  */
-void *
-mpool_get(mp, pgno, flags)
-	MPOOL *mp;
-	pgno_t pgno;
-	u_int flags;				/* XXX not used? */
+void *mpool_get(MPOOL *mp, pgno_t pgno, u_int flags)
 {
-	struct _hqh *head;
+	struct MPOOL::_hqh *head;
 	BKT *bp;
 	off_t off;
 	int nr;
@@ -273,11 +257,7 @@ mpool_get(mp, pgno, flags)
  *	@param page
  *	@param flags
  */
-int
-mpool_put(mp, page, flags)
-	MPOOL *mp;
-	void *page;
-	u_int flags;
+int mpool_put(MPOOL *mp, void *page, u_int flags)
 {
 	BKT *bp;
 
@@ -303,9 +283,7 @@ mpool_put(mp, page, flags)
  *
  *	@param mp
  */
-int
-mpool_close(mp)
-	MPOOL *mp;
+int mpool_close(MPOOL *mp)
 {
 	BKT *bp;
 
@@ -326,9 +304,7 @@ mpool_close(mp)
  *
  *	@param mp
  */
-int
-mpool_sync(mp)
-	MPOOL *mp;
+int mpool_sync(MPOOL *mp)
 {
 	BKT *bp;
 
@@ -349,16 +325,14 @@ mpool_sync(mp)
  *
  *	@param mp
  */
-static BKT *
-mpool_bkt(mp)
-	MPOOL *mp;
+BKT *mpool_bkt(MPOOL *mp)
 {
-	struct _hqh *head;
+	struct MPOOL::_hqh *head;
 	BKT *bp;
 
 	/* If under the max cached, always create a new page. */
 	if (mp->curcache < mp->maxcache)
-		goto new;
+		goto new_;
 
 	/*
 	 * If the cache is max'd out, walk the lru list for a buffer we
@@ -390,7 +364,7 @@ mpool_bkt(mp)
 			return (bp);
 		}
 
-new:	if ((bp = (BKT *)malloc(sizeof(BKT) + mp->pagesize)) == NULL)
+new_:	if ((bp = (BKT *)malloc(sizeof(BKT) + mp->pagesize)) == NULL)
 		return (NULL);
 #ifdef STATISTICS
 	++mp->pagealloc;
@@ -410,10 +384,7 @@ new:	if ((bp = (BKT *)malloc(sizeof(BKT) + mp->pagesize)) == NULL)
  *	@param mp
  *	@param bp
  */
-static int
-mpool_write(mp, bp)
-	MPOOL *mp;
-	BKT *bp;
+int mpool_write(MPOOL *mp, BKT *bp)
 {
 	off_t off;
 
@@ -447,12 +418,9 @@ mpool_write(mp, bp)
  *	@param mp
  *	@param pgno
  */
-static BKT *
-mpool_look(mp, pgno)
-	MPOOL *mp;
-	pgno_t pgno;
+BKT *mpool_look(MPOOL *mp, pgno_t pgno)
 {
-	struct _hqh *head;
+	struct MPOOL::_hqh *head;
 	BKT *bp;
 
 	head = &mp->hqh[HASHKEY(pgno)];
@@ -476,9 +444,7 @@ mpool_look(mp, pgno)
  *
  *	@param mp
  */
-void
-mpool_stat(mp)
-	MPOOL *mp;
+void mpool_stat(MPOOL *mp)
 {
 	BKT *bp;
 	int cnt;

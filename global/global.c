@@ -1366,7 +1366,7 @@ struct parsefile_data {
 static void
 put_syms(int type, const char *tag, int lno, const char *path, const char *line_image, void *arg)
 {
-	struct parsefile_data *data = arg;
+	struct parsefile_data *data = reinterpret_cast<parsefile_data*>(arg);
 	const char *key;
 
 	if (format == FORMAT_PATH && data->count > 0)

@@ -148,10 +148,10 @@ WORD		{ALPHA}{ALPHANUM}*
 				int c;
 
 				DBG_PRINT("</*");
-				while ((c = input()) != EOF) {
+				while ((c = yyinput()) != EOF) {
 					DBG_PRINT("%c", c);
 					if (c == '*') {
-						while ((c = input()) != EOF && c == '*')
+						while ((c = yyinput()) != EOF && c == '*')
 							DBG_PRINT("%c", c);
 						DBG_PRINT("%c", c);
 						if (c == EOF || c == '/')

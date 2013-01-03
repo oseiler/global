@@ -167,7 +167,7 @@ static const char *
 alias(const char *alias_name)
 {
 	struct sh_entry *ent = strhash_assign(sh, alias_name, 0);
-	return ent ? ent->value : NULL;
+	return ent ? reinterpret_cast<char*>(ent->value) : NULL;
 }
 
 /**

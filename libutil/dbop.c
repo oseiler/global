@@ -76,7 +76,7 @@
  */
 static void start_sort_process(DBOP *);
 static void terminate_sort_process(DBOP *);
-static char *sortnotfound = "POSIX sort program not found. If available, the program will be speed up.\nPlease see ./configure --help.";
+static const char *sortnotfound = "POSIX sort program not found. If available, the program will be speed up.\nPlease see ./configure --help.";
 /*
  * 1. DJGPP
  */
@@ -345,7 +345,7 @@ dbop_get(DBOP *dbop, const char *name)
 	case RET_SPECIAL:
 		return (NULL);
 	}
-	return (dat.data);
+	return reinterpret_cast<char*>(dat.data);
 }
 /**
  * dbop_put: put data by a key.

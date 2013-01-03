@@ -183,7 +183,7 @@ anchor_load(const char *path)
 			else
 				type = 'Y';
 			/* allocate an entry */
-			a = varray_append(vb);
+			a = reinterpret_cast<anchor*>(varray_append(vb));
 			a->lineno = atoi(ptable.part[PART_LNO].start);
 			a->type = type;
 			a->done = 0;
@@ -202,7 +202,7 @@ anchor_load(const char *path)
 		/*
 		 * Sort by lineno.
 		 */
-		table = varray_assign(vb, 0, 0);
+		table = reinterpret_cast<anchor*>(varray_assign(vb, 0, 0));
 		qsort(table, used, sizeof(struct anchor), cmp); 
 		/*
 		 * Setup some lineno.

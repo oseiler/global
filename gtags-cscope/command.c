@@ -529,7 +529,7 @@ cscope: cannot open pipe to shell command: %s\n", newpat);
 	/* FALLTHROUGH */
     default:
 	if (selecting && !mouse) {
-	    char		*c;
+	    const char		*c;
 
 	    if ((c = strchr(dispchars, commandc)))
 		editref(c - dispchars);
@@ -649,7 +649,7 @@ changestring(void)
 	return(NO);
     }
     /* create the line change indicators */
-    change = mycalloc(totallines, sizeof(BOOL));
+    change = reinterpret_cast<BOOL*>(mycalloc(totallines, sizeof(BOOL)));
     changing = YES;
     mousemenu();
 
@@ -740,7 +740,7 @@ changestring(void)
 	default:
 	    {
 		/* if a line was selected */
-		char		*cc;
+		const char		*cc;
 
 		if ((cc = strchr(dispchars, c)))
 		    mark(cc - dispchars);

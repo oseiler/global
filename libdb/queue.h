@@ -451,8 +451,8 @@ struct {								\
 	    (var) = (var)->field.cqe_prev)
 
 #define	CIRCLEQ_INIT(head) do {						\
-	(head)->cqh_first = (void *)(head);				\
-	(head)->cqh_last = (void *)(head);				\
+	*reinterpret_cast<void**>(&(head)->cqh_first) = (void *)(head);	\
+	*reinterpret_cast<void**>(&(head)->cqh_last) = (void *)(head);	\
 } while (0)
 
 #define CIRCLEQ_INSERT_AFTER(head, listelm, elm, field) do {		\
@@ -476,8 +476,8 @@ struct {								\
 } while (0)
 
 #define CIRCLEQ_INSERT_HEAD(head, elm, field) do {			\
-	(elm)->field.cqe_next = (head)->cqh_first;			\
-	(elm)->field.cqe_prev = (void *)(head);				\
+	*reinterpret_cast<void**>(&(elm)->field.cqe_next) = (head)->cqh_first; \
+	*reinterpret_cast<void**>(&(elm)->field.cqe_prev) = (void *)(head); \
 	if ((head)->cqh_last == (void *)(head))				\
 		(head)->cqh_last = (elm);				\
 	else								\
@@ -486,7 +486,7 @@ struct {								\
 } while (0)
 
 #define CIRCLEQ_INSERT_TAIL(head, elm, field) do {			\
-	(elm)->field.cqe_next = (void *)(head);				\
+	*reinterpret_cast<void**>(&(elm)->field.cqe_next) = (void *)(head);	\
 	(elm)->field.cqe_prev = (head)->cqh_last;			\
 	if ((head)->cqh_first == (void *)(head))			\
 		(head)->cqh_first = (elm);				\

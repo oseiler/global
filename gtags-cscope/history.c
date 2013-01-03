@@ -55,7 +55,7 @@ addcmd(int f, char *s)
 {
 	struct cmd *h;
 
-	h = mymalloc(sizeof(struct cmd));
+	h = reinterpret_cast<cmd*>(mymalloc(sizeof(struct cmd)));
 	if( tail) {
 		tail->next = h;
 		h->next = 0;

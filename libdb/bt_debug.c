@@ -55,16 +55,14 @@ static char sccsid[] = "@(#)bt_debug.c	8.5 (Berkeley) 8/17/94";
  *
  *	@param dbp	pointer to the #DB
  */
-void
-__bt_dump(dbp)
-	DB *dbp;
+void __bt_dump(DB *dbp)
 {
 	BTREE *t;
 	PAGE *h;
 	pgno_t i;
 	char *sep;
 
-	t = dbp->internal;
+	t = reinterpret_cast<BTREE*>(dbp->internal);
 	(void)fprintf(stderr, "%s: pgsz %d",
 	    F_ISSET(t, B_INMEM) ? "memory" : "disk", t->bt_psize);
 	if (F_ISSET(t, R_RECNO))
@@ -87,7 +85,7 @@ __bt_dump(dbp)
 	}
 #undef X
 
-	for (i = P_ROOT; (h = mpool_get(t->bt_mp, i, 0)) != NULL; ++i) {
+	for (i = P_ROOT; (h = reinterpret_cast<PAGE*>(mpool_get(t->bt_mp, i, 0))) != NULL; ++i) {
 		__bt_dpage(h);
 		(void)mpool_put(t->bt_mp, h, 0);
 	}
@@ -98,9 +96,7 @@ __bt_dump(dbp)
  *
  *	@param h	pointer to the #PAGE
  */
-void
-__bt_dmpage(h)
-	PAGE *h;
+void __bt_dmpage(PAGE *h)
 {
 	BTMETA *m;
 	char *sep;
@@ -132,16 +128,13 @@ __bt_dmpage(h)
  *	@param dbp
  *	@param pgno	page number to dump.
  */
-void
-__bt_dnpage(dbp, pgno)
-	DB *dbp;
-	pgno_t pgno;
+void __bt_dnpage(DB *dbp, pgno_t pgno)
 {
 	BTREE *t;
 	PAGE *h;
 
-	t = dbp->internal;
-	if ((h = mpool_get(t->bt_mp, pgno, 0)) != NULL) {
+	t = reinterpret_cast<BTREE*>(dbp->internal);
+	if ((h = reinterpret_cast<PAGE*>(mpool_get(t->bt_mp, pgno, 0))) != NULL) {
 		__bt_dpage(h);
 		(void)mpool_put(t->bt_mp, h, 0);
 	}
@@ -152,16 +145,14 @@ __bt_dnpage(dbp, pgno)
  *
  *	@param h	pointer to the #PAGE
  */
-void
-__bt_dpage(h)
-	PAGE *h;
+void __bt_dpage(PAGE *h)
 {
 	BINTERNAL *bi;
 	BLEAF *bl;
 	RINTERNAL *ri;
 	RLEAF *rl;
 	indx_t cur, top;
-	char *sep;
+	const char *sep;
 
 	(void)fprintf(stderr, "    page %d: (", h->pgno);
 #undef X
@@ -245,9 +236,7 @@ __bt_dpage(h)
  *
  *	@param dbp	pointer to the #DB
  */
-void
-__bt_stat(dbp)
-	DB *dbp;
+void __bt_stat(DB *dbp)
 {
 	extern u_long bt_cache_hit, bt_cache_miss, bt_pfxsaved, bt_rootsplit;
 	extern u_long bt_sortsplit, bt_split;
@@ -257,10 +246,10 @@ __bt_stat(dbp)
 	u_long ifree, lfree, nkeys;
 	int levels;
 
-	t = dbp->internal;
+	t = reinterpret_cast<BTREE*>(dbp->internal);
 	pcont = pinternal = pleaf = 0;
 	nkeys = ifree = lfree = 0;
-	for (i = P_ROOT; (h = mpool_get(t->bt_mp, i, 0)) != NULL; ++i) {
+	for (i = P_ROOT; (h = reinterpret_cast<PAGE*>(mpool_get(t->bt_mp, i, 0))) != NULL; ++i) {
 		switch (h->flags & P_TYPE) {
 		case P_BINTERNAL:
 		case P_RINTERNAL:
@@ -282,7 +271,7 @@ __bt_stat(dbp)
 
 	/* Count the levels of the tree. */
 	for (i = P_ROOT, levels = 0 ;; ++levels) {
-		h = mpool_get(t->bt_mp, i, 0);
+		h = reinterpret_cast<PAGE*>(mpool_get(t->bt_mp, i, 0));
 		if (h->flags & (P_BLEAF|P_RLEAF)) {
 			if (levels == 0)
 				levels = 1;

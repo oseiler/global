@@ -94,7 +94,7 @@ WORD		{ALPHA}{ALPHANUM}*
 		 * #include|   <aaa/bbb.h>|
 		 *         ~~~~~~~~~~~~~~~~
 		 */
-		while ((c = input()) && c != EOF && c != '\n' && isspace(c))
+		while ((c = yyinput()) && c != EOF && c != '\n' && isspace(c))
 			echoc(c);
 		if (c == EOF)
 			c = '\n';
@@ -111,7 +111,7 @@ WORD		{ALPHA}{ALPHANUM}*
 			put_char(c);
 
 			/* pick up path name */
-			while ((c = input()) && c != EOF && c != sep && c != '\n')
+			while ((c = yyinput()) && c != EOF && c != sep && c != '\n')
 				*p++ = c;
 			*p = '\0';
 			if (c == EOF)

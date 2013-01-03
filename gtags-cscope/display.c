@@ -150,7 +150,7 @@ dispinit(void)
 		mdisprefs = strlen(dispchars);
 
 	/* allocate the displayed line array */
-	displine = mymalloc(mdisprefs * sizeof(int));
+	displine = reinterpret_cast<int*>(mymalloc(mdisprefs * sizeof(int)));
 }
 
 /** display a page of the references */

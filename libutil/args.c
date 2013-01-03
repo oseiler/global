@@ -31,10 +31,12 @@
 #define ARGS_GFIND	3
 #define ARGS_BOTH	4
 
-int type;
-const char **argslist;
-FILE *ip;
-GFIND *gp;
+namespace {
+  int type;
+  char *const *argslist;
+  FILE *ip;
+  GFIND *gp;
+}
 
 /**
  * args_open:
@@ -42,7 +44,7 @@ GFIND *gp;
  *	@param[in]	args	args array
  */
 void
-args_open(const char **args)
+args_open(char *const *args)
 {
 	type = ARGS_ARGS;
 	argslist = args;
@@ -73,7 +75,7 @@ args_open_filelist(const char *filename)
  *				When @FILE{-} is specified, read from standard input.
  */
 void
-args_open_both(const char **args, const char *filename)
+args_open_both(char *const *args, const char *filename)
 {
 	type = ARGS_BOTH;
 	argslist = args;

@@ -79,13 +79,7 @@ static char sccsid[] = "@(#)bt_overflow.c	8.5 (Berkeley) 7/16/94";
  *
  * @return #RET_ERROR, #RET_SUCCESS
  */
-int
-__ovfl_get(t, p, ssz, buf, bufsz)
-	BTREE *t;
-	void *p;
-	size_t *ssz;
-	void **buf;
-	size_t *bufsz;
+int __ovfl_get(BTREE *t, void *p, size_t *ssz, void **buf, size_t *bufsz)
 {
 	PAGE *h;
 	pgno_t pg;
@@ -114,7 +108,7 @@ __ovfl_get(t, p, ssz, buf, bufsz)
 	 */
 	plen = t->bt_psize - BTDATAOFF;
 	for (p = *buf;; p = (char *)p + nb, pg = h->nextpg) {
-		if ((h = mpool_get(t->bt_mp, pg, 0)) == NULL)
+		if ((h = reinterpret_cast<PAGE*>(mpool_get(t->bt_mp, pg, 0))) == NULL)
 			return (RET_ERROR);
 
 		nb = MIN(sz, plen);
@@ -136,11 +130,7 @@ __ovfl_get(t, p, ssz, buf, bufsz)
  *
  * @return #RET_ERROR, #RET_SUCCESS
  */
-int
-__ovfl_put(t, dbt, pg)
-	BTREE *t;
-	const DBT *dbt;
-	pgno_t *pg;
+int __ovfl_put(BTREE *t, const DBT *dbt, pgno_t *pg)
 {
 	PAGE *h, *last;
 	void *p;
@@ -188,10 +178,7 @@ __ovfl_put(t, dbt, pg)
  *
  * @return #RET_ERROR, #RET_SUCCESS
  */
-int
-__ovfl_delete(t, p)
-	BTREE *t;
-	void *p;
+int __ovfl_delete(BTREE *t, void *p)
 {
 	PAGE *h;
 	pgno_t pg;
@@ -205,7 +192,7 @@ __ovfl_delete(t, p)
 	if (pg == P_INVALID || sz == 0)
 		abort();
 #endif
-	if ((h = mpool_get(t->bt_mp, pg, 0)) == NULL)
+	if ((h = reinterpret_cast<PAGE*>(mpool_get(t->bt_mp, pg, 0))) == NULL)
 		return (RET_ERROR);
 
 	/* Don't delete chains used by internal pages. */
@@ -220,7 +207,7 @@ __ovfl_delete(t, p)
 		__bt_free(t, h);
 		if (sz <= plen)
 			break;
-		if ((h = mpool_get(t->bt_mp, pg, 0)) == NULL)
+		if ((h = reinterpret_cast<PAGE*>(mpool_get(t->bt_mp, pg, 0))) == NULL)
 			return (RET_ERROR);
 	}
 	return (RET_SUCCESS);

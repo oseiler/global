@@ -74,17 +74,13 @@ static int __bt_seqset(BTREE *, EPG *, DBT *, int);
  * @return
  *	#RET_ERROR, #RET_SUCCESS or #RET_SPECIAL if there's no next key.
  */
-int
-__bt_seq(dbp, key, data, flags)
-	const DB *dbp;
-	DBT *key, *data;
-	u_int flags;
+int __bt_seq(const DB *dbp, DBT *key, DBT *data, u_int flags)
 {
 	BTREE *t;
 	EPG e;
 	int status;
 
-	t = dbp->internal;
+	t = reinterpret_cast<BTREE*>(dbp->internal);
 
 	/* Toss any page pinned across calls. */
 	if (t->bt_pinned != NULL) {
@@ -148,12 +144,7 @@ __bt_seq(dbp, key, data, flags)
  * @return
  *	#RET_ERROR, #RET_SUCCESS or #RET_SPECIAL if there's no next key.
  */
-static int
-__bt_seqset(t, ep, key, flags)
-	BTREE *t;
-	EPG *ep;
-	DBT *key;
-	int flags;
+int __bt_seqset(BTREE *t, EPG *ep, DBT *key, int flags)
 {
 	PAGE *h;
 	pgno_t pg;
@@ -179,7 +170,7 @@ __bt_seqset(t, ep, key, flags)
 	case R_NEXT:
 		/* Walk down the left-hand side of the tree. */
 		for (pg = P_ROOT;;) {
-			if ((h = mpool_get(t->bt_mp, pg, 0)) == NULL)
+			if ((h = reinterpret_cast<PAGE*>(mpool_get(t->bt_mp, pg, 0))) == NULL)
 				return (RET_ERROR);
 
 			/* Check for an empty tree. */
@@ -200,7 +191,7 @@ __bt_seqset(t, ep, key, flags)
 	case R_PREV:
 		/* Walk down the right-hand side of the tree. */
 		for (pg = P_ROOT;;) {
-			if ((h = mpool_get(t->bt_mp, pg, 0)) == NULL)
+			if ((h = reinterpret_cast<PAGE*>(mpool_get(t->bt_mp, pg, 0))) == NULL)
 				return (RET_ERROR);
 
 			/* Check for an empty tree. */
@@ -236,11 +227,7 @@ __bt_seqset(t, ep, key, flags)
  * @return
  *	#RET_ERROR, #RET_SUCCESS or #RET_SPECIAL if there's no next key.
  */
-static int
-__bt_seqadv(t, ep, flags)
-	BTREE *t;
-	EPG *ep;
-	int flags;
+int __bt_seqadv(BTREE *t, EPG *ep, int flags)
 {
 	CURSOR *c;
 	PAGE *h;
@@ -266,7 +253,7 @@ __bt_seqadv(t, ep, flags)
 		return (__bt_first(t, &c->key, ep, &exact));
 
 	/* Get the page referenced by the cursor. */
-	if ((h = mpool_get(t->bt_mp, c->pg.pgno, 0)) == NULL)
+	if ((h = reinterpret_cast<PAGE*>(mpool_get(t->bt_mp, c->pg.pgno, 0))) == NULL)
 		return (RET_ERROR);
 
 	/*
@@ -288,7 +275,7 @@ __bt_seqadv(t, ep, flags)
 			mpool_put(t->bt_mp, h, 0);
 			if (pg == P_INVALID)
 				return (RET_SPECIAL);
-			if ((h = mpool_get(t->bt_mp, pg, 0)) == NULL)
+			if ((h = reinterpret_cast<PAGE*>(mpool_get(t->bt_mp, pg, 0))) == NULL)
 				return (RET_ERROR);
 			index = 0;
 		}
@@ -311,7 +298,7 @@ usecurrent:		F_CLR(c, CURS_AFTER | CURS_BEFORE);
 			mpool_put(t->bt_mp, h, 0);
 			if (pg == P_INVALID)
 				return (RET_SPECIAL);
-			if ((h = mpool_get(t->bt_mp, pg, 0)) == NULL)
+			if ((h = reinterpret_cast<PAGE*>(mpool_get(t->bt_mp, pg, 0))) == NULL)
 				return (RET_ERROR);
 			index = NEXTINDEX(h) - 1;
 		} else
@@ -337,12 +324,7 @@ usecurrent:		F_CLR(c, CURS_AFTER | CURS_BEFORE);
  *	The first entry in the tree greater than or equal to @a key,
  *	or #RET_SPECIAL if no such key exists.
  */
-static int
-__bt_first(t, key, erval, exactp)
-	BTREE *t;
-	const DBT *key;
-	EPG *erval;
-	int *exactp;
+int __bt_first(BTREE *t, const DBT *key, EPG *erval, int *exactp)
 {
 	PAGE *h;
 	EPG *ep, save;
@@ -388,8 +370,7 @@ __bt_first(t, key, erval, exactp)
 					break;
 				if (h->pgno != save.page->pgno)
 					mpool_put(t->bt_mp, h, 0);
-				if ((h = mpool_get(t->bt_mp,
-				    h->prevpg, 0)) == NULL) {
+				if ((h = reinterpret_cast<PAGE*>(mpool_get(t->bt_mp, h->prevpg, 0))) == NULL) {
 					if (h->pgno == save.page->pgno)
 						mpool_put(t->bt_mp,
 						    save.page, 0);
@@ -420,7 +401,7 @@ __bt_first(t, key, erval, exactp)
 		mpool_put(t->bt_mp, h, 0);
 		if (pg == P_INVALID)
 			return (RET_SPECIAL);
-		if ((h = mpool_get(t->bt_mp, pg, 0)) == NULL)
+		if ((h = reinterpret_cast<PAGE*>(mpool_get(t->bt_mp, pg, 0))) == NULL)
 			return (RET_ERROR);
 		ep->index = 0;
 		ep->page = h;
@@ -437,11 +418,7 @@ __bt_first(t, key, erval, exactp)
  *	@param pgno	page number
  *	@param index	page index
  */
-void
-__bt_setcur(t, pgno, index)
-	BTREE *t;
-	pgno_t pgno;
-	u_int index;
+void __bt_setcur(BTREE *t, pgno_t pgno, u_int index)
 {
 	/* Lose any already deleted key. */
 	if (t->bt_cursor.key.data != NULL) {

@@ -22,14 +22,16 @@
 
 #define NPART 10
 
-typedef struct {
-        int npart;
-	struct part {
-		char *start;
-		char *end;
-		int savec;
-	} part[NPART];
-} SPLIT;
+struct part {
+  char *start;
+  char *end;
+  int savec;
+};
+
+struct SPLIT {
+  int npart;
+  struct part part[NPART];
+};
 
 int split(const char *, int, SPLIT *);
 void recover(SPLIT *);

@@ -330,7 +330,7 @@ gtags-cscope: pattern too long, cannot be > %d characters\n", PATLEN);
     tmpdir = mygetenv("TMPDIR", TMPDIR);
 #endif
     lineflag = mygetenv("CSCOPE_LINEFLAG", LINEFLAG);
-    lineflagafterfile = getenv("CSCOPE_LINEFLAG_AFTER_FILE") ? 1 : 0;
+    lineflagafterfile = getenv("CSCOPE_LINEFLAG_AFTER_FILE") ? YES : NO;
 
     /* make sure that tmpdir exists */
     if (lstat (tmpdir, &stat_buf)) {

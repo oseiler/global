@@ -60,11 +60,7 @@ static int __bt_sprev(BTREE *, PAGE *, const DBT *, int *);
  *	of the key, if it were inserted into the tree, is entered into
  *	the BTREE::bt_cur field of the tree.  A pointer to the field is returned.
  */
-EPG *
-__bt_search(t, key, exactp)
-	BTREE *t;
-	const DBT *key;
-	int *exactp;
+EPG *__bt_search(BTREE *t, const DBT *key, int *exactp)
 {
 	PAGE *h;
 	indx_t base, index, lim;
@@ -73,7 +69,7 @@ __bt_search(t, key, exactp)
 
 	BT_CLR(t);
 	for (pg = P_ROOT;;) {
-		if ((h = mpool_get(t->bt_mp, pg, 0)) == NULL)
+		if ((h = reinterpret_cast<PAGE*>(mpool_get(t->bt_mp, pg, 0))) == NULL)
 			return (NULL);
 
 		/* Do a binary search on the current page. */
@@ -144,12 +140,7 @@ next:		BT_PUSH(t, h->pgno, index);
  * @return
  *	@VAR{TRUE} (1) if an exact match found, else @VAR{FALSE} (0).
  */
-static int
-__bt_snext(t, h, key, exactp)
-	BTREE *t;
-	PAGE *h;
-	const DBT *key;
-	int *exactp;
+int __bt_snext(BTREE *t, PAGE *h, const DBT *key, int *exactp)
 {
 	EPG e;
 
@@ -157,7 +148,7 @@ __bt_snext(t, h, key, exactp)
 	 * Get the next page.  The key is either an exact
 	 * match, or not as good as the one we already have.
 	 */
-	if ((e.page = mpool_get(t->bt_mp, h->nextpg, 0)) == NULL)
+	if ((e.page = reinterpret_cast<PAGE*>(mpool_get(t->bt_mp, h->nextpg, 0))) == NULL)
 		return (0);
 	e.index = 0;
 	if (__bt_cmp(t, key, &e) == 0) {
@@ -182,12 +173,7 @@ __bt_snext(t, h, key, exactp)
  * @return
  *	@VAR{TRUE} (1) if an exact match found, else @VAR{FALSE} (0).
  */
-static int
-__bt_sprev(t, h, key, exactp)
-	BTREE *t;
-	PAGE *h;
-	const DBT *key;
-	int *exactp;
+int __bt_sprev(BTREE *t, PAGE *h, const DBT *key, int *exactp)
 {
 	EPG e;
 
@@ -195,7 +181,7 @@ __bt_sprev(t, h, key, exactp)
 	 * Get the previous page.  The key is either an exact
 	 * match, or not as good as the one we already have.
 	 */
-	if ((e.page = mpool_get(t->bt_mp, h->prevpg, 0)) == NULL)
+	if ((e.page = reinterpret_cast<PAGE*>(mpool_get(t->bt_mp, h->prevpg, 0))) == NULL)
 		return (0);
 	e.index = NEXTINDEX(e.page) - 1;
 	if (__bt_cmp(t, key, &e) == 0) {
