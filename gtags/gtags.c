@@ -726,42 +726,25 @@ exit:
 
 	return updated;
 }
+
 /**
  * @fn static void put_syms(int type, const char *tag, int lno, const char *path, const char *line_image, void *arg)
  *
  * callback functions for built-in parser
  */
+
 struct put_func_data : public ParserCallback {
-	GTOP *gtop[GTAGLIM];
-	const char *fid;
+  GTOP *gtop[GTAGLIM];
+  const char *fid;
 
-	virtual void put(int type, const char *tag, int lno, const char *path, const char *line_image);
+  virtual void put(int type, const char *tag, int lno, const char *path, const char *line_image) {
+    if (type == PARSER_DEF) {
+      gtags_put_using(gtop[GTAGS], tag, lno, fid, line_image);
+    } else if (type == PARSER_REF_SYM && gtop[GRTAGS]) {
+      gtags_put_using(gtop[GRTAGS], tag, lno, fid, line_image);
+    }
+  }
 };
-static void
-put_syms(int type, const char *tag, int lno, const char *path, const char *line_image, void *arg)
-{
-	const struct put_func_data *data = reinterpret_cast<put_func_data*>(arg);
-	GTOP *gtop;
-
-	switch (type) {
-	case PARSER_DEF:
-		gtop = data->gtop[GTAGS];
-		break;
-	case PARSER_REF_SYM:
-		gtop = data->gtop[GRTAGS];
-		if (gtop == NULL)
-			return;
-		break;
-	default:
-		return;
-	}
-	gtags_put_using(gtop, tag, lno, data->fid, line_image);
-}
-
-void put_func_data::put(int type, const char *tag, int lno, const char *path, const char *line_image)
-{
-  put_syms(type, tag, lno, path, line_image, this);
-}
 
 /**
  * updatetags: update tag file.

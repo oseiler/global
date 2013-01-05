@@ -1341,6 +1341,7 @@ pathlist(const char *pattern, const char *dbpath)
 		fprintf(stderr, " (using '%s').\n", makepath(dbpath, dbname(GPATH), NULL));
 	}
 }
+
 /**
  * @fn void parsefile(char *const *argv, const char *cwd, const char *root, const char *dbpath, int db)
  *
@@ -1352,74 +1353,72 @@ pathlist(const char *pattern, const char *dbpath)
  *	@param[in]	dbpath	dbpath
  *	@param[in]	db	type of parse
  */
+
 #define TARGET_DEF	(1 << GTAGS)
 #define TARGET_REF	(1 << GRTAGS)
 #define TARGET_SYM	(1 << GSYMS)
+
 struct parsefile_data : public ParserCallback {
-	CONVERT *cv;
-	DBOP *dbop;
-	int target;
-	int extractmethod;
-	int count;
-	const char *fid;			/**< fid of the file under processing */
+  CONVERT	*cv;
+  DBOP		*dbop;
+  int		 target;
+  int		 extractmethod;
+  int		 count;
+  const char	*fid;		/**< fid of the file under processing */
 
-	virtual void put(int type, const char *tag, int lno, const char *path, const char *line_image);
-};
-static void
-put_syms(int type, const char *tag, int lno, const char *path, const char *line_image, void *arg)
-{
-	struct parsefile_data *data = reinterpret_cast<parsefile_data*>(arg);
-	const char *key;
+  virtual void put(int type, const char *tag, int lno, const char *path, const char *line_image) {
+    if (format == FORMAT_PATH && count > 0)
+      return;
 
-	if (format == FORMAT_PATH && data->count > 0)
-		return;
-	switch (type) {
-	case PARSER_DEF:
-		if (!(data->target & TARGET_DEF))
-			return;
-		break;
-	case PARSER_REF_SYM:
-		if (!(data->target & (TARGET_REF | TARGET_SYM)))
-			return;
-		/*
-		 * extract method when class method definition.
-		 *
-		 * Ex: Class::method(...)
-		 *
-		 * key	= 'method'
-		 * data = 'Class::method  103 ./class.cpp ...'
-		 */
-		if (data->extractmethod) {
-			if ((key = locatestring(tag, ".", MATCH_LAST)) != NULL)
-				key++;
-			else if ((key = locatestring(tag, "::", MATCH_LAST)) != NULL)
-				key += 2;
-			else
-				key = tag;
-		} else {
-			key = tag;
-		}
-		if (data->target == TARGET_REF || data->target == TARGET_SYM) {
-			if (dbop_get(data->dbop, key) != NULL) {
-				if (!(data->target & TARGET_REF))
-					return;
-			} else {
-				if (!(data->target & TARGET_SYM))
-					return;
-			}
-		}
-		break;
-	default:
-		return;
+    switch (type) {
+    case PARSER_DEF:
+      if (!(target & TARGET_DEF))
+	return;
+      break;
+
+    case PARSER_REF_SYM: {
+      if (!(target & (TARGET_REF | TARGET_SYM)))
+	return;
+
+      // extract method when class method definition.
+      //
+      // Ex: Class::method(...)
+      //
+      // key  = 'method'
+      // data = 'Class::method  103 ./class.cpp ...'
+
+      const char *key;
+      if (extractmethod) {
+	if ((key = locatestring(tag, ".", MATCH_LAST)) != NULL)
+	  key++;
+	else if ((key = locatestring(tag, "::", MATCH_LAST)) != NULL)
+	  key += 2;
+	else
+	  key = tag;
+      } else {
+	key = tag;
+      }
+
+      if (target == TARGET_REF || target == TARGET_SYM) {
+	if (dbop_get(dbop, key) != NULL) {
+	  if (!(target & TARGET_REF))
+	    return;
+	} else {
+	  if (!(target & TARGET_SYM))
+	    return;
 	}
-	convert_put_using(data->cv, tag, path, lno, line_image, data->fid);
-	data->count++;
-}
+      }
+      break;
+    }
 
-void parsefile_data::put(int type, const char *tag, int lno, const char *path, const char *line_image)
-{
-  put_syms(type, tag, lno, path, line_image, this);
-}
+    default:
+      return;
+    }
+
+    convert_put_using(cv, tag, path, lno, line_image, fid);
+    count++;
+  }
+};
 
 void
 parsefile(char *const *argv, const char *cwd, const char *root, const char *dbpath, int db)
