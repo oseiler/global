@@ -50,16 +50,19 @@ void parser_exit(void);
 #define PARSER_BEGIN_BLOCK	16
 /** @} */
 
-typedef void (*PARSER_CALLBACK)(int, const char *, int, const char *, const char *, void *);
+class ParserCallback {
+public:
+  virtual ~ParserCallback() = 0;
+  virtual void put(int type, const char* tag, int line, const char* path, const char* lineImage) = 0;
+};
 
-void parse_file(const char *, int, PARSER_CALLBACK, void *);
+void parse_file(const char *, int, ParserCallback&);
 
 struct parser_param {
 	int size;		/**< size of this structure */
 	int flags;
 	const char *file;
-	PARSER_CALLBACK put;
-	void *arg;
+	ParserCallback* callback;
 	int (*isnotfunction)(const char *);
 	const char *langmap;
 	void (*die)(const char *, ...);

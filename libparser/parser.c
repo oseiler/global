@@ -336,7 +336,7 @@ parser_exit(void)
  *	@param[in]	arg	argument for callback routine
  */
 void
-parse_file(const char *path, int flags, PARSER_CALLBACK put, void *arg)
+parse_file(const char *path, int flags, ParserCallback& callback)
 {
 	const char *lang, *suffix;
 	const struct lang_entry *ent;
@@ -367,8 +367,7 @@ parse_file(const char *path, int flags, PARSER_CALLBACK put, void *arg)
 	param.size = sizeof(param);
 	param.flags = flags;
 	param.file = path;
-	param.put = put;
-	param.arg = arg;
+	param.callback= &callback;
 	param.isnotfunction = isnotfunction;
 	param.langmap = langmap_saved;
 	param.die = die;
@@ -384,4 +383,8 @@ dbg_print(int level, const char *s)
 	for (; level > 0; level--)
 		fprintf(stderr, "    ");
 	fprintf(stderr, "%s\n", s);
+}
+
+ParserCallback::~ParserCallback()
+{
 }

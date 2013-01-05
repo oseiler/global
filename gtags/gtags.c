@@ -731,9 +731,11 @@ exit:
  *
  * callback functions for built-in parser
  */
-struct put_func_data {
+struct put_func_data : public ParserCallback {
 	GTOP *gtop[GTAGLIM];
 	const char *fid;
+
+	virtual void put(int type, const char *tag, int lno, const char *path, const char *line_image);
 };
 static void
 put_syms(int type, const char *tag, int lno, const char *path, const char *line_image, void *arg)
@@ -755,6 +757,12 @@ put_syms(int type, const char *tag, int lno, const char *path, const char *line_
 	}
 	gtags_put_using(gtop, tag, lno, data->fid, line_image);
 }
+
+void put_func_data::put(int type, const char *tag, int lno, const char *path, const char *line_image)
+{
+  put_syms(type, tag, lno, path, line_image, this);
+}
+
 /**
  * updatetags: update tag file.
  *
@@ -834,7 +842,7 @@ updatetags(const char *dbpath, const char *root, IDSET *deleteset, STRBUF *addli
 			die("GPATH is corrupted.('%s' not found)", path);
 		if (vflag)
 			fprintf(stderr, " [%d/%d] extracting tags of %s\n", ++seqno, total, path + 2);
-		parse_file(path, flags, put_syms, &data);
+		parse_file(path, flags, data);
 		gtags_flush(data.gtop[GTAGS], data.fid);
 		if (data.gtop[GRTAGS] != NULL)
 			gtags_flush(data.gtop[GRTAGS], data.fid);
@@ -898,7 +906,7 @@ createtags(const char *dbpath, const char *root)
 		seqno++;
 		if (vflag)
 			fprintf(stderr, " [%d] extracting tags of %s\n", seqno, path + 2);
-		parse_file(path, flags, put_syms, &data);
+		parse_file(path, flags, data);
 		gtags_flush(data.gtop[GTAGS], data.fid);
 		gtags_flush(data.gtop[GRTAGS], data.fid);
 	}

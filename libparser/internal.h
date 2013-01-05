@@ -27,7 +27,7 @@
 
 #define PUT(type, tag, lno, line) do {					\
 	DBG_PRINT(level, line);						\
-	param->put(type, tag, lno, curfile, line, param->arg);		\
+	param->callback->put(type, tag, lno, curfile, line);		\
 } while (0)
 
 #ifdef DEBUG

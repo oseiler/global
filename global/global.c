@@ -1355,13 +1355,15 @@ pathlist(const char *pattern, const char *dbpath)
 #define TARGET_DEF	(1 << GTAGS)
 #define TARGET_REF	(1 << GRTAGS)
 #define TARGET_SYM	(1 << GSYMS)
-struct parsefile_data {
+struct parsefile_data : public ParserCallback {
 	CONVERT *cv;
 	DBOP *dbop;
 	int target;
 	int extractmethod;
 	int count;
 	const char *fid;			/**< fid of the file under processing */
+
+	virtual void put(int type, const char *tag, int lno, const char *path, const char *line_image);
 };
 static void
 put_syms(int type, const char *tag, int lno, const char *path, const char *line_image, void *arg)
@@ -1413,6 +1415,12 @@ put_syms(int type, const char *tag, int lno, const char *path, const char *line_
 	convert_put_using(data->cv, tag, path, lno, line_image, data->fid);
 	data->count++;
 }
+
+void parsefile_data::put(int type, const char *tag, int lno, const char *path, const char *line_image)
+{
+  put_syms(type, tag, lno, path, line_image, this);
+}
+
 void
 parsefile(char *const *argv, const char *cwd, const char *root, const char *dbpath, int db)
 {
@@ -1507,7 +1515,7 @@ parsefile(char *const *argv, const char *cwd, const char *root, const char *dbpa
 		if (lflag && !locatestring(path, localprefix, MATCH_AT_FIRST))
 			continue;
 		data.count = 0;
-		parse_file(path, flags, put_syms, &data);
+		parse_file(path, flags, data);
 		count += data.count;
 	}
 	args_close();

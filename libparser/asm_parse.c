@@ -120,7 +120,7 @@
 	char *nl = strchr(line_image, '\n');				\
 	if (nl != NULL)							\
 		*nl = '\0';						\
-	param->put(type, tag, lno, param->file, line_image, param->arg);\
+	param->callback->put(type, tag, lno, param->file, line_image);  \
 	if (nl != NULL)							\
 		*nl = '\n';						\
 } while (0)

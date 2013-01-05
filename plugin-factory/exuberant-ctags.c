@@ -242,7 +242,7 @@ put_line(char *ctags_x, const struct parser_param *param)
 		while (isspace((unsigned char)*p))
 			p++;
 	}
-	param->put(type, tagname, lineno, filename, p, param->arg);
+	param->callback->put(type, tagname, lineno, filename, p);
 }
 
 void
