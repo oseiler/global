@@ -1366,6 +1366,33 @@ struct parsefile_data : public ParserCallback {
   int		 count;
   const char	*fid;		/**< fid of the file under processing */
 
+  parsefile_data(const char *cwd, const char *root, const char *dbpath, int db) :
+    cv(NULL), dbop(NULL), target(0), extractmethod(0), count(0), fid(NULL)
+  {
+    if (db == GRTAGS + GSYMS) {
+      target = TARGET_REF|TARGET_SYM;
+    } else {
+      target = 1 << db;
+    }
+
+    extractmethod = getconfb("extractmethod");
+    cv = convert_open(type, format, root, cwd, dbpath, stdout, db);
+
+    if (target == TARGET_REF || target == TARGET_SYM) {
+      dbop = dbop_open(makepath(dbpath, dbname(GTAGS), NULL), 0, 0, 0);
+      if (dbop == NULL) {
+	die("%s not found.", dbname(GTAGS));
+      }
+    }
+  }
+
+  ~parsefile_data() {
+    if (dbop != NULL) {
+      dbop_close(dbop);
+    }
+    convert_close(cv);
+  }
+
   virtual void put(int type, const char *tag, int lno, const char *path, const char *line_image) {
     if (format == FORMAT_PATH && count > 0)
       return;
@@ -1420,118 +1447,104 @@ struct parsefile_data : public ParserCallback {
   }
 };
 
-void
-parsefile(char *const *argv, const char *cwd, const char *root, const char *dbpath, int db)
-{
-	int count = 0;
-	int flags = 0;
-	STRBUF *sb = strbuf_open(0);
-	char *langmap;
-	const char *plugin_parser, *av;
-	char path[MAXPATHLEN];
-	struct parsefile_data data;
+void parsefile(char *const *argv, const char *cwd, const char *root, const char *dbpath, int db) {
+  int flags = 0;
+  if (vflag)
+    flags |= PARSER_VERBOSE;
+  if (debug)
+    flags |= PARSER_DEBUG;
 
-	flags = 0;
-	if (vflag)
-		flags |= PARSER_VERBOSE;
-	if (debug)
-		flags |= PARSER_DEBUG;
-	/*
-	if (wflag)
-		flags |= PARSER_WARNING;
-	*/
-	if (db == GRTAGS + GSYMS)
-		data.target = TARGET_REF|TARGET_SYM;
-	else
-		data.target = 1 << db;
-	data.extractmethod = getconfb("extractmethod");
-	if (getconfs("langmap", sb))
-		langmap = check_strdup(strbuf_value(sb));
-	else
-		langmap = NULL;
-	strbuf_reset(sb);
-	if (getconfs("gtags_parser", sb))
-		plugin_parser = strbuf_value(sb);
-	else
-		plugin_parser = NULL;
-	data.cv = convert_open(type, format, root, cwd, dbpath, stdout, db);
-	if (gpath_open(dbpath, 0) < 0)
-		die("GPATH not found.");
-	if (data.target == TARGET_REF || data.target == TARGET_SYM) {
-		data.dbop = dbop_open(makepath(dbpath, dbname(GTAGS), NULL), 0, 0, 0);
-		if (data.dbop == NULL)
-			die("%s not found.", dbname(GTAGS));
-	} else {
-		data.dbop = NULL;
-	}
-	data.fid = NULL;
-	parser_init(langmap, plugin_parser);
-	if (langmap != NULL)
-		free(langmap);
+  char *langmap = NULL;
+  STRBUF *sb = strbuf_open(0);
+  if (getconfs("langmap", sb))
+    langmap = check_strdup(strbuf_value(sb));
+  strbuf_reset(sb);
 
-	if (*argv && file_list)
-		args_open_both(argv, file_list);
-	else if (*argv)
-		args_open(argv);
-	else if (file_list)
-		args_open_filelist(file_list);
-	else
-		args_open_nop();
-	while ((av = args_read()) != NULL) {
-		/*
-		 * convert the path into relative to the root directory of source tree.
-		 */
-		if (normalize(av, get_root_with_slash(), cwd, path, sizeof(path)) == NULL) {
-			if (!qflag)
-				die("'%s' is out of the source project.", av);
-			continue;
-		}
-		if (!test("f", makepath(root, path, NULL))) {
-			if (!qflag) {
-				if (test("d", NULL))
-					die("'%s' is not a source file.", av);
-				else
-					die("'%s' not found.", av);
-			}
-			continue;
-		}
-		/*
-		 * Memorize the file id of the path. This is used in put_syms().
-		 */
-		{
-			static char s_fid[MAXFIDLEN];
-			int type = 0;
-			const char *p = gpath_path2fid(path, &type);
+  const char* plugin_parser = NULL;
+  if (getconfs("gtags_parser", sb))
+    plugin_parser = strbuf_value(sb);
 
-			if (!p || type != GPATH_SOURCE) {
-				if (!qflag)
-					die("'%s' is not a source file.", av);
-				continue;
-			}
-			strlimcpy(s_fid, p, sizeof(s_fid));
-			data.fid = s_fid;
-		}
-		if (lflag && !locatestring(path, localprefix, MATCH_AT_FIRST))
-			continue;
-		data.count = 0;
-		parse_file(path, flags, data);
-		count += data.count;
-	}
-	args_close();
-	parser_exit();
-	/*
-	 * Settlement
-	 */
-	if (data.dbop != NULL)
-		dbop_close(data.dbop);
-	gpath_close();
-	convert_close(data.cv);
-	strbuf_close(sb);
-	if (vflag) {
-		print_count(count);
-		fprintf(stderr, " (no index used).\n");
-	}
+  if (gpath_open(dbpath, 0) < 0)
+    die("GPATH not found.");
+
+  struct parsefile_data data(cwd, root, dbpath, db);
+
+  parser_init(langmap, plugin_parser);
+  if (langmap != NULL)
+    free(langmap);
+
+  if (*argv && file_list)
+    args_open_both(argv, file_list);
+  else if (*argv)
+    args_open(argv);
+  else if (file_list)
+    args_open_filelist(file_list);
+  else
+    args_open_nop();
+
+  int count = 0;
+  char path[MAXPATHLEN];
+  const char *av;
+  while ((av = args_read()) != NULL) {
+    /*
+     * convert the path into relative to the root directory of source tree.
+     */
+    if (normalize(av, get_root_with_slash(), cwd, path, sizeof(path)) == NULL) {
+      if (!qflag)
+	die("'%s' is out of the source project.", av);
+      continue;
+    }
+    if (!test("f", makepath(root, path, NULL))) {
+      if (!qflag) {
+	if (test("d", NULL))
+	  die("'%s' is not a source file.", av);
+	else
+	  die("'%s' not found.", av);
+      }
+
+      continue;
+    }
+
+    /*
+     * Memorize the file id of the path. This is used in put_syms().
+     */
+    {
+      static char s_fid[MAXFIDLEN];
+      int type = 0;
+      const char *p = gpath_path2fid(path, &type);
+
+      if (!p || type != GPATH_SOURCE) {
+	if (!qflag)
+	  die("'%s' is not a source file.", av);
+	continue;
+      }
+      strlimcpy(s_fid, p, sizeof(s_fid));
+      data.fid = s_fid;
+    }
+
+    if (lflag && !locatestring(path, localprefix, MATCH_AT_FIRST))
+      continue;
+    data.count = 0;
+
+    parse_file(path, flags, data);
+    count += data.count;
+  }
+
+  args_close();
+  parser_exit();
+
+  /*
+   * Settlement
+   */
+  gpath_close();
+  strbuf_close(sb);
+
+  if (vflag) {
+    print_count(count);
+    fprintf(stderr, " (no index used).\n");
+  }
 }
+
 /**
  * @fn int search(const char *pattern, const char *root, const char *cwd, const char *dbpath, int db)
  *

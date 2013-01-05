@@ -737,6 +737,40 @@ struct put_func_data : public ParserCallback {
   GTOP *gtop[GTAGLIM];
   const char *fid;
 
+  put_func_data(const char *dbpath, const char *root) :
+    fid(NULL)
+  {
+    gtop[GTAGS] = gtags_open(dbpath, root, GTAGS, GTAGS_MODIFY, 0);
+
+    if (test("f", makepath(dbpath, dbname(GRTAGS), NULL))) {
+      gtop[GRTAGS] = gtags_open(dbpath, root, GRTAGS, GTAGS_MODIFY, 0);
+    } else {
+      /*
+       * If you set NULL to data.gtop[GRTAGS], parse_file() doesn't write to
+       * GRTAGS. See put_syms().
+       */
+      gtop[GRTAGS] = NULL;
+    }
+  }
+
+  put_func_data(const char *dbpath, const char *root, int openflags) :
+    fid(NULL)
+  {
+    gtop[GTAGS] = gtags_open(dbpath, root, GTAGS, GTAGS_CREATE, openflags);
+    gtop[GTAGS]->flags = 0;
+    if (extractmethod)
+      gtop[GTAGS]->flags |= GTAGS_EXTRACTMETHOD;
+    gtop[GRTAGS] = gtags_open(dbpath, root, GRTAGS, GTAGS_CREATE, openflags);
+    gtop[GRTAGS]->flags = gtop[GTAGS]->flags;
+  }
+
+  virtual ~put_func_data() {
+    gtags_close(gtop[GTAGS]);
+    if (gtop[GRTAGS] != NULL) {
+      gtags_close(gtop[GRTAGS]);
+    }
+  }
+
   virtual void put(int type, const char *tag, int lno, const char *path, const char *line_image) {
     if (type == PARSER_DEF) {
       gtags_put_using(gtop[GTAGS], tag, lno, fid, line_image);
@@ -754,169 +788,150 @@ struct put_func_data : public ParserCallback {
  *	@param[in]	deleteset	bit array of fid of deleted or modified files 
  *	@param[in]	addlist		@CODE{\\0} separated list of added or modified files
  */
-void
-updatetags(const char *dbpath, const char *root, IDSET *deleteset, STRBUF *addlist)
-{
-	struct put_func_data data;
-	int seqno, flags;
-	const char *path, *start, *end;
+void updatetags(const char *dbpath, const char *root, IDSET *deleteset, STRBUF *addlist) {
+  if (vflag)
+    fprintf(stderr, "[%s] Updating '%s' and '%s'.\n", now(), dbname(GTAGS), dbname(GRTAGS));
 
-	if (vflag)
-		fprintf(stderr, "[%s] Updating '%s' and '%s'.\n", now(), dbname(GTAGS), dbname(GRTAGS));
-	/*
-	 * Open tag files.
-	 */
-	data.gtop[GTAGS] = gtags_open(dbpath, root, GTAGS, GTAGS_MODIFY, 0);
-	if (test("f", makepath(dbpath, dbname(GRTAGS), NULL))) {
-		data.gtop[GRTAGS] = gtags_open(dbpath, root, GRTAGS, GTAGS_MODIFY, 0);
-	} else {
-		/*
-		 * If you set NULL to data.gtop[GRTAGS], parse_file() doesn't write to
-		 * GRTAGS. See put_syms().
-		 */
-		data.gtop[GRTAGS] = NULL;
-	}
-	/*
-	 * Delete tags from GTAGS.
-	 */
-	if (!idset_empty(deleteset)) {
-		if (vflag) {
-			char fid[MAXFIDLEN];
-			int total = idset_count(deleteset);
-			unsigned int id;
+  /*
+   * Open tag files and delete tags from GTAGS.
+   */
+  struct put_func_data data(dbpath, root);
+  if (!idset_empty(deleteset)) {
+    if (vflag) {
+      int total = idset_count(deleteset);
+      int seqno = 1;
+      for (unsigned int id = idset_first(deleteset); id != END_OF_ID; id = idset_next(deleteset)) {
+	char fid[MAXFIDLEN];
+	snprintf(fid, sizeof(fid), "%d", id);
+	const char* path = gpath_fid2path(fid, NULL);
+	if (path == NULL)
+	  die("GPATH is corrupted.");
+	fprintf(stderr, " [%d/%d] deleting tags of %s\n", seqno++, total, path + 2);
+      }
+    }
 
-			seqno = 1;
-			for (id = idset_first(deleteset); id != END_OF_ID; id = idset_next(deleteset)) {
-				snprintf(fid, sizeof(fid), "%d", id);
-				path = gpath_fid2path(fid, NULL);
-				if (path == NULL)
-					die("GPATH is corrupted.");
-				fprintf(stderr, " [%d/%d] deleting tags of %s\n", seqno++, total, path + 2);
-			}
-		}
-		gtags_delete(data.gtop[GTAGS], deleteset);
-		if (data.gtop[GRTAGS] != NULL)
-			gtags_delete(data.gtop[GRTAGS], deleteset);
-	}
-	/*
-	 * Set flags.
-	 */
-	data.gtop[GTAGS]->flags = 0;
-	if (extractmethod)
-		data.gtop[GTAGS]->flags |= GTAGS_EXTRACTMETHOD;
-	data.gtop[GRTAGS]->flags = data.gtop[GTAGS]->flags;
-	flags = 0;
-	if (vflag)
-		flags |= PARSER_VERBOSE;
-	if (debug)
-		flags |= PARSER_DEBUG;
-	if (wflag)
-		flags |= PARSER_WARNING;
-	/*
-	 * Add tags to GTAGS and GRTAGS.
-	 */
-	start = strbuf_value(addlist);
-	end = start + strbuf_getlen(addlist);
-	seqno = 0;
-	for (path = start; path < end; path += strlen(path) + 1) {
-		gpath_put(path, GPATH_SOURCE);
-		data.fid = gpath_path2fid(path, NULL);
-		if (data.fid == NULL)
-			die("GPATH is corrupted.('%s' not found)", path);
-		if (vflag)
-			fprintf(stderr, " [%d/%d] extracting tags of %s\n", ++seqno, total, path + 2);
-		parse_file(path, flags, data);
-		gtags_flush(data.gtop[GTAGS], data.fid);
-		if (data.gtop[GRTAGS] != NULL)
-			gtags_flush(data.gtop[GRTAGS], data.fid);
-	}
-	parser_exit();
-	gtags_close(data.gtop[GTAGS]);
-	if (data.gtop[GRTAGS] != NULL)
-		gtags_close(data.gtop[GRTAGS]);
+    gtags_delete(data.gtop[GTAGS], deleteset);
+    if (data.gtop[GRTAGS] != NULL)
+      gtags_delete(data.gtop[GRTAGS], deleteset);
+  }
+
+  /*
+   * Set flags.
+   */
+  data.gtop[GTAGS]->flags = 0;
+  if (extractmethod)
+    data.gtop[GTAGS]->flags |= GTAGS_EXTRACTMETHOD;
+  data.gtop[GRTAGS]->flags = data.gtop[GTAGS]->flags;
+
+  int flags = 0;
+  if (vflag)
+    flags |= PARSER_VERBOSE;
+  if (debug)
+    flags |= PARSER_DEBUG;
+  if (wflag)
+    flags |= PARSER_WARNING;
+
+  /*
+   * Add tags to GTAGS and GRTAGS.
+   */
+  const char* start = strbuf_value(addlist);
+  const char* end   = start + strbuf_getlen(addlist);
+  int seqno = 0;
+  for (const char* path = start; path < end; path += strlen(path) + 1) {
+    gpath_put(path, GPATH_SOURCE);
+    data.fid = gpath_path2fid(path, NULL);
+    if (data.fid == NULL)
+      die("GPATH is corrupted.('%s' not found)", path);
+
+    if (vflag)
+      fprintf(stderr, " [%d/%d] extracting tags of %s\n", ++seqno, total, path + 2);
+
+    parse_file(path, flags, data);
+    gtags_flush(data.gtop[GTAGS], data.fid);
+    if (data.gtop[GRTAGS] != NULL)
+      gtags_flush(data.gtop[GRTAGS], data.fid);
+  }
+
+  parser_exit();
 }
+
 /**
  * createtags: create tags file
  *
  *	@param[in]	dbpath	dbpath directory
  *	@param[in]	root	root directory of source tree
  */
-void
-createtags(const char *dbpath, const char *root)
-{
-	STATISTICS_TIME *tim;
-	STRBUF *sb = strbuf_open(0);
-	struct put_func_data data;
-	int openflags, flags, seqno;
-	const char *path;
+void createtags(const char *dbpath, const char *root) {
+  STATISTICS_TIME* tim = statistics_time_start("Time of creating %s and %s.", dbname(GTAGS), dbname(GRTAGS));
 
-	tim = statistics_time_start("Time of creating %s and %s.", dbname(GTAGS), dbname(GRTAGS));
-	if (vflag)
-		fprintf(stderr, "[%s] Creating '%s' and '%s'.\n", now(), dbname(GTAGS), dbname(GRTAGS));
-	openflags = cflag ? GTAGS_COMPACT : 0;
-	data.gtop[GTAGS] = gtags_open(dbpath, root, GTAGS, GTAGS_CREATE, openflags);
-	data.gtop[GTAGS]->flags = 0;
-	if (extractmethod)
-		data.gtop[GTAGS]->flags |= GTAGS_EXTRACTMETHOD;
-	data.gtop[GRTAGS] = gtags_open(dbpath, root, GRTAGS, GTAGS_CREATE, openflags);
-	data.gtop[GRTAGS]->flags = data.gtop[GTAGS]->flags;
-	flags = 0;
-	if (vflag)
-		flags |= PARSER_VERBOSE;
-	if (debug)
-		flags |= PARSER_DEBUG;
-	if (wflag)
-		flags |= PARSER_WARNING;
-	/*
-	 * Add tags to GTAGS and GRTAGS.
-	 */
-	if (file_list)
-		find_open_filelist(file_list, root);
-	else
-		find_open(NULL);
-	seqno = 0;
-	while ((path = find_read()) != NULL) {
-		if (*path == ' ') {
-			path++;
-			if (!test("b", path))
-				gpath_put(path, GPATH_OTHER);
-			continue;
-		}
-		gpath_put(path, GPATH_SOURCE);
-		data.fid = gpath_path2fid(path, NULL);
-		if (data.fid == NULL)
-			die("GPATH is corrupted.('%s' not found)", path);
-		seqno++;
-		if (vflag)
-			fprintf(stderr, " [%d] extracting tags of %s\n", seqno, path + 2);
-		parse_file(path, flags, data);
-		gtags_flush(data.gtop[GTAGS], data.fid);
-		gtags_flush(data.gtop[GRTAGS], data.fid);
-	}
-	total = seqno;
-	parser_exit();
-	find_close();
-	statistics_time_end(tim);
-	tim = statistics_time_start("Time of flushing B-tree cache");
-	gtags_close(data.gtop[GTAGS]);
-	gtags_close(data.gtop[GRTAGS]);
-	statistics_time_end(tim);
-	strbuf_reset(sb);
-	if (getconfs("GTAGS_extra", sb)) {
-		tim = statistics_time_start("Time of executing GTAGS_extra command");
-		if (system(strbuf_value(sb)))
-			fprintf(stderr, "GTAGS_extra command failed: %s\n", strbuf_value(sb));
-		statistics_time_end(tim);
-	}
-	strbuf_reset(sb);
-	if (getconfs("GRTAGS_extra", sb)) {
-		tim = statistics_time_start("Time of executing GRTAGS_extra command");
-		if (system(strbuf_value(sb)))
-			fprintf(stderr, "GRTAGS_extra command failed: %s\n", strbuf_value(sb));
-		statistics_time_end(tim);
-	}
-	strbuf_close(sb);
+  if (vflag)
+    fprintf(stderr, "[%s] Creating '%s' and '%s'.\n", now(), dbname(GTAGS), dbname(GRTAGS));
+
+  int flags = 0;
+  if (vflag)
+    flags |= PARSER_VERBOSE;
+  if (debug)
+    flags |= PARSER_DEBUG;
+  if (wflag)
+    flags |= PARSER_WARNING;
+
+  /*
+   * Add tags to GTAGS and GRTAGS.
+   */
+  if (file_list)
+    find_open_filelist(file_list, root);
+  else
+    find_open(NULL);
+
+  struct put_func_data data(dbpath, root, cflag ? GTAGS_COMPACT : 0);
+  int seqno = 0;
+  const char* path;
+  while ((path = find_read()) != NULL) {
+    if (*path == ' ') {
+      path++;
+      if (!test("b", path))
+	gpath_put(path, GPATH_OTHER);
+      continue;
+    }
+    gpath_put(path, GPATH_SOURCE);
+    data.fid = gpath_path2fid(path, NULL);
+    if (data.fid == NULL)
+      die("GPATH is corrupted.('%s' not found)", path);
+    seqno++;
+    if (vflag)
+      fprintf(stderr, " [%d] extracting tags of %s\n", seqno, path + 2);
+    parse_file(path, flags, data);
+    gtags_flush(data.gtop[GTAGS], data.fid);
+    gtags_flush(data.gtop[GRTAGS], data.fid);
+  }
+
+  total = seqno;
+  parser_exit();
+  find_close();
+  statistics_time_end(tim);
+  tim = statistics_time_start("Time of flushing B-tree cache");
+  statistics_time_end(tim);
+
+  STRBUF *sb = strbuf_open(0);
+  strbuf_reset(sb);
+  if (getconfs("GTAGS_extra", sb)) {
+    tim = statistics_time_start("Time of executing GTAGS_extra command");
+    if (system(strbuf_value(sb)))
+      fprintf(stderr, "GTAGS_extra command failed: %s\n", strbuf_value(sb));
+    statistics_time_end(tim);
+  }
+
+  strbuf_reset(sb);
+  if (getconfs("GRTAGS_extra", sb)) {
+    tim = statistics_time_start("Time of executing GRTAGS_extra command");
+    if (system(strbuf_value(sb)))
+      fprintf(stderr, "GRTAGS_extra command failed: %s\n", strbuf_value(sb));
+    statistics_time_end(tim);
+  }
+
+  strbuf_close(sb);
 }
+
 /**
  * printconf: print configuration data.
  *
