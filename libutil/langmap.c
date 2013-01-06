@@ -95,7 +95,7 @@ decide_lang(const char *suffix)
 	if (!strcmp(suffix, ".h") && getenv("GTAGSFORCECPP") != NULL)
 		return "cpp";
 	lang = strbuf_value(active_map);
-	tail = lang + strbuf_getlen(active_map);
+	tail = lang + active_map->length();
 
 	/* check whether or not list includes suffix. */
 	while (lang < tail) {

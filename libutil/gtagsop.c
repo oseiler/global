@@ -854,7 +854,7 @@ flush_pool(GTOP *gtop, const char *s_fid)
 			strbuf_puts(gtop->sb, entry->name);
 		}
 		strbuf_putc(gtop->sb, ' ');
-		header_offset = strbuf_getlen(gtop->sb);
+		header_offset = gtop->sb->length();
 		/*
 		 * If GTAGS_COMPLINE flag is set, each line number is expressed as the
 		 * difference from the previous line number except for the head.
@@ -874,7 +874,7 @@ flush_pool(GTOP *gtop, const char *s_fid)
 						/*
 						 * Don't use range expression at the head.
 						 */
-						if (strbuf_getlen(gtop->sb) == header_offset)
+						if (gtop->sb->length() == header_offset)
 							strbuf_putn(gtop->sb, n);
 						else
 							cont = last;
@@ -888,15 +888,15 @@ flush_pool(GTOP *gtop, const char *s_fid)
 						strbuf_putn(gtop->sb, last - cont);
 						cont = 0;
 					}
-					if (strbuf_getlen(gtop->sb) > header_offset) {
+					if (gtop->sb->length() > header_offset) {
 						strbuf_putc(gtop->sb, ',');
 						strbuf_putn(gtop->sb, n - last);
 					} else {
 						strbuf_putn(gtop->sb, n);
 					}
-					if (strbuf_getlen(gtop->sb) > DBOP_PAGESIZE / 4) {
+					if (gtop->sb->length() > DBOP_PAGESIZE / 4) {
 						dbop_put(gtop->dbop, key, strbuf_value(gtop->sb));
-						strbuf_setlen(gtop->sb, header_offset);
+						gtop->sb->resize(header_offset);
 					}
 				}
 				last = n;
@@ -915,17 +915,17 @@ flush_pool(GTOP *gtop, const char *s_fid)
 
 				if (n == last)
 					continue;
-				if (strbuf_getlen(gtop->sb) > header_offset)
+				if (gtop->sb->length() > header_offset)
 					strbuf_putc(gtop->sb, ',');
 				strbuf_putn(gtop->sb, n);
-				if (strbuf_getlen(gtop->sb) > DBOP_PAGESIZE / 4) {
+				if (gtop->sb->length() > DBOP_PAGESIZE / 4) {
 					dbop_put(gtop->dbop, key, strbuf_value(gtop->sb));
-					strbuf_setlen(gtop->sb, header_offset);
+					gtop->sb->resize(header_offset);
 				}
 				last = n;
 			}
 		}
-		if (strbuf_getlen(gtop->sb) > header_offset) {
+		if (gtop->sb->length() > header_offset) {
 			dbop_put(gtop->dbop, key, strbuf_value(gtop->sb));
 		}
 		/* Free line number table */

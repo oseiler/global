@@ -170,7 +170,7 @@ gpath_put(const char *path, int type)
 	strbuf_puts0(sb, fid);
 	if (type == GPATH_OTHER)
 		strbuf_puts0(sb, "o");
-	dbop_put_withlen(dbop, path, strbuf_value(sb), strbuf_getlen(sb));
+	dbop_put_withlen(dbop, path, strbuf_value(sb), sb->length());
 	/*
 	 * fid => path mapping.
 	 */
@@ -178,7 +178,7 @@ gpath_put(const char *path, int type)
 	strbuf_puts0(sb, path);
 	if (type == GPATH_OTHER)
 		strbuf_puts0(sb, "o");
-	dbop_put_withlen(dbop, fid, strbuf_value(sb), strbuf_getlen(sb));
+	dbop_put_withlen(dbop, fid, strbuf_value(sb), sb->length());
 }
 /**
  * gpath_path2fid: convert path into id

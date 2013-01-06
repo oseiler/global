@@ -317,7 +317,7 @@ sed(FILE *ip, int place)
 	while ((c = fgetc(ip)) != EOF) {
 		strbuf_putc(sb, c);
 		if (c == '@') {
-			int curpos = strbuf_getlen(sb);
+			int curpos = sb->length();
 			if (start_position == -1) {
 				start_position = curpos - 1;
 			} else {
@@ -325,7 +325,7 @@ sed(FILE *ip, int place)
 					strbuf_value(sb) + start_position,
 					curpos - start_position))
 				{
-					strbuf_setlen(sb, start_position);
+					sb->resize(start_position);
 					strbuf_puts(sb, parent_dir);
 					start_position = -1;
 				} else {

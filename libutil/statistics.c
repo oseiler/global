@@ -140,9 +140,9 @@ statistics_time_start(const char *fmt, ...)
 	strbuf_vsprintf(sb, fmt, ap);
 	va_end(ap);
 
-	t = reinterpret_cast<STATISTICS_TIME*>(check_malloc(offsetof(STATISTICS_TIME, name) + strbuf_getlen(sb) + 1));
+	t = reinterpret_cast<STATISTICS_TIME*>(check_malloc(offsetof(STATISTICS_TIME, name) + sb->length() + 1));
 
-	t->name_len = strbuf_getlen(sb);
+	t->name_len = sb->length();
 	strcpy(t->name, strbuf_value(sb));
 
 	GET_ELAPSED_TIME(&t->elapsed_start);

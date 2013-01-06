@@ -48,7 +48,7 @@
 		*nl = '\n';						\
 } while (0)
 
-#define GET_SYM(offset) (assert((offset) < strbuf_getlen(asm_symtable)),\
+#define GET_SYM(offset) (assert((offset) < asm_symtable->length()),	\
 			 &strbuf_value(asm_symtable)[offset])
 
 STRBUF *asm_symtable;

@@ -119,7 +119,7 @@ convert_pathname(CONVERT *cv, const char *path)
 		 * make absolute path name.
 		 * 'path + 1' means skipping "." at the head.
 		 */
-		strbuf_setlen(&cv->abspath, cv->start_point);
+		cv->abspath.resize(cv->start_point);
 		strbuf_puts(&cv->abspath, path + 1);
 		/*
 		 * print path name with converting.
@@ -401,7 +401,7 @@ CONVERT::CONVERT(int type, int format, const char *root, const char *cwd, const 
   // set base directory.
   strbuf_puts(&abspath, root);
   strbuf_unputc(&abspath, '/');
-  start_point = strbuf_getlen(&abspath);
+  start_point = abspath.length();
 
   // copy elements.
   if (strlen(cwd) > MAXPATHLEN) {

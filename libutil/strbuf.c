@@ -61,11 +61,11 @@ strbuf_puts(sb, "bc");                  [abc]
                                             v
 char *s = strbuf_value(sb);             [abc\0]         s == "abc"
                                             v
-int len = strbuf_getlen(sb);            [abc\0]         len == 3
+size_t len = sb->length();              [abc\0]         len == 3
                                          v
 strbuf_reset(sb);                       [abc\0]
                                          v
-int len = strbuf_getlen(sb);            [abc\0]         len == 0
+size_t len = sb->length();              [abc\0]         len == 0
                                            v
 strbuf_puts(sb, "XY");                  [XYc\0]
                                            v

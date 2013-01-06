@@ -76,8 +76,8 @@ linetable_open(const char *path)
 	lineno = 1;
 	offset = 0;
 	for (offset = 0;
-		(strbuf_fgets(ib, ip, STRBUF_APPEND), offset != strbuf_getlen(ib));
-		offset = strbuf_getlen(ib))
+		(strbuf_fgets(ib, ip, STRBUF_APPEND), offset != ib->length());
+		offset = ib->length())
 	{
 		linetable_put(offset, lineno++);
 	}

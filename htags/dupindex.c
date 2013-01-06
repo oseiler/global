@@ -123,7 +123,7 @@ makedupindex(void)
 					strbuf_putn(&tmp, count - 1);
 					strbuf_putc(&tmp, '\0');
 					strbuf_putn(&tmp, entry_count);
-					cache_put(db, prev, strbuf_value(&tmp), strbuf_getlen(&tmp) + 1);
+					cache_put(db, prev, strbuf_value(&tmp), tmp.length() + 1);
 				}				
 				/* single entry */
 				if (first_line[0]) {
@@ -135,7 +135,7 @@ makedupindex(void)
 					strbuf_puts_withterm(&tmp, lno, ' ');
 					strbuf_putc(&tmp, '\0');
 					strbuf_puts(&tmp, fid);
-					cache_put(db, prev, strbuf_value(&tmp), strbuf_getlen(&tmp) + 1);
+					cache_put(db, prev, strbuf_value(&tmp), tmp.length() + 1);
 				}
 				/*
 				 * Chop the tail of the line. It is not important.
@@ -192,7 +192,7 @@ makedupindex(void)
 			strbuf_putn(&tmp, count);
 			strbuf_putc(&tmp, '\0');
 			strbuf_putn(&tmp, entry_count);
-			cache_put(db, prev, strbuf_value(&tmp), strbuf_getlen(&tmp) + 1);
+			cache_put(db, prev, strbuf_value(&tmp), tmp.length() + 1);
 		}
 		if (first_line[0]) {
 			char fid[MAXFIDLEN];
@@ -203,7 +203,7 @@ makedupindex(void)
 			strbuf_puts_withterm(&tmp, lno, ' ');
 			strbuf_putc(&tmp, '\0');
 			strbuf_puts(&tmp, fid);
-			cache_put(db, prev, strbuf_value(&tmp), strbuf_getlen(&tmp) + 1);
+			cache_put(db, prev, strbuf_value(&tmp), tmp.length() + 1);
 		}
 	}
 

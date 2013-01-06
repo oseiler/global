@@ -458,7 +458,7 @@ convertpath(const char *dbpath, const char *htmldir, const char *path, STRBUF *s
 	 * new style.
 	 */
 	if (gpath_open(dbpath, 0) == 0) {
-		int tag1 = strbuf_getlen(sb);
+		int tag1 = sb->length();
 
 		p = gpath_path2fid(path, NULL);
 		if (p == NULL) {
@@ -468,16 +468,16 @@ convertpath(const char *dbpath, const char *htmldir, const char *path, STRBUF *s
 		gpath_close();
 		strbuf_puts(sb, p);
 		for (i = 0; i < lim; i++) {
-			int tag2 = strbuf_getlen(sb);
+			int tag2 = sb->length();
 			strbuf_puts(sb, suffix[i]);
 			if (test("f", strbuf_value(sb)))
 				return 0;
 			strbuf_puts(sb, gz);
 			if (test("f", strbuf_value(sb)))
 				return 0;
-			strbuf_setlen(sb, tag2);
+			sb->resize(tag2);
 		}
-		strbuf_setlen(sb, tag1);
+		sb->resize(tag1);
 	}
 	/*
 	 * old style.
@@ -485,14 +485,14 @@ convertpath(const char *dbpath, const char *htmldir, const char *path, STRBUF *s
 	for (p = path + 1; *p; p++)
 		strbuf_putc(sb, (*p == '/') ? ' ' : *p);
 	for (i = 0; i < lim; i++) {
-		int tag = strbuf_getlen(sb);
+		int tag = sb->length();
 		strbuf_puts(sb, suffix[i]);
 		if (test("f", strbuf_value(sb)))
 			return 0;
 		strbuf_puts(sb, gz);
 		if (test("f", strbuf_value(sb)))
 			return 0;
-		strbuf_setlen(sb, tag);
+		sb->resize(tag);
 	}
 	return -1;
 }

@@ -157,7 +157,7 @@ repeat_find_next(void)
 			gpath_put(path, GPATH_OTHER);\
 		continue;\
 	}\
-	if (strbuf_getlen(&comline) + length + 2 > limit)\
+	if (comline.length() + length + 2 > limit)	\
 		break;\
 	xp->seqno++;\
 	if (xp->put_gpath)\
@@ -228,12 +228,14 @@ execute_command(XARGS *xp)
 			/* initial */
 			fseek(xp->ip, xp->fptr, SEEK_SET)
 			;
+
 			/* continuation condition */
 			(LT_MAX &&
-				((p = (strbuf_getlen(xp->path) > 0 ?
+			 ((p = (xp->path->length() > 0 ?
 				strbuf_value(xp->path) :
 				strbuf_fgets(xp->path, xp->ip, STRBUF_NOCRLF))) != NULL))
-			;
+			  ;
+
 			/* preparation */
 			strbuf_reset(xp->path)
 		)
@@ -384,7 +386,7 @@ xargs_open_with_strbuf(const char *command, int max_args, STRBUF *sb)
 
 	xp->type = XARGS_STRBUF;
 	xp->curp = strbuf_value(sb);
-	xp->endp = xp->curp + strbuf_getlen(sb);
+	xp->endp = xp->curp + sb->length();
 	return xp;
 }
 /**

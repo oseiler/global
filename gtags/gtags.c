@@ -666,30 +666,30 @@ incremental(const char *dbpath, const char *root)
 	/*
 	 * execute updating.
 	 */
-	if ((!idset_empty(deleteset) || strbuf_getlen(&addlist) > 0) ||
-	    (strbuf_getlen(&deletelist) + strbuf_getlen(&addlist_other) > 0))
+	if ((!idset_empty(deleteset) || addlist.length() > 0) ||
+	    (deletelist.length() + addlist_other.length() > 0))
 	{
 		int db;
 		updated = 1;
 		tim = statistics_time_start("Time of updating %s and %s.", dbname(GTAGS), dbname(GRTAGS));
-		if (!idset_empty(deleteset) || strbuf_getlen(&addlist) > 0)
+		if (!idset_empty(deleteset) || addlist.length() > 0)
 			updatetags(dbpath, root, deleteset, &addlist);
-		if (strbuf_getlen(&deletelist) + strbuf_getlen(&addlist_other) > 0) {
+		if (deletelist.length() + addlist_other.length() > 0) {
 			const char *start, *end, *p;
 
 			if (vflag)
 				fprintf(stderr, "[%s] Updating '%s'.\n", now(), dbname(GPATH));
 			/* gpath_open(dbpath, 2); */
-			if (strbuf_getlen(&deletelist) > 0) {
+			if (deletelist.length() > 0) {
 				start = strbuf_value(&deletelist);
-				end = start + strbuf_getlen(&deletelist);
+				end = start + deletelist.length();
 
 				for (p = start; p < end; p += strlen(p) + 1)
 					gpath_delete(p);
 			}
-			if (strbuf_getlen(&addlist_other) > 0) {
+			if (addlist_other.length() > 0) {
 				start = strbuf_value(&addlist_other);
-				end = start + strbuf_getlen(&addlist_other);
+				end = start + addlist_other.length();
 
 				for (p = start; p < end; p += strlen(p) + 1) {
 					gpath_put(p, GPATH_OTHER);
@@ -828,7 +828,7 @@ void updatetags(const char *dbpath, const char *root, IDSET *deleteset, STRBUF *
    * Add tags to GTAGS and GRTAGS.
    */
   const char* start = strbuf_value(addlist);
-  const char* end   = start + strbuf_getlen(addlist);
+  const char* end   = start + addlist->length();
   int seqno = 0;
   for (const char* path = start; path < end; path += strlen(path) + 1) {
     gpath_put(path, GPATH_SOURCE);

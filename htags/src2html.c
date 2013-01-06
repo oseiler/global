@@ -794,7 +794,7 @@ get_cvs_module(const char *file, const char **basename)
 			fclose(ip);
 		}
 	}
-	if (strbuf_getlen(module) > 0)
+	if (module->length() > 0)
 		return strbuf_value(module);
 	return NULL;
 }
@@ -963,7 +963,7 @@ src2html(const char *src, const char *html, int notsource)
 				strbuf_puts_nl(define_index, item_end);
 			}
 		}
-		if (strbuf_getlen(define_index) > 0) {
+		if (define_index->length() > 0) {
 			fputs(header_begin, out);
 			fputs(title_define_index, out);
 			fputs_nl(header_end, out);

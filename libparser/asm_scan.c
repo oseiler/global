@@ -712,9 +712,9 @@ char *asm_text;
 } while (0)
 
 #define ADD_SYM(tag, lno) do {						\
-	LEXLVAL = strbuf_getlen(asm_symtable);				\
-	LEXLLOC = (lno);						\
-	strbuf_puts0(asm_symtable, tag);				\
+    LEXLVAL = asm_symtable->length();					\
+    LEXLLOC = (lno);							\
+    strbuf_puts0(asm_symtable, tag);					\
 } while (0)
 
 #undef PUT

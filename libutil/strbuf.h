@@ -60,6 +60,9 @@
 #define STRBUF_SHARPSKIP	4
 /** @} */
 
+struct STRBUF;
+void __strbuf_expandbuf(STRBUF *, int);
+
 struct STRBUF {
   char	*sbuf;
   char	*endp;
@@ -72,6 +75,21 @@ struct STRBUF {
   /// \return	sb	#STRBUF structure
   explicit STRBUF(int init = INITIALSIZE);
   ~STRBUF();
+
+  inline size_t length() const {
+    return (curp - sbuf);
+  }
+
+  inline void resize(size_t new_length) {
+    if (!alloc_failed) {
+      size_t current = length();
+      if (new_length < current) {
+	curp = sbuf + new_length;
+      } else if (new_length > current) {
+	__strbuf_expandbuf(this, new_length - current);
+      }
+    }
+  }
 };
 
 /**
@@ -103,7 +121,6 @@ struct STRBUF {
 #ifdef DEBUG
 void strbuf_dump(char *);
 #endif
-void __strbuf_expandbuf(STRBUF *, int);
 void strbuf_reset(STRBUF *);
 void strbuf_clear(STRBUF *);
 void strbuf_nputs(STRBUF *, const char *, int);
@@ -138,20 +155,6 @@ inline void strbuf_putc(STRBUF* sb, char c) {
 inline void strbuf_puts0(STRBUF* sb, const char* s) {
   strbuf_puts(sb, s);
   strbuf_putc(sb, '\0');
-}
-
-inline int strbuf_getlen(const STRBUF* sb) {
-  return (sb->curp - sb->sbuf);
-}
-
-inline void strbuf_setlen(STRBUF* sb, unsigned int len) {
-  if (!sb->alloc_failed) {
-    if (len < strbuf_getlen(sb)) {
-      sb->curp = sb->sbuf + len;
-    } else if (len > strbuf_getlen(sb)) {
-      __strbuf_expandbuf(sb, len - strbuf_getlen(sb));
-    }
-  }
 }
 
 #endif /* ! _STRBUF_H */

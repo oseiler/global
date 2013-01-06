@@ -532,7 +532,7 @@ find_open(const char *start)
 	if (getdirs(dir, curp->sb) < 0)
 		die("Work is given up.");
 	curp->start = curp->p = strbuf_value(curp->sb);
-	curp->end   = curp->start + strbuf_getlen(curp->sb);
+	curp->end   = curp->start + curp->sb->length();
 	strlimcpy(cwddir, get_root(), sizeof(cwddir));
 }
 /**
@@ -679,7 +679,7 @@ find_read_traverse(void)
 				curp->real = getrealpath(dir);
 				curp->sb = sb;
 				curp->start = curp->p = strbuf_value(sb);
-				curp->end   = curp->start + strbuf_getlen(sb);
+				curp->end   = curp->start + sb->length();
 			}
 		}
 		delete curp->sb;

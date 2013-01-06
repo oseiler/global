@@ -102,7 +102,7 @@ strtrim(const char *p, int flag, int *len)
 		if (isspace(*p)) {
 			if (flag != TRIM_ALL) {
 				if (cut_off == -1 && flag != TRIM_HEAD)
-					cut_off = strbuf_getlen(sb);
+					cut_off = sb->length();
 				strbuf_putc(sb,*p);
 			}
 		} else {
@@ -114,9 +114,9 @@ strtrim(const char *p, int flag, int *len)
 	 * Delete blanks of the tail.
 	 */
 	if (cut_off != -1)
-		strbuf_setlen(sb, cut_off);
+		sb->resize(cut_off);
 	if (len)
-		*len = strbuf_getlen(sb);
+		*len = sb->length();
 	return strbuf_value(sb);
 }
 /**
