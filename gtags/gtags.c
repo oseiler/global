@@ -666,13 +666,13 @@ incremental(const char *dbpath, const char *root)
 	/*
 	 * execute updating.
 	 */
-	if ((!idset_empty(deleteset) || addlist.length() > 0) ||
+	if ((!idset_empty(deleteset) || !addlist.empty()) ||
 	    (deletelist.length() + addlist_other.length() > 0))
 	{
 		int db;
 		updated = 1;
 		tim = statistics_time_start("Time of updating %s and %s.", dbname(GTAGS), dbname(GRTAGS));
-		if (!idset_empty(deleteset) || addlist.length() > 0)
+		if (!idset_empty(deleteset) || !addlist.empty())
 			updatetags(dbpath, root, deleteset, &addlist);
 		if (deletelist.length() + addlist_other.length() > 0) {
 			const char *start, *end, *p;
@@ -680,14 +680,14 @@ incremental(const char *dbpath, const char *root)
 			if (vflag)
 				fprintf(stderr, "[%s] Updating '%s'.\n", now(), dbname(GPATH));
 			/* gpath_open(dbpath, 2); */
-			if (deletelist.length() > 0) {
+			if (!deletelist.empty()) {
 				start = strbuf_value(&deletelist);
 				end = start + deletelist.length();
 
 				for (p = start; p < end; p += strlen(p) + 1)
 					gpath_delete(p);
 			}
-			if (addlist_other.length() > 0) {
+			if (!addlist_other.empty()) {
 				start = strbuf_value(&addlist_other);
 				end = start + addlist_other.length();
 

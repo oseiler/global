@@ -653,7 +653,7 @@ gen_list_begin(void)
 {
 	STATIC_STRBUF(sb);
 
-	if (strbuf_empty(sb)) {
+	if (sb->empty()) {
 		strbuf_clear(sb);
 		if (table_list) {
 			if (enable_xhtml) {

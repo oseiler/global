@@ -80,6 +80,10 @@ struct STRBUF {
     return (curp - sbuf);
   }
 
+  inline bool empty() const {
+    return length() == 0;
+  }
+
   inline void resize(size_t new_length) {
     if (!alloc_failed) {
       size_t current = length();
@@ -137,10 +141,6 @@ void strbuf_sprintf(STRBUF *, const char *, ...)
 	__attribute__ ((__format__ (__printf__, 2, 3)));
 void strbuf_vsprintf(STRBUF *, const char *, va_list)
 	__attribute__ ((__format__ (__printf__, 2, 0)));
-
-inline bool strbuf_empty(const STRBUF* sb) {
-  return (sb->sbufsize == 0);
-}
 
 inline void strbuf_putc(STRBUF* sb, char c) {
   if (!sb->alloc_failed) {

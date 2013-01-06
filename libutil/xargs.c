@@ -231,7 +231,7 @@ execute_command(XARGS *xp)
 
 			/* continuation condition */
 			(LT_MAX &&
-			 ((p = (xp->path->length() > 0 ?
+			 ((p = (!xp->path->empty() ?
 				strbuf_value(xp->path) :
 				strbuf_fgets(xp->path, xp->ip, STRBUF_NOCRLF))) != NULL))
 			  ;

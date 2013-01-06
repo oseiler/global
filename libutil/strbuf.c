@@ -35,6 +35,8 @@
 #include "die.h"
 #include "strbuf.h"
 
+#include <algorithm>
+
 #ifndef isblank
 #define isblank(c)	((c) == ' ' || (c) == '\t')
 #endif
@@ -97,13 +99,16 @@ print_and_abort(void)
 void
 __strbuf_expandbuf(STRBUF *sb, int length)
 {
-	int count = sb->curp - sb->sbuf;
-	int newsize = sb->sbufsize + (length > EXPANDSIZE ? length : EXPANDSIZE);
-	char *newbuf;
-
 	if (sb->alloc_failed)
 		return;
-	newbuf = (char *)check_realloc(sb->sbuf, newsize + 1);
+
+	int count = sb->curp - sb->sbuf;
+	int newsize = sb->sbufsize + (length > EXPANDSIZE ? length : EXPANDSIZE);
+
+	char* newbuf = new char[newsize+1];
+	std::copy(sb->sbuf, sb->sbuf+count, newbuf);
+	delete[] sb->sbuf;
+
 	sb->sbufsize = newsize;
 	sb->sbuf = newbuf;
 
@@ -135,9 +140,9 @@ strbuf_clear(STRBUF *sb)
 {
 	if (sb == NULL)
 		die("NULL string buffer. (strbuf_clear)");
-	if (strbuf_empty(sb)) {
+	if (sb->sbufsize == 0) {
 		sb->sbufsize = INITIALSIZE;
-		sb->sbuf = (char *)check_malloc(sb->sbufsize + 1);
+		sb->sbuf = new char[sb->sbufsize + 1];
 		sb->curp = sb->sbuf;
 		sb->endp = sb->sbuf + sb->sbufsize;
 	} else {
