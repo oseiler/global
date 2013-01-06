@@ -61,7 +61,6 @@
 /** @} */
 
 struct STRBUF {
-  char	*name;
   char	*sbuf;
   char	*endp;
   char	*curp;
@@ -121,8 +120,6 @@ void strbuf_sprintf(STRBUF *, const char *, ...)
 	__attribute__ ((__format__ (__printf__, 2, 3)));
 void strbuf_vsprintf(STRBUF *, const char *, va_list)
 	__attribute__ ((__format__ (__printf__, 2, 0)));
-STRBUF *strbuf_open_tempbuf(void);
-void strbuf_release_tempbuf(STRBUF *);
 
 inline bool strbuf_empty(const STRBUF* sb) {
   return (sb->sbufsize == 0);
@@ -155,10 +152,6 @@ inline void strbuf_setlen(STRBUF* sb, unsigned int len) {
       __strbuf_expandbuf(sb, len - strbuf_getlen(sb));
     }
   }
-}
-
-inline char strbuf_lastchar(const STRBUF* sb) {
-  return *(sb->curp - 1);
 }
 
 #endif /* ! _STRBUF_H */

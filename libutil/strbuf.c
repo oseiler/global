@@ -446,42 +446,8 @@ strbuf_vsprintf(STRBUF *sb, const char *s, va_list ap)
 	}
 }
 
-/**
- * @fn STRBUF *strbuf_open_tempbuf(void)
- *
- * Temporary string buffer for general purpose.
- *
- * @par Usage:
- *
- * @code
- *	STRBUF *sbt = strbuf_open_tempbuf();
- *	....
- *	strbuf_puts(sbtemp, "xxx");
- *	...
- *	strbuf_release_tempbuf(sbt);
- * @endcode
- *
- */
-static int used = 0;
-
-STRBUF *
-strbuf_open_tempbuf(void)
-{
-	STATIC_STRBUF(sb);
-	if (used)
-		die("Internal error: temporary string buffer is already used.");
-	used = 1;
-	strbuf_clear(sb);
-	return sb;
-}
-void
-strbuf_release_tempbuf(STRBUF *sb)
-{
-	used = 0;
-}
-
 STRBUF::STRBUF(int init) :
-  name(NULL), sbuf(NULL), endp(NULL), curp(NULL),
+  sbuf(NULL), endp(NULL), curp(NULL),
   sbufsize(init > 0 ? init : INITIALSIZE),
   alloc_failed(0)
 {
@@ -491,9 +457,5 @@ STRBUF::STRBUF(int init) :
 }
 
 STRBUF::~STRBUF() {
-  if (name) {
-    free(name); // TODO - not sure if this is actually being assigned...
-  }
-
   delete [] sbuf;
 }
