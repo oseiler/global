@@ -130,7 +130,7 @@ C_family(const struct parser_param *param, int type)
 					int savelineno = lineno;
 
 					strlimcpy(savetok, token, sizeof(savetok));
-					strbuf_reset(&sb);
+					sb.clear();
 					strbuf_puts(&sb, sp);
 					saveline = sb.c_str();
 					arg1[0] = '\0';

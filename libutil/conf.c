@@ -200,9 +200,10 @@ includelabel(STRBUF *sb, const char *label, int	level)
 static const char *configpath(void)
 {
 	STATIC_STRBUF(sb);
+	sb->clear();
+
 	const char *p;
 
-	strbuf_clear(sb);
 	/*
 	 * at first, check environment variable GTAGSCONF.
 	 */

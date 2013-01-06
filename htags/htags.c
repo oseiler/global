@@ -514,19 +514,19 @@ load_with_replace(const char *file, STRBUF *result, int place)
 	/*
 	 * construct skeleton file name in the system datadir directory.
 	 */
-	strbuf_reset(&sb);
+	sb.clear();
 	strbuf_sprintf(&sb, "%s/gtags/%s.tmpl", datadir, file);
 	ip = fopen(sb.c_str(), "r");
 	if (!ip) {
 #ifdef __DJGPP__
-		strbuf_reset(&sb);
+		sb.clear();
 		strbuf_sprintf(&sb, "%s/gtags/%s", datadir, file);
 		ip = fopen(sb.c_str(), "r");
 		if (!ip)
 #endif
 		  die("skeleton file '%s' not found.", sb.c_str());
 	}
-	strbuf_reset(&sb);
+	sb.clear();
 	/*
 	 * Read template file and evaluate macros.
 	 */
@@ -711,8 +711,8 @@ static char *
 makesearchpart(const char *target)
 {
 	STATIC_STRBUF(sb);
+	sb->clear();
 
-	strbuf_clear(sb);
 	strbuf_puts(sb, header_begin);
 	if (Fflag)
 		strbuf_puts(sb, gen_href_begin(NULL, "search", normal_suffix, NULL));
@@ -1256,11 +1256,11 @@ configuration(int argc, char *const *argv)
 	/*
 	 * Config variables.
 	 */
-	strbuf_reset(&sb);
+	sb.clear();
 	if (!getconfs("datadir", &sb))
 		die("cannot get datadir directory name.");
 	strlimcpy(datadir, sb.c_str(), sizeof(datadir));
-	strbuf_reset(&sb);
+	sb.clear();
 	if (!getconfs("localstatedir", &sb))
 		die("cannot get localstatedir directory name.");
 	strlimcpy(localstatedir, sb.c_str(), sizeof(localstatedir));
@@ -1276,23 +1276,23 @@ configuration(int argc, char *const *argv)
 		else
 			tabs = n;
 	}
-	strbuf_reset(&sb);
+	sb.clear();
 	if (getconfs("gzipped_suffix", &sb))
 		gzipped_suffix = check_strdup(sb.c_str());
-	strbuf_reset(&sb);
+	sb.clear();
 	if (getconfs("normal_suffix", &sb))
 		normal_suffix = check_strdup(sb.c_str());
 	if (getconfb("no_order_list"))
 		no_order_list = 1;
-	strbuf_reset(&sb);
+	sb.clear();
 	if (getconfs("prolog_script", &sb))
 		prolog_script = check_strdup(sb.c_str());
-	strbuf_reset(&sb);
+	sb.clear();
 	if (getconfs("epilog_script", &sb))
 		epilog_script = check_strdup(sb.c_str());
 	if (getconfb("colorize_warned_line"))
 		colorize_warned_line = 1;
-	strbuf_reset(&sb);
+	sb.clear();
 	if (getconfs("script_alias", &sb)) {
 		p = check_strdup(sb.c_str());
 		/* remove the last '/' */
@@ -1301,10 +1301,10 @@ configuration(int argc, char *const *argv)
 			*q = '\0';
 		script_alias = p;
 	}
-	strbuf_reset(&sb);
+	sb.clear();
 	if (getconfs("body_begin", &sb)) {
 		p = check_strdup(sb.c_str());
-		strbuf_reset(&sb);
+		sb.clear();
 		if (getconfs("body_end", &sb)) {
 			q = check_strdup(sb.c_str());
 			body_begin = p;
@@ -1313,10 +1313,10 @@ configuration(int argc, char *const *argv)
 			free(p);
 		}
 	}
-	strbuf_reset(&sb);
+	sb.clear();
 	if (getconfs("table_begin", &sb)) {
 		p = check_strdup(sb.c_str());
-		strbuf_reset(&sb);
+		sb.clear();
 		if (getconfs("table_end", &sb)) {
 			q = check_strdup(sb.c_str());
 			table_begin = p;
@@ -1325,10 +1325,10 @@ configuration(int argc, char *const *argv)
 			free(p);
 		}
 	}
-	strbuf_reset(&sb);
+	sb.clear();
 	if (getconfs("title_begin", &sb)) {
 		p = check_strdup(sb.c_str());
-		strbuf_reset(&sb);
+		sb.clear();
 		if (getconfs("title_end", &sb)) {
 			q = check_strdup(sb.c_str());
 			title_begin = p;
@@ -1337,10 +1337,10 @@ configuration(int argc, char *const *argv)
 			free(p);
 		}
 	}
-	strbuf_reset(&sb);
+	sb.clear();
 	if (getconfs("comment_begin", &sb)) {
 		p = check_strdup(sb.c_str());
-		strbuf_reset(&sb);
+		sb.clear();
 		if (getconfs("comment_end", &sb)) {
 			q = check_strdup(sb.c_str());
 			comment_begin = p;
@@ -1349,10 +1349,10 @@ configuration(int argc, char *const *argv)
 			free(p);
 		}
 	}
-	strbuf_reset(&sb);
+	sb.clear();
 	if (getconfs("sharp_begin", &sb)) {
 		p = check_strdup(sb.c_str());
-		strbuf_reset(&sb);
+		sb.clear();
 		if (getconfs("sharp_end", &sb)) {
 			q = check_strdup(sb.c_str());
 			sharp_begin = p;
@@ -1361,10 +1361,10 @@ configuration(int argc, char *const *argv)
 			free(p);
 		}
 	}
-	strbuf_reset(&sb);
+	sb.clear();
 	if (getconfs("brace_begin", &sb)) {
 		p = check_strdup(sb.c_str());
-		strbuf_reset(&sb);
+		sb.clear();
 		if (getconfs("brace_end", &sb)) {
 			q = check_strdup(sb.c_str());
 			brace_begin = p;
@@ -1373,10 +1373,10 @@ configuration(int argc, char *const *argv)
 			free(p);
 		}
 	}
-	strbuf_reset(&sb);
+	sb.clear();
 	if (getconfs("reserved_begin", &sb)) {
 		p = check_strdup(sb.c_str());
-		strbuf_reset(&sb);
+		sb.clear();
 		if (getconfs("reserved_end", &sb)) {
 			q = check_strdup(sb.c_str());
 			reserved_begin = p;
@@ -1385,10 +1385,10 @@ configuration(int argc, char *const *argv)
 			free(p);
 		}
 	}
-	strbuf_reset(&sb);
+	sb.clear();
 	if (getconfs("position_begin", &sb)) {
 		p = check_strdup(sb.c_str());
-		strbuf_reset(&sb);
+		sb.clear();
 		if (getconfs("position_end", &sb)) {
 			q = check_strdup(sb.c_str());
 			position_begin = p;
@@ -1397,10 +1397,10 @@ configuration(int argc, char *const *argv)
 			free(p);
 		}
 	}
-	strbuf_reset(&sb);
+	sb.clear();
 	if (getconfs("warned_line_begin", &sb)) {
 		p = check_strdup(sb.c_str());
-		strbuf_reset(&sb);
+		sb.clear();
 		if (getconfs("warned_line_end", &sb)) {
 			q = check_strdup(sb.c_str());
 			warned_line_begin = p;
@@ -1409,17 +1409,17 @@ configuration(int argc, char *const *argv)
 			free(p);
 		}
 	}
-	strbuf_reset(&sb);
+	sb.clear();
 	if (getconfs("include_file_suffixes", &sb))
 		include_file_suffixes = check_strdup(sb.c_str());
-	strbuf_reset(&sb);
+	sb.clear();
 	if (getconfs("langmap", &sb))
 		langmap = check_strdup(sb.c_str());
-	strbuf_reset(&sb);
+	sb.clear();
 	if (getconfs("xhtml_version", &sb))
 		xhtml_version = check_strdup(sb.c_str());
 	/* insert htags_options into the head of ARGSV array. */
-	strbuf_reset(&sb);
+	sb.clear();
 	if (getconfs("htags_options", &sb))
 		htags_options = check_strdup(sb.c_str());
 }
@@ -2016,7 +2016,7 @@ main(int argc, char **argv)
 	}
 	if (auto_completion || tree_view) {
 		STATIC_STRBUF(sb);
-		strbuf_clear(sb);
+		sb->clear();
 		strbuf_puts_nl(sb, "<script type='text/javascript' src='js/jquery.js'></script>");
 		if (auto_completion)
 			loadfile("jscode_suggest", sb);

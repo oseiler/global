@@ -111,10 +111,10 @@ args_open_nop(void)
 const char *
 args_read(void)
 {
-	const char *p;
 	STATIC_STRBUF(sb);
+	sb->clear();
 
-	strbuf_clear(sb);
+	const char *p;
 	switch (type) {
 	case ARGS_NOP:
 		p = NULL;
@@ -137,6 +137,7 @@ args_read(void)
 	default:
 		die("args_read: illegal type.");
 	}
+
 	return p;
 }
 /**

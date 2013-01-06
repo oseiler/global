@@ -47,15 +47,15 @@ const char *
 strmake(const char *p, const char *lim)
 {
 	STATIC_STRBUF(sb);
-	const char *c;
+	sb->clear();
 
-	strbuf_clear(sb);
 	for (; *p; p++) {
-		for (c = lim; *c; c++)
+		for (const char* c = lim; *c; c++)
 			if (*p == *c)
 				goto end;
 		strbuf_putc(sb,*p);
 	}
+
 end:
 	return sb->c_str();
 }
@@ -87,17 +87,18 @@ const char *
 strtrim(const char *p, int flag, int *len)
 {
 	STATIC_STRBUF(sb);
-	int cut_off = -1;
+	sb->clear();
 
-	strbuf_clear(sb);
 	/*
 	 * Delete blanks of the head.
 	 */
 	if (flag != TRIM_TAIL)
 		SKIP_BLANKS(p);
+
 	/*
 	 * Copy string.
 	 */
+	int cut_off = -1;
 	for (; *p; p++) {
 		if (isspace(*p)) {
 			if (flag != TRIM_ALL) {
@@ -110,6 +111,7 @@ strtrim(const char *p, int flag, int *len)
 			cut_off = -1;
 		}
 	}
+
 	/*
 	 * Delete blanks of the tail.
 	 */

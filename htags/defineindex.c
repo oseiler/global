@@ -193,7 +193,7 @@ makedefineindex(const char *file, int total, STRBUF *defines)
 		 * generating url for function definition.
 	 	 */
 		line = cache_get(GTAGS, tag);
-		strbuf_reset(&url);
+		url.clear();
 
 		if (line == NULL)
 			die("internal error in makedefineindex()."); 

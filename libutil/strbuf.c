@@ -65,7 +65,7 @@ const char *s = sb->c_str();            [abc\0]         s == "abc"
                                             v
 size_t len = sb->length();              [abc\0]         len == 3
                                          v
-strbuf_reset(sb);                       [abc\0]
+sb->clear();                            [abc\0]
                                          v
 size_t len = sb->length();              [abc\0]         len == 0
                                            v
@@ -116,39 +116,6 @@ __strbuf_expandbuf(STRBUF *sb, int length)
 	sb->endp = sb->sbuf + sb->sbufsize;
 }
 
-/**
- * strbuf_reset: reset string buffer.
- *
- *	@param[in]	sb	string buffer
- */
-void
-strbuf_reset(STRBUF *sb)
-{
-	sb->curp = sb->sbuf;
-	sb->alloc_failed = 0;
-}
-/**
- * strbuf_clear: clear static string buffer.
- *
- *	@param[in]	sb	statically defined string buffer
- *
- * This function is used for the initializing of static string buffer.
- * For the detail, see STATIC_STRBUF(sb) macro in @FILE{strbuf.h}.
- */
-void
-strbuf_clear(STRBUF *sb)
-{
-	if (sb == NULL)
-		die("NULL string buffer. (strbuf_clear)");
-	if (sb->sbufsize == 0) {
-		sb->sbufsize = INITIALSIZE;
-		sb->sbuf = new char[sb->sbufsize + 1];
-		sb->curp = sb->sbuf;
-		sb->endp = sb->sbuf + sb->sbufsize;
-	} else {
-		strbuf_reset(sb);
-	}
-}
 /**
  * strbuf_nputs: Put string with length
  *
@@ -315,7 +282,7 @@ char *
 strbuf_fgets(STRBUF *sb, FILE *ip, int flags)
 {
 	if (!(flags & STRBUF_APPEND))
-		strbuf_reset(sb);
+		sb->clear();
 
 	if (sb->curp >= sb->endp)
 		__strbuf_expandbuf(sb, EXPANDSIZE);	/* expand buffer */

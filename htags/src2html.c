@@ -197,16 +197,17 @@ HTML_quoting(int c)
 const char *
 fill_anchor(const char *root, const char *path)
 {
-	STATIC_STRBUF(sb);
-	char buf[MAXBUFLEN], *limit, *p;
-
-	strbuf_clear(sb);
+	char buf[MAXBUFLEN];
 	strlimcpy(buf, path, sizeof(buf));
+
+	char* p;
 	for (p = buf; *p; p++)
 		if (*p == sep)
 			*p = '\0';
-	limit = p;
+	char* limit = p;
 
+	STATIC_STRBUF(sb);
+	sb->clear();
 	if (root != NULL)
 		strbuf_sprintf(sb, "%sroot%s/", gen_href_begin_simple(root), gen_href_end());
 	for (p = buf; p < limit; p += strlen(p) + 1) {
@@ -239,12 +240,12 @@ const char *
 link_format(int ref[A_SIZE])
 {
 	STATIC_STRBUF(sb);
+	sb->clear();
+
 	const char **label = Iflag ? anchor_comment : anchor_label;
 	const char **icons = anchor_icons;
-	int i;
 
-	strbuf_clear(sb);
-	for (i = 0; i < A_LIMIT; i++) {
+	for (int i = 0; i < A_LIMIT; i++) {
 		if (i == A_INDEX) {
 			strbuf_puts(sb, gen_href_begin("..", "mains", normal_suffix, NULL));
 		} else if (i == A_HELP) {
@@ -283,14 +284,13 @@ link_format(int ref[A_SIZE])
 const char *
 fixed_guide_link_format(int ref[A_LIMIT], const char *anchors)
 {
-	int i = 0;
 	STATIC_STRBUF(sb);
+	sb->clear();
 
-	strbuf_clear(sb);
 	strbuf_puts(sb, "<!-- beginning of fixed guide -->\n");
 	strbuf_puts(sb, guide_begin);
 	strbuf_putc(sb, '\n');
-	for (i = 0; i < A_LIMIT; i++) {
+	for (int i = 0; i < A_LIMIT; i++) {
 		if (i == A_PREV || i == A_NEXT)
 			continue;
 		strbuf_puts(sb, guide_unit_begin);
@@ -348,14 +348,14 @@ fixed_guide_link_format(int ref[A_LIMIT], const char *anchors)
 const char *
 generate_guide(int lineno)
 {
-	STATIC_STRBUF(sb);
 	int i = 0;
-
-	strbuf_clear(sb);
 	if (definition_header == RIGHT_HEADER)
 		i = 4;
 	else if (nflag)
 		i = ncol + 1;
+
+	STATIC_STRBUF(sb);
+	sb->clear();
 	if (i > 0)
 		for (; i > 0; i--)
 			strbuf_putc(sb, ' ');
@@ -383,8 +383,8 @@ const char *
 tooltip(int type, int lno, const char *opt)
 {
 	STATIC_STRBUF(sb);
+	sb->clear();
 
-	strbuf_clear(sb);
 	if (lno > 0) {
 		if (type == 'I')
 			strbuf_puts(sb, "Included from");
@@ -459,8 +459,8 @@ put_anchor(char *name, int type, int lineno)
 
 			if (dynamic) {
 				STATIC_STRBUF(sb);
+				sb->clear();
 
-				strbuf_clear(sb);
 				strbuf_puts(sb, action);
 				strbuf_putc(sb, '?');
 				strbuf_puts(sb, "pattern=");
@@ -525,10 +525,10 @@ put_anchor(char *name, int type, int lineno)
 void
 put_anchor_force(char *name, int length, int lineno)
 {
-	STATIC_STRBUF(sb);
 	int saveflag = wflag;
 
-	strbuf_clear(sb);
+	STATIC_STRBUF(sb);
+	sb->clear();
 	strbuf_nputs(sb, name, length);
 	wflag = 0;
 	put_anchor(sb->c_str(), 'R', lineno);
@@ -714,7 +714,7 @@ put_end_of_line(int lineno)
 
 	/* flush output buffer */
 	fputs(outbuf->c_str(), out);
-	strbuf_reset(outbuf);
+	outbuf->clear();
 
 	if (warned)
 		fputs(warned_line_end, out);
@@ -767,14 +767,9 @@ encode(STRBUF *sb, const char *url)
 static const char *
 get_cvs_module(const char *file, const char **basename)
 {
-	const char *p;
 	STATIC_STRBUF(dir);
-	static char prev_dir[MAXPATHLEN];
-	STATIC_STRBUF(module);
-	FILE *ip;
-
-	strbuf_clear(dir);
-	p = locatestring(file, "/", MATCH_LAST);
+	dir->clear();
+	const char* p = locatestring(file, "/", MATCH_LAST);
 	if (p != NULL) {
 		strbuf_nputs(dir, file, p - file);
 		p++;
@@ -784,11 +779,14 @@ get_cvs_module(const char *file, const char **basename)
 	}
 	if (basename != NULL)
 		*basename = p;
+
+	STATIC_STRBUF(module);
+	static char prev_dir[MAXPATHLEN];
 	if (strcmp(dir->c_str(), prev_dir) != 0) {
 		strlimcpy(prev_dir, dir->c_str(), sizeof(prev_dir));
-		strbuf_clear(module);
+		module->clear();
 		strbuf_puts(dir, "/CVS/Repository");
-		ip = fopen(dir->c_str(), "r");
+		FILE* ip = fopen(dir->c_str(), "r");
 		if (ip != NULL) {
 			strbuf_fgets(module, ip, STRBUF_NOCRLF);
 			fclose(ip);
@@ -823,7 +821,7 @@ src2html(const char *src, const char *html, int notsource)
 
 	fileop_out = open_output_file(html, cflag);
 	out = get_descripter(fileop_out);
-	strbuf_clear(outbuf);
+	outbuf->clear();
 
 	snprintf(indexlink, sizeof(indexlink), "../mains.%s", normal_suffix);
 	fputs_nl(gen_page_begin(src, SUBDIR), out);
@@ -842,10 +840,11 @@ src2html(const char *src, const char *html, int notsource)
 	fputs(header_begin, out);
 	fputs(fill_anchor(indexlink, src), out);
 	if (cvsweb_url) {
-		STATIC_STRBUF(sb);
 		const char *module, *basename;
 
-		strbuf_clear(sb);
+		STATIC_STRBUF(sb);
+		sb->clear();
+
 		strbuf_puts(sb, cvsweb_url);
 		if (use_cvs_module
 		 && (module = get_cvs_module(src, &basename)) != NULL) {
@@ -899,7 +898,6 @@ src2html(const char *src, const char *html, int notsource)
 		const char *basename;
 		struct data *incref;
 		struct anchor *ancref;
-		STATIC_STRBUF(define_index);
 
                 /*
                  * INCLUDED FROM index.
@@ -951,7 +949,9 @@ src2html(const char *src, const char *html, int notsource)
 		/*
 		 * DEFINITIONS index.
 		 */
-		strbuf_clear(define_index);
+		STATIC_STRBUF(define_index);
+		define_index->clear();
+
 		for (ancref = anchor_first(); ancref; ancref = anchor_next()) {
 			if (ancref->type == 'D') {
 				char tmp[32];

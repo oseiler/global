@@ -70,10 +70,10 @@ const char *
 makepath(const char *dir, const char *file, const char *suffix)
 {
 	STATIC_STRBUF(sb);
+	sb->clear();
+
 	int length;
 	char sep = '/';
-
-	strbuf_clear(sb);
 	if (dir != NULL) {
 		if ((length = strlen(dir)) > MAXPATHLEN)
 			die("path name too long. '%s'\n", dir);

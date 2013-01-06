@@ -1502,7 +1502,7 @@ yyreduce:
     {
 			PUT(PARSER_REF_SYM, GET_SYM((yyvsp[(1) - (6)])), (yylsp[(1) - (6)]));
 			PUT(PARSER_DEF, GET_SYM((yyvsp[(3) - (6)])), (yylsp[(3) - (6)]));
-			strbuf_reset(asm_symtable);
+			asm_symtable->clear();
 		}
     break;
 
@@ -1519,7 +1519,7 @@ yyreduce:
 				if (isalpha(c) || c == '_' || c >= 0x80)
 					PUT(PARSER_REF_SYM, &sym[1], (yylsp[(2) - (4)]));
 			}
-			strbuf_reset(asm_symtable);
+			asm_symtable->clear();
 		}
     break;
 
@@ -1530,7 +1530,7 @@ yyreduce:
     {
 			PUT(PARSER_REF_SYM, GET_SYM((yyvsp[(2) - (7)])), (yylsp[(2) - (7)]));
 			PUT(PARSER_REF_SYM, GET_SYM((yyvsp[(4) - (7)])), (yylsp[(4) - (7)]));
-			strbuf_reset(asm_symtable);
+			asm_symtable->clear();
 		}
     break;
 
@@ -1540,7 +1540,7 @@ yyreduce:
 #line 112 "asm_parse.y"
     {
 			PUT(PARSER_DEF, GET_SYM((yyvsp[(2) - (4)])), (yylsp[(2) - (4)]));
-			strbuf_reset(asm_symtable);
+			asm_symtable->clear();
 		}
     break;
 
@@ -1550,7 +1550,7 @@ yyreduce:
 #line 117 "asm_parse.y"
     {
 			PUT(PARSER_DEF, GET_SYM((yyvsp[(2) - (4)])), (yylsp[(2) - (4)]));
-			strbuf_reset(asm_symtable);
+			asm_symtable->clear();
 		}
     break;
 
@@ -1560,7 +1560,7 @@ yyreduce:
 #line 122 "asm_parse.y"
     {
 			PUT(PARSER_DEF, GET_SYM((yyvsp[(2) - (4)])), (yylsp[(2) - (4)]));
-			strbuf_reset(asm_symtable);
+			asm_symtable->clear();
 		}
     break;
 
@@ -1570,7 +1570,7 @@ yyreduce:
 #line 127 "asm_parse.y"
     {
 			PUT(PARSER_DEF, GET_SYM((yyvsp[(1) - (4)])), (yylsp[(1) - (4)]));
-			strbuf_reset(asm_symtable);
+			asm_symtable->clear();
 		}
     break;
 
@@ -1580,7 +1580,7 @@ yyreduce:
 #line 132 "asm_parse.y"
     {
 			PUT(PARSER_DEF, GET_SYM((yyvsp[(2) - (5)])), (yylsp[(2) - (5)]));
-			strbuf_reset(asm_symtable);
+			asm_symtable->clear();
 		}
     break;
 
@@ -1590,7 +1590,7 @@ yyreduce:
 #line 137 "asm_parse.y"
     {
 			PUT(PARSER_DEF, GET_SYM((yyvsp[(1) - (4)])), (yylsp[(1) - (4)]));
-			strbuf_reset(asm_symtable);
+			asm_symtable->clear();
 		}
     break;
 
@@ -1598,7 +1598,7 @@ yyreduce:
 
 /* Line 1806 of yacc.c  */
 #line 142 "asm_parse.y"
-    { strbuf_reset(asm_symtable); }
+    { asm_symtable->clear(); }
     break;
 
 

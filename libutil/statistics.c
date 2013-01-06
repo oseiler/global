@@ -134,7 +134,7 @@ statistics_time_start(const char *fmt, ...)
 	STATISTICS_TIME *t;
 	va_list ap;
 
-	strbuf_reset(sb);
+	sb->clear();
 
 	va_start(ap, fmt);
 	strbuf_vsprintf(sb, fmt, ap);

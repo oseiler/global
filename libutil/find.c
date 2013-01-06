@@ -161,14 +161,14 @@ prepare_source(void)
 	if (getconfs("langmap", &sb)) {
 		langmap =  check_strdup(sb.c_str());
 	}
-	strbuf_reset(&sb);
+	sb.clear();
 	make_suffixes(langmap ? langmap : DEFAULTLANGMAP, &sb);
 	sufflist = check_strdup(sb.c_str());
 	trim(sufflist);
 	{
 		const char *suffp;
 
-		strbuf_reset(&sb);
+		sb.clear();
 		strbuf_puts(&sb, "\\.(");       /* ) */
 		for (suffp = sufflist; suffp; ) {
 			const char *p;
@@ -231,7 +231,7 @@ prepare_skip(void)
 	if (!list)
 		list = new STRBUF;
 	else
-		strbuf_reset(list);
+		list->clear();
 	list_count = 0;
 	if (listarray)
 		(void)free(listarray);
@@ -245,7 +245,7 @@ prepare_skip(void)
 	}
 	skiplist = check_strdup(reg.c_str());
 	trim(skiplist);
-	strbuf_reset(&reg);
+	reg.clear();
 
 	/*
 	 * construct regular expression.
@@ -706,10 +706,10 @@ static char *
 find_read_filelist(void)
 {
 	STATIC_STRBUF(ib);
+	ib->clear();
+
 	static char buf[MAXPATHLEN + 1];
 	static char *path;
-
-	strbuf_clear(ib);
 	for (;;) {
 		path = strbuf_fgets(ib, ip, STRBUF_NOCRLF);
 		if (path == NULL) {

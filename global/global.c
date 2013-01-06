@@ -809,7 +809,7 @@ completion_tags(const char *dbpath, const char *root, const char *prefix, int db
 		else
 			firstchar[0] = toupper(firstchar[0]);
 		for (i = 0; i < 2; i++) {
-			strbuf_reset(&sb);
+			sb.clear();
 			strbuf_putc(&sb, firstchar[i]);
 			for (gtp = gtags_first(gtop, sb.c_str(), flags); gtp; gtp = gtags_next(gtop)) {
 				if (regexec(&preg, gtp->tag, 0, 0, 0) == 0) {
@@ -1482,7 +1482,7 @@ void parsefile(char *const *argv, const char *cwd, const char *root, const char 
   STRBUF sb;
   if (getconfs("langmap", &sb))
     langmap = check_strdup(sb.c_str());
-  strbuf_reset(&sb);
+  sb.clear();
 
   const char* plugin_parser = NULL;
   if (getconfs("gtags_parser", &sb))

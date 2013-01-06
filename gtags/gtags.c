@@ -441,10 +441,10 @@ main(int argc, char **argv)
 	openconf();
 	if (getconfb("extractmethod"))
 		extractmethod = 1;
-	strbuf_reset(&sb);
+	sb.clear();
 	if (getconfs("langmap", &sb))
 		langmap = check_strdup(sb.c_str());
-	strbuf_reset(&sb);
+	sb.clear();
 	if (getconfs("gtags_parser", &sb))
 		gtags_parser = check_strdup(sb.c_str());
 	/*
@@ -491,7 +491,7 @@ main(int argc, char **argv)
 		tim = statistics_time_start("Time of creating ID");
 		if (vflag)
 			fprintf(stderr, "[%s] Creating indexes for idutils.\n", now());
-		strbuf_reset(&sb);
+		sb.clear();
 		strbuf_puts(&sb, "mkid");
 		if (vflag)
 			strbuf_puts(&sb, " -v");
@@ -913,7 +913,7 @@ void createtags(const char *dbpath, const char *root) {
     statistics_time_end(tim);
   }
 
-  strbuf_reset(&sb);
+  sb.clear();
   if (getconfs("GRTAGS_extra", &sb)) {
     tim = statistics_time_start("Time of executing GRTAGS_extra command");
     if (system(sb.c_str()))

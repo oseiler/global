@@ -166,7 +166,7 @@ WORD		{ALPHA}{ALPHANUM}*
 <PHP>"#".*		DBG_PRINT("<%s>", LEXTEXT);
 
  /* String */
-<PHP>\"			{ strbuf_reset(string); BEGIN STRING; }
+<PHP>\"			{ string->clear(); BEGIN STRING; }
 <STRING>\"		{
 				DBG_PRINT("<S:%s>", string->c_str());
 				BEGIN PHP;
@@ -177,7 +177,7 @@ WORD		{ALPHA}{ALPHANUM}*
 <STRING>.		strbuf_putc(string, LEXTEXT[0]);
 
  /* Literal */
-<PHP>\'			{ strbuf_reset(string); BEGIN LITERAL; }
+<PHP>\'			{ string->clear(); BEGIN LITERAL; }
 <LITERAL>\'		{
 				DBG_PRINT("<L:%s>", string->c_str());
 				BEGIN PHP;

@@ -93,6 +93,11 @@ struct STRBUF {
     return length() == 0;
   }
 
+  inline void clear() {
+    curp = sbuf;
+    alloc_failed = 0;
+  }
+
   inline void resize(size_t new_length) {
     if (!alloc_failed) {
       size_t current = length();
@@ -113,29 +118,27 @@ struct STRBUF {
  * is repeatedly used though the area is never released. <br>
  *
  * @attention
- * You must call strbuf_clear() every time before using. <br>
+ * You should call STRBUF::clear() every time before using. <br>
  * You must @STRONG{not} call delete for it.
  *
  * @par Usage:
  * @code
  *      function(...) {
  *              STATIC_STRBUF(sb);
- *
- *              strbuf_clear(sb);
+ *              sb->clear();
  *              ...
  *		strbuf_puts(sb, "xxxxx");
  *              ...
  *              return sb->c_str();
  *      }
  * @endcode
+ *
+ * @remark Not all uses of STATIC_STRBUF perform a call to clear, since they
+ * rely on the static instance containing the results from the previous usage; these
+ * places should perhaps just declare a static STRBUF directly.
  */
 #define STATIC_STRBUF(sb) static STRBUF sb##_instance; STRBUF* sb = & sb##_instance
 
-#ifdef DEBUG
-void strbuf_dump(char *);
-#endif
-void strbuf_reset(STRBUF *);
-void strbuf_clear(STRBUF *);
 void strbuf_nputs(STRBUF *, const char *, int);
 void strbuf_nputc(STRBUF *, int, int);
 void strbuf_puts(STRBUF *, const char *);

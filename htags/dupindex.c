@@ -77,7 +77,7 @@ makedupindex(void)
 		/*
 		 * construct command line.
 		 */
-		strbuf_reset(&command);
+		command.clear();
 #if defined(_WIN32) && !defined(__CYGWIN__)
 		strbuf_putc(&command, '"');
 #endif
@@ -118,7 +118,7 @@ makedupindex(void)
 					/*
 					 * cache record: " <fid>\0<entry number>\0"
 					 */
-					strbuf_reset(&tmp);
+					tmp.clear();
 					strbuf_putc(&tmp, ' ');
 					strbuf_putn(&tmp, count - 1);
 					strbuf_putc(&tmp, '\0');
@@ -131,7 +131,7 @@ makedupindex(void)
 					const char *ctags_x = parse_xid(first_line, fid, NULL);
 					const char *lno = nextelement(ctags_x);
 
-					strbuf_reset(&tmp);
+					tmp.clear();
 					strbuf_puts_withterm(&tmp, lno, ' ');
 					strbuf_putc(&tmp, '\0');
 					strbuf_puts(&tmp, fid);
@@ -187,7 +187,7 @@ makedupindex(void)
 			/*
 			 * cache record: " <fid>\0<entry number>\0"
 			 */
-			strbuf_reset(&tmp);
+			tmp.clear();
 			strbuf_putc(&tmp, ' ');
 			strbuf_putn(&tmp, count);
 			strbuf_putc(&tmp, '\0');
@@ -199,7 +199,7 @@ makedupindex(void)
 			const char *ctags_x = parse_xid(first_line, fid, NULL);
 			const char *lno = nextelement(ctags_x);
 
-			strbuf_reset(&tmp);
+			tmp.clear();
 			strbuf_puts_withterm(&tmp, lno, ' ');
 			strbuf_putc(&tmp, '\0');
 			strbuf_puts(&tmp, fid);

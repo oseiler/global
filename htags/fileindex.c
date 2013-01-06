@@ -251,8 +251,7 @@ static const char *
 appendslash(const char *path)
 {
 	STATIC_STRBUF(sb);
-
-	strbuf_clear(sb);
+	sb->clear();
 	strbuf_puts(sb, path);
 	strbuf_putc(sb, '/');
 	return sb->c_str();
@@ -482,18 +481,19 @@ print_directory(int level, char *basedir)
 static void
 print_directory_header(FILE *op, int level, const char *dir)
 {
-	STATIC_STRBUF(sb);
 	const char *top = (Fflag && !tree_view) ? "../files" : "../mains";
 
 	if (level == 0)
 		die("print_directory_header: internal error.");
-	strbuf_clear(sb);
+
+	STATIC_STRBUF(sb);
+	sb->clear();
 	strbuf_puts(sb, removedotslash(dir));
 	strbuf_putc(sb, '/');
 	fputs_nl(gen_page_begin(sb->c_str(), SUBDIR), op);
 	fputs_nl(body_begin, op);
 
-	strbuf_clear(sb);
+	sb->clear();
  	strbuf_sprintf(sb, "%s%sroot%s/", header_begin, gen_href_begin(NULL, top, normal_suffix, NULL), gen_href_end());
 	fputs(sb->c_str(), op);
 	{
@@ -596,7 +596,6 @@ print_directory_footer(FILE *op, int level, const char *dir)
 static const char *
 print_file_name(int level, const char *path)
 {
-	STATIC_STRBUF(sb);
 	const char *target = (Fflag) ? "mains" : "_top";
 	int size = filesize(path);
 	char tips[80];
@@ -612,7 +611,10 @@ print_file_name(int level, const char *path)
 	 */
 	if (regexec(&is_include_file, path, 0, 0, 0) == 0)
 		put_inc(lastpart(path), path, src_count);
-	strbuf_clear(sb);
+
+	STATIC_STRBUF(sb);
+	sb->clear();
+
 	if (table_flist)
 		strbuf_puts(sb, fitem_begin);
 	else if (!no_order_list)
@@ -657,7 +659,6 @@ print_file_name(int level, const char *path)
 static const char *
 print_directory_name(int level, const char *path, int count)
 {
-	STATIC_STRBUF(sb);
 	char tips[80];
 
 	if (count > 1)
@@ -665,7 +666,9 @@ print_directory_name(int level, const char *path, int count)
 	else
 		snprintf(tips, sizeof(tips), "%d file", count);
 	path = removedotslash(path);
-	strbuf_clear(sb);
+
+	STATIC_STRBUF(sb);
+	sb->clear();
 	if (table_flist)
 		strbuf_puts(sb, fitem_begin);
 	else if (!no_order_list)
@@ -695,7 +698,6 @@ print_directory_name(int level, const char *path, int count)
 int
 makefileindex(const char *file, STRBUF *a_files)
 {
-	STATIC_STRBUF(sb);
 	FILE *filesop;
 	int flags = REG_EXTENDED;
 	/*
@@ -718,7 +720,9 @@ makefileindex(const char *file, STRBUF *a_files)
 	 */
 	if (w32)
 		flags |= REG_ICASE;
-	strbuf_clear(sb);
+
+	STATIC_STRBUF(sb);
+	sb->clear();
 	strbuf_puts(sb, "\\.(");
 	{
 		const char *p = include_file_suffixes;
@@ -906,7 +910,7 @@ makeincludeindex(void)
 			}
 			snprintf(buf, sizeof(buf), "%s %s", ptable.part[PART_LNO].start, decode_path(ptable.part[PART_PATH].start));
 			recover(&ptable);
-			strbuf_reset(inc->ref_contents);
+			inc->ref_contents->clear();
 			strbuf_puts(inc->ref_contents, buf);
 		} else {
 			char path[MAXPATHLEN];

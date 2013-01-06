@@ -75,13 +75,14 @@ const char *
 quote_string(const char *s)
 {
 	STATIC_STRBUF(sb);
+	sb->clear();
 
-	strbuf_clear(sb);
 	for (; *s; s++) {
 		if (!isalnum((unsigned char)*s))
 			strbuf_putc(sb, '\\');
 		strbuf_putc(sb, *s);
 	}
+
 	return sb->c_str();
 }
 /**
@@ -96,8 +97,8 @@ const char *
 quote_chars(const char *s, unsigned int c)
 {
 	STATIC_STRBUF(sb);
+	sb->clear();
 
-	strbuf_clear(sb);
 	for (; *s; s++) {
 		if ((unsigned char)*s == c)
 			strbuf_putc(sb, '\\');
@@ -124,8 +125,8 @@ const char *
 quote_shell(const char *s)
 {
 	STATIC_STRBUF(sb);
+	sb->clear();
 
-	strbuf_clear(sb);
 	strbuf_putc(sb, SHELL_QUOTE);
 #if defined(__DJGPP__) || (defined(_WIN32) && !defined(__CYGWIN__))
 	strbuf_puts(sb, s);

@@ -180,11 +180,12 @@ char *
 compress(const char *in, const char *name)
 {
 	STATIC_STRBUF(sb);
+	sb->clear();
+
 	const char *p = in;
 	int length = strlen(name);
 	int spaces = 0;
 
-	strbuf_clear(sb);
 	while (*p) {
 		if (*p == ' ') {
 			spaces++;
@@ -260,11 +261,9 @@ char *
 uncompress(const char *in, const char *name)
 {
 	STATIC_STRBUF(sb);
-	const char *p;
-	int i;
+	sb->clear();
 
-	strbuf_clear(sb);
-	for (p = in;  *p; p++) {
+	for (const char* p = in;  *p; p++) {
 		if (*p == '@') {
 			int spaces = 0;
 
@@ -291,13 +290,14 @@ uncompress(const char *in, const char *name)
 			case '9':
 				spaces = *p - '0';
 				break;
-			default:
+			default: {
 				if (*p < 'a' || *p > 'z')
 					die("Abbrev character must be a lower alphabetic character. (%c)", *p);
-				i = *p - 'a';
+				int i = *p - 'a';
 				if (ab2name[i].name)
 					strbuf_puts(sb, ab2name[i].name);
 				break;
+			}
                         }
 			strbuf_nputc(sb, ' ', spaces);
                 } else {

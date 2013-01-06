@@ -88,7 +88,7 @@ line:	ASM_ENTRY '(' ASM_SYMBOL ')' error '\n'
 		{
 			PUT(PARSER_REF_SYM, GET_SYM($1), @1);
 			PUT(PARSER_DEF, GET_SYM($3), @3);
-			strbuf_reset(asm_symtable);
+			asm_symtable->clear();
 		}
 	| ASM_CALL ASM_SYMBOL error '\n'
 		{
@@ -100,46 +100,46 @@ line:	ASM_ENTRY '(' ASM_SYMBOL ')' error '\n'
 				if (isalpha(c) || c == '_' || c >= 0x80)
 					PUT(PARSER_REF_SYM, &sym[1], @2);
 			}
-			strbuf_reset(asm_symtable);
+			asm_symtable->clear();
 		}
 	| ASM_CALL ASM_EXT '(' ASM_SYMBOL ')' error '\n'
 		{
 			PUT(PARSER_REF_SYM, GET_SYM($2), @2);
 			PUT(PARSER_REF_SYM, GET_SYM($4), @4);
-			strbuf_reset(asm_symtable);
+			asm_symtable->clear();
 		}
 	| "#define" ASM_SYMBOL error '\n'
 		{
 			PUT(PARSER_DEF, GET_SYM($2), @2);
-			strbuf_reset(asm_symtable);
+			asm_symtable->clear();
 		}
 	| "#undef" ASM_SYMBOL error '\n'
 		{
 			PUT(PARSER_DEF, GET_SYM($2), @2);
-			strbuf_reset(asm_symtable);
+			asm_symtable->clear();
 		}
 	| ASM_MACRO ASM_SYMBOL error '\n'
 		{
 			PUT(PARSER_DEF, GET_SYM($2), @2);
-			strbuf_reset(asm_symtable);
+			asm_symtable->clear();
 		}
 	| ASM_LABEL ASM_MACRO error '\n'
 		{
 			PUT(PARSER_DEF, GET_SYM($1), @1);
-			strbuf_reset(asm_symtable);
+			asm_symtable->clear();
 		}
 	| ASM_EQU ASM_SYMBOL ',' error '\n'
 		{
 			PUT(PARSER_DEF, GET_SYM($2), @2);
-			strbuf_reset(asm_symtable);
+			asm_symtable->clear();
 		}
 	| ASM_LABEL ASM_EQU error '\n'
 		{
 			PUT(PARSER_DEF, GET_SYM($1), @1);
-			strbuf_reset(asm_symtable);
+			asm_symtable->clear();
 		}
 	| error '\n'
-		{ strbuf_reset(asm_symtable); }
+		{ asm_symtable->clear(); }
 ;
 
 %%

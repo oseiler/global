@@ -505,7 +505,7 @@ gtags_put_using(GTOP *gtop, const char *tag, int lno, const char *fid, const cha
 	} else {
 		key = tag;
 	}
-	strbuf_reset(gtop->sb);
+	gtop->sb->clear();
 	strbuf_puts(gtop->sb, fid);
 	strbuf_putc(gtop->sb, ' ');
 	strbuf_puts(gtop->sb, (gtop->format & GTAGS_COMPNAME) ? compress(tag, key) : tag);
@@ -845,7 +845,7 @@ flush_pool(GTOP *gtop, const char *s_fid)
 		/* Sort line number table */
 		qsort(lno_array, vb->length, sizeof(int), compare_lineno); 
 
-		strbuf_reset(gtop->sb);
+		gtop->sb->clear();
 		strbuf_puts(gtop->sb, s_fid);
 		strbuf_putc(gtop->sb, ' ');
 		if (gtop->format & GTAGS_COMPNAME) {

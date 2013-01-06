@@ -227,7 +227,7 @@ execute_command(XARGS *xp)
 		for (
 			/* initial */
 			fseek(xp->ip, xp->fptr, SEEK_SET)
-			;
+				;
 
 			/* continuation condition */
 			(LT_MAX &&
@@ -237,8 +237,8 @@ execute_command(XARGS *xp)
 			  ;
 
 			/* preparation */
-			strbuf_reset(xp->path)
-		)
+			xp->path->clear()
+		     )
 			APPEND_ARGUMENT(p);
 		xp->fptr = ftell(xp->ip);
 		break;

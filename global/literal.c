@@ -176,8 +176,7 @@ literal_search(CONVERT *cv, const char *file)
 				goto finish;
 			} else {
 				STATIC_STRBUF(sb);
-
-				strbuf_clear(sb);
+				sb->clear();
 				strbuf_nputs(sb, linep, p - linep);
 				strbuf_unputc(sb, '\n');
 				strbuf_unputc(sb, '\r');

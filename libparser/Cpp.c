@@ -113,7 +113,7 @@ Cpp(const struct parser_param *param)
 					int savelineno = lineno;
 
 					strlimcpy(savetok, token, sizeof(savetok));
-					strbuf_reset(&sb);
+					sb.clear();
 					strbuf_puts(&sb, sp);
 					saveline = sb.c_str();
 					if (function_definition(param)) {

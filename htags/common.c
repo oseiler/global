@@ -296,8 +296,8 @@ const char *
 upperdir(const char *dir)
 {
 	STATIC_STRBUF(sb);
+	sb->clear();
 
-	strbuf_clear(sb);
 	strbuf_sprintf(sb, "../%s", dir);
 	return sb->c_str();
 }
@@ -309,11 +309,11 @@ upperdir(const char *dir)
 static const char *
 sed(FILE *ip, int place)
 {
-	STATIC_STRBUF(sb);
 	const char *parent_dir = (place == SUBDIR) ? "../.." : "..";
 	int c, start_position = -1;
 
-	strbuf_clear(sb);
+	STATIC_STRBUF(sb);
+	sb->clear();
 	while ((c = fgetc(ip)) != EOF) {
 		strbuf_putc(sb, c);
 		if (c == '@') {
@@ -387,7 +387,6 @@ gen_insert_footer(int place)
 static const char *
 gen_page_generic_begin(const char *title, int place, int use_frameset, const char *header_item)
 {
-	STATIC_STRBUF(sb);
 	const char *dir = NULL;
 
 	switch (place) {
@@ -401,7 +400,9 @@ gen_page_generic_begin(const char *title, int place, int use_frameset, const cha
 		 dir = "$basedir/";	/* decided by the CGI script */
 		break;
 	}
-	strbuf_clear(sb);
+
+	STATIC_STRBUF(sb);
+	sb->clear();
 	if (enable_xhtml) {
 		/*
 		 * Since some browser cannot treat "<?xml...>", we don't
@@ -500,10 +501,10 @@ gen_page_end(void)
 const char *
 gen_image(int where, const char *file, const char *alt)
 {
-	STATIC_STRBUF(sb);
 	const char *dir = (where == PARENT) ? "../icons" : "icons";
 
-	strbuf_clear(sb);
+	STATIC_STRBUF(sb);
+	sb->clear();
 	if (enable_xhtml)
 		strbuf_sprintf(sb, "<img class='icon' src='%s/%s.%s' alt='[%s]'%s>",
 			dir, file, icon_suffix, fix_attr_value(alt), empty_element);
@@ -532,8 +533,8 @@ const char *
 gen_name_string(const char *name)
 {
 	STATIC_STRBUF(sb);
+	sb->clear();
 
-	strbuf_clear(sb);
 	if (enable_xhtml) {
 		/*
 		 * Since some browser cannot understand "<a id='xxx' />",
@@ -568,8 +569,8 @@ const char *
 gen_href_begin_with_title_target(const char *dir, const char *file, const char *suffix, const char *key, const char *title, const char *target)
 {
 	STATIC_STRBUF(sb);
+	sb->clear();
 
-	strbuf_clear(sb);
 	/*
 	 * Construct URL.
 	 * href='dir/file.suffix#key'
@@ -652,9 +653,7 @@ const char *
 gen_list_begin(void)
 {
 	STATIC_STRBUF(sb);
-
 	if (sb->empty()) {
-		strbuf_clear(sb);
 		if (table_list) {
 			if (enable_xhtml) {
 				strbuf_sprintf(sb, "%s\n%s%s%s%s",
@@ -675,6 +674,7 @@ gen_list_begin(void)
 			strbuf_puts(sb, verbatim_begin);
 		}
 	}
+
 	return sb->c_str();
 }
 /**
@@ -685,19 +685,19 @@ gen_list_begin(void)
 const char *
 gen_list_body(const char *srcdir, const char *ctags_x, const char *fid)	/* virtually const */
 {
-	STATIC_STRBUF(sb);
-	char path[MAXPATHLEN];
-	const char *p;
 	SPLIT ptable;
-
-	strbuf_clear(sb);
 	if (split((char *)ctags_x, 4, &ptable) < 4) {
 		recover(&ptable);
 		die("too small number of parts in list_body().\n'%s'", ctags_x);
 	}
+
+	char path[MAXPATHLEN];
 	strlimcpy(path, decode_path(ptable.part[PART_PATH].start + 2), sizeof(path));
 	if (fid == NULL)
 		fid = path2fid(path);
+
+	STATIC_STRBUF(sb);
+	sb->clear();
 	if (table_list) {
 		strbuf_puts(sb, current_row_begin);
 		if (enable_xhtml) {
@@ -716,7 +716,7 @@ gen_list_body(const char *srcdir, const char *ctags_x, const char *fid)	/* virtu
 				       "<td nowrap='nowrap' align='left'>%s</td><td nowrap='nowrap'>",
 				ptable.part[PART_LNO].start, path);
 		}
-		for (p = ptable.part[PART_LINE].start; *p; p++) {
+		for (const char* p = ptable.part[PART_LINE].start; *p; p++) {
 			unsigned char c = *p;
 
 			if (c == '&')
@@ -745,12 +745,12 @@ gen_list_body(const char *srcdir, const char *ctags_x, const char *fid)	/* virtu
 		recover(&ptable);
 
 		/* print line number */
-		for (p = ptable.part[PART_TAG].end; p < ptable.part[PART_PATH].start; p++)
+		for (const char* p = ptable.part[PART_TAG].end; p < ptable.part[PART_PATH].start; p++)
 			strbuf_putc(sb, *p);
 		/* print file name */
 		strbuf_puts(sb, path);
 		/* print the rest */
-		for (p = ptable.part[PART_PATH].end; *p; p++) {
+		for (const char* p = ptable.part[PART_PATH].end; *p; p++) {
 			unsigned char c = *p;
 
 			if (c == '&')
@@ -783,8 +783,8 @@ const char *
 gen_form_begin(const char *target)
 {
 	STATIC_STRBUF(sb);
+	sb->clear();
 
-	strbuf_clear(sb);
 	strbuf_sprintf(sb, "<form method='get' action='%s'", fix_attr_value(action));
 	if (Fflag && target)
 		strbuf_sprintf(sb, " target='%s'", fix_attr_value(target));
@@ -841,8 +841,8 @@ const char *
 gen_input_with_title_checked(const char *name, const char *value, const char *type, int checked, const char *title)
 {
 	STATIC_STRBUF(sb);
+	sb->clear();
 
-	strbuf_clear(sb);
 	strbuf_puts(sb, "<input");
 	if (type)
 		strbuf_sprintf(sb, " type='%s'", type);
@@ -870,8 +870,8 @@ const char *
 gen_frameset_begin(const char *contents)
 {
 	STATIC_STRBUF(sb);
+	sb->clear();
 
-	strbuf_clear(sb);
 	strbuf_sprintf(sb, "<frameset %s>", contents);
 	return sb->c_str();
 }
@@ -893,8 +893,8 @@ const char *
 gen_frame(const char *name, const char *src)
 {
 	STATIC_STRBUF(sb);
+	sb->clear();
 
-	strbuf_clear(sb);
 	strbuf_sprintf(sb, "<frame name='%s' id='%s' src='%s'%s>", name, name, src, empty_element);
 	return sb->c_str();
 }
@@ -911,12 +911,10 @@ static const char *
 fix_attr_value(const char *value)
 {
 	STATIC_STRBUF(sb);
+	sb->clear();
+
+	const char* cptr = value;
 	char c;
-	const char *cptr;
-
-	strbuf_clear(sb);
-	cptr = value;
-
 	while((c = *cptr) != '\0') {
 		if(c == ATTR_DELIM)
 			strbuf_puts(sb, "&#39;");
@@ -924,5 +922,6 @@ fix_attr_value(const char *value)
 			strbuf_putc(sb, c);
 		++cptr;
 	}
+
 	return sb->c_str();
 }

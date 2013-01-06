@@ -152,7 +152,6 @@ void
 gpath_put(const char *path, int type)
 {
 	char fid[MAXFIDLEN];
-	STATIC_STRBUF(sb);
 
 	assert(opened > 0);
 	if (_mode == 1 && created)
@@ -166,7 +165,8 @@ gpath_put(const char *path, int type)
 	/*
 	 * path => fid mapping.
 	 */
-	strbuf_clear(sb);
+	STATIC_STRBUF(sb);
+	sb->clear();
 	strbuf_puts0(sb, fid);
 	if (type == GPATH_OTHER)
 		strbuf_puts0(sb, "o");
@@ -174,10 +174,11 @@ gpath_put(const char *path, int type)
 	/*
 	 * fid => path mapping.
 	 */
-	strbuf_clear(sb);
+	sb->clear();
 	strbuf_puts0(sb, path);
 	if (type == GPATH_OTHER)
 		strbuf_puts0(sb, "o");
+
 	dbop_put_withlen(dbop, fid, sb->c_str(), sb->length());
 }
 /**

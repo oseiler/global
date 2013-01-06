@@ -283,7 +283,7 @@ main(int argc, char **argv)
 		 * Replace with alias value.
 		 */
 		if ((p = alias(arg->c_str())) != NULL) {
-			strbuf_reset(arg);
+			arg->clear();
 			strbuf_puts(arg, p);
 		}
 	}
@@ -380,7 +380,7 @@ getdefinitionURL(const char *arg, const char *htmldir, STRBUF *URL)
 	fclose(fp);
 	if (status == -1)
 		die("definition %s not found.", arg);
-	strbuf_reset(URL);
+	URL->clear();
 	/*
 	 * convert path into URL.
 	 */
@@ -451,7 +451,7 @@ convertpath(const char *dbpath, const char *htmldir, const char *path, STRBUF *s
 	int i, lim = sizeof(suffix)/sizeof(char *);
 	const char *p;
 
-	strbuf_reset(sb);
+	sb->clear();
 	strbuf_puts(sb, htmldir);
 	strbuf_puts(sb, "/S/");
 	/*

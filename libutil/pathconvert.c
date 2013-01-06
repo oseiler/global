@@ -86,13 +86,13 @@ set_print0(void)
 char *
 decode_path(const char *path)
 {
-	STATIC_STRBUF(sb);
-	const char *p;
-
 	if (strchr(path, '%') == NULL)
 		return (char *)path;
-	strbuf_clear(sb);
-	for (p = path; *p; p++) {
+
+	STATIC_STRBUF(sb);
+	sb->clear();
+
+	for (const char* p = path; *p; p++) {
 		if (*p == '%') {
 			unsigned char c1, c2;
 			c1 = *++p;

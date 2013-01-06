@@ -1178,7 +1178,7 @@ DBG_PRINT("<%s>", LEXTEXT);
 case 14:
 YY_RULE_SETUP
 #line 169 "php.l"
-{ strbuf_reset(string); BEGIN STRING; }
+{ string->clear(); BEGIN STRING; }
 	YY_BREAK
 case 15:
 YY_RULE_SETUP
@@ -1204,7 +1204,7 @@ strbuf_putc(string, LEXTEXT[0]);
 case 18:
 YY_RULE_SETUP
 #line 180 "php.l"
-{ strbuf_reset(string); BEGIN LITERAL; }
+{ string->clear(); BEGIN LITERAL; }
 	YY_BREAK
 case 19:
 YY_RULE_SETUP
