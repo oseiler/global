@@ -23,24 +23,33 @@
 #include "gparam.h"
 #include "strbuf.h"
 
-typedef struct {
-	FILE *op;
-	int type;		/**< #PATH_ABSOLUTE, #PATH_RELATIVE */
-	int format;		/**< defined in @FILE{format.h} */
-	STRBUF *abspath;
-	char basedir[MAXPATHLEN];
-	int start_point;
-	int db;			/**< for @NAME{gtags-cscope} */
+struct CONVERT {
+  FILE		*op;
+  int		 type;		/**< #PATH_ABSOLUTE, #PATH_RELATIVE */
+  int		 format;	/**< defined in @FILE{format.h} */
+  STRBUF	*abspath;
+  char		 basedir[MAXPATHLEN];
+  int		 start_point;
+  int		 db;		/**< for @NAME{gtags-cscope} */
 
-} CONVERT;
+  /// open convert filter
+  /// \param[in]	type	#PATH_ABSOLUTE, #PATH_RELATIVE, #PATH_THROUGH
+  /// \param[in]	format	tag record format
+  /// \param[in]	root	root directory of source tree
+  /// \param[in]	cwd	current directory
+  /// \param[in]	dbpath	dbpath directory
+  /// \param[in]	op	output file
+  /// \param[in]	db	tag type (#GTAGS, #GRTAGS, #GSYMS, #GPATH, #NOTAGS) <br>
+  ///			only for @NAME{cscope} format
+  CONVERT(int type, int format, const char *root, const char *cwd, const char *dbpath, FILE *op, int db);
+  ~CONVERT();
+};
 
 void set_encode_chars(const unsigned char *);
 void set_print0(void);
 char *decode_path(const char *);
-CONVERT *convert_open(int, int, const char *, const char *, const char *, FILE *, int);
 void convert_put(CONVERT *, const char *);
 void convert_put_path(CONVERT *, const char *);
 void convert_put_using(CONVERT *, const char *, const char *, int, const char *, const char *);
-void convert_close(CONVERT *cv);
 
 #endif /* ! _PATHCONVERT_H_ */

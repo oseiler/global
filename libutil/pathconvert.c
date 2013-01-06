@@ -178,46 +178,7 @@ convert_pathname(CONVERT *cv, const char *path)
 	}
 	return (const char *)path;
 }
-/**
- * convert_open: open convert filter
- *
- *	@param[in]	type	#PATH_ABSOLUTE, #PATH_RELATIVE, #PATH_THROUGH
- *	@param[in]	format	tag record format
- *	@param[in]	root	root directory of source tree
- *	@param[in]	cwd	current directory
- *	@param[in]	dbpath	dbpath directory
- *	@param[in]	op	output file
- *	@param[in]	db	tag type (#GTAGS, #GRTAGS, #GSYMS, #GPATH, #NOTAGS) <br>
- *			only for @NAME{cscope} format
- */
-CONVERT *
-convert_open(int type, int format, const char *root, const char *cwd, const char *dbpath, FILE *op, int db)
-{
-	CONVERT *cv = (CONVERT *)check_calloc(sizeof(CONVERT), 1);
-	/*
-	 * set base directory.
-	 */
-	cv->abspath = strbuf_open(MAXPATHLEN);
-	strbuf_puts(cv->abspath, root);
-	strbuf_unputc(cv->abspath, '/');
-	cv->start_point = strbuf_getlen(cv->abspath);
-	/*
-	 * copy elements.
-	 */
-	if (strlen(cwd) > MAXPATHLEN)
-		die("current directory name too long.");
-	strlimcpy(cv->basedir, cwd, sizeof(cv->basedir));
-	cv->type = type;
-	cv->format = format;
-	cv->op = op;
-	cv->db = db;
-	/*
-	 * open GPATH.
-	 */
-	if (gpath_open(dbpath, 0) < 0)
-		die("GPATH not found.");
-	return cv;
-}
+
 /**
  * convert_put: convert path into relative or absolute and print.
  *
@@ -433,10 +394,29 @@ convert_put_using(CONVERT *cv, const char *tag, const char *path, int lineno, co
 	}
 	(void)fputc(newline, cv->op);
 }
-void
-convert_close(CONVERT *cv)
+
+CONVERT::CONVERT(int type, int format, const char *root, const char *cwd, const char *dbpath, FILE *op, int db) :
+  op(op), type(type), format(format), abspath(NULL), start_point(0), db(db)
 {
-	strbuf_close(cv->abspath);
-	gpath_close();
-	free(cv);
+  // set base directory.
+  abspath = strbuf_open(MAXPATHLEN);
+  strbuf_puts(abspath, root);
+  strbuf_unputc(abspath, '/');
+  start_point = strbuf_getlen(abspath);
+
+  // copy elements.
+  if (strlen(cwd) > MAXPATHLEN) {
+    die("current directory name too long.");
+  }
+  strlimcpy(basedir, cwd, sizeof(basedir));
+
+  // open GPATH.
+  if (gpath_open(dbpath, 0) < 0) {
+    die("GPATH not found.");
+  }
+}
+
+CONVERT::~CONVERT() {
+  strbuf_close(abspath);
+  gpath_close();
 }
