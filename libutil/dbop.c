@@ -727,12 +727,12 @@ dbop_close(DBOP *dbop)
 		 */
 		STRBUF sb(256);
 		while (strbuf_fgets(&sb, dbop->sortin, STRBUF_NOCRLF)) {
-			for (p = strbuf_value(&sb); *p && *p != SORT_SEP; p++)
+			for (p = sb.c_str(); *p && *p != SORT_SEP; p++)
 				;
 			if (!*p)
 				die("unexpected end of record.");
 			*p++ = '\0';
-			dbop_put(dbop, strbuf_value(&sb), p);
+			dbop_put(dbop, sb.c_str(), p);
 		}
 		fclose(dbop->sortin);
 		terminate_sort_process(dbop);

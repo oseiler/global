@@ -143,7 +143,7 @@ statistics_time_start(const char *fmt, ...)
 	t = reinterpret_cast<STATISTICS_TIME*>(check_malloc(offsetof(STATISTICS_TIME, name) + sb->length() + 1));
 
 	t->name_len = sb->length();
-	strcpy(t->name, strbuf_value(sb));
+	strcpy(t->name, sb->c_str());
 
 	GET_ELAPSED_TIME(&t->elapsed_start);
 

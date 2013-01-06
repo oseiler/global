@@ -78,7 +78,7 @@ load_notfunction(const char *filename)
 	 * Don't free *p.
 	 */
 	p = (char *)check_malloc(sb.length() + 1);
-	memcpy(p, strbuf_value(&sb), sb.length() + 1);
+	memcpy(p, sb.c_str(), sb.length() + 1);
 	for (i = 0; i < tablesize; i++) {
 		words[i].name = p;
 		p += strlen(p) + 1;

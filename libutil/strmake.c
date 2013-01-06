@@ -57,7 +57,7 @@ strmake(const char *p, const char *lim)
 		strbuf_putc(sb,*p);
 	}
 end:
-	return strbuf_value(sb);
+	return sb->c_str();
 }
 
 /**
@@ -117,7 +117,7 @@ strtrim(const char *p, int flag, int *len)
 		sb->resize(cut_off);
 	if (len)
 		*len = sb->length();
-	return strbuf_value(sb);
+	return sb->c_str();
 }
 /**
  * strcmp with terminate character.

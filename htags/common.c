@@ -299,7 +299,7 @@ upperdir(const char *dir)
 
 	strbuf_clear(sb);
 	strbuf_sprintf(sb, "../%s", dir);
-	return strbuf_value(sb);
+	return sb->c_str();
 }
 /**
  * Load text from file with replacing @CODE{\@PARENT_DIR\@} macro.
@@ -322,8 +322,8 @@ sed(FILE *ip, int place)
 				start_position = curpos - 1;
 			} else {
 				if (!strncmp("@PARENT_DIR@",
-					strbuf_value(sb) + start_position,
-					curpos - start_position))
+					     sb->c_str() + start_position,
+					     curpos - start_position))
 				{
 					sb->resize(start_position);
 					strbuf_puts(sb, parent_dir);
@@ -337,7 +337,7 @@ sed(FILE *ip, int place)
 				start_position = -1;
 		}
 	}
-	return strbuf_value(sb);
+	return sb->c_str();
 }
 /**
  * Generate custom header.
@@ -442,7 +442,7 @@ gen_page_generic_begin(const char *title, int place, int use_frameset, const cha
 	if (html_header)
 		strbuf_puts(sb, html_header);		/* --html-header=file */
 	strbuf_puts(sb, html_head_end);
-	return strbuf_value(sb);
+	return sb->c_str();
 }
 /**
  * Generate beginning of normal page
@@ -510,7 +510,7 @@ gen_image(int where, const char *file, const char *alt)
 	else
 		strbuf_sprintf(sb, "<img src='%s/%s.%s' alt='[%s]' %s%s>",
 			dir, file, icon_suffix, fix_attr_value(alt), icon_spec, empty_element);
-	return strbuf_value(sb);
+	return sb->c_str();
 }
 /**
  * Generate name tag.
@@ -547,7 +547,7 @@ gen_name_string(const char *name)
 	} else {
 		strbuf_sprintf(sb, "<a name='%s'></a>", name);
 	}
-	return strbuf_value(sb);
+	return sb->c_str();
 }
 /**
  * Generate anchor begin tag (@CODE{\<a href='dir/file.suffix\#key'\>}).
@@ -602,7 +602,7 @@ gen_href_begin_with_title_target(const char *dir, const char *file, const char *
 	if (title)
 		strbuf_sprintf(sb, " title='%s'", fix_attr_value(title));
 	strbuf_putc(sb, '>');
-	return strbuf_value(sb);
+	return sb->c_str();
 }
 /**
  * Generate simple anchor begin tag.
@@ -675,7 +675,7 @@ gen_list_begin(void)
 			strbuf_puts(sb, verbatim_begin);
 		}
 	}
-	return strbuf_value(sb);
+	return sb->c_str();
 }
 /**
  * Generate list body.
@@ -764,7 +764,7 @@ gen_list_body(const char *srcdir, const char *ctags_x, const char *fid)	/* virtu
 		}
 		strbuf_puts(sb, current_line_end);
 	}
-	return strbuf_value(sb);
+	return sb->c_str();
 }
 /**
  * Generate list end tag.
@@ -789,7 +789,7 @@ gen_form_begin(const char *target)
 	if (Fflag && target)
 		strbuf_sprintf(sb, " target='%s'", fix_attr_value(target));
 	strbuf_puts(sb, ">");
-	return strbuf_value(sb);
+	return sb->c_str();
 }
 /**
  * Generate end of form (@CODE{\</form\>})
@@ -859,7 +859,7 @@ gen_input_with_title_checked(const char *name, const char *value, const char *ty
 	if (title)
 		strbuf_sprintf(sb, " title='%s'", fix_attr_value(title));
 	strbuf_sprintf(sb, "%s>", empty_element);
-	return strbuf_value(sb);
+	return sb->c_str();
 }
 /**
  * Generate beginning of frameset (@CODE{\<frameset\>})
@@ -873,7 +873,7 @@ gen_frameset_begin(const char *contents)
 
 	strbuf_clear(sb);
 	strbuf_sprintf(sb, "<frameset %s>", contents);
-	return strbuf_value(sb);
+	return sb->c_str();
 }
 /**
  * Generate end of frameset (@CODE{\</frameset\>})
@@ -896,7 +896,7 @@ gen_frame(const char *name, const char *src)
 
 	strbuf_clear(sb);
 	strbuf_sprintf(sb, "<frame name='%s' id='%s' src='%s'%s>", name, name, src, empty_element);
-	return strbuf_value(sb);
+	return sb->c_str();
 }
 
 
@@ -924,5 +924,5 @@ fix_attr_value(const char *value)
 			strbuf_putc(sb, c);
 		++cptr;
 	}
-	return strbuf_value(sb);
+	return sb->c_str();
 }

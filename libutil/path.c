@@ -210,7 +210,7 @@ makedirectories(const char *base, const char *rest, int verbose)
 			q++;
 		strbuf_putc(&sb, SEP);
 		strbuf_nputs(&sb, p, q - p);
-		p = strbuf_value(&sb);
+		p = sb.c_str();
 		if (!test("d", p)) {
 			if (verbose)
 				fprintf(stderr, " Making directory '%s'.\n", p);

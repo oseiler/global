@@ -443,10 +443,10 @@ main(int argc, char **argv)
 		extractmethod = 1;
 	strbuf_reset(&sb);
 	if (getconfs("langmap", &sb))
-		langmap = check_strdup(strbuf_value(&sb));
+		langmap = check_strdup(sb.c_str());
 	strbuf_reset(&sb);
 	if (getconfs("gtags_parser", &sb))
-		gtags_parser = check_strdup(strbuf_value(&sb));
+		gtags_parser = check_strdup(sb.c_str());
 	/*
 	 * initialize parser.
 	 */
@@ -505,9 +505,9 @@ main(int argc, char **argv)
 			strbuf_puts(&sb, " >" NULL_DEVICE);
 		}
 		if (debug)
-			fprintf(stderr, "executing mkid like: %s\n", strbuf_value(&sb));
-		if (system(strbuf_value(&sb)))
-			die("mkid failed: %s", strbuf_value(&sb));
+			fprintf(stderr, "executing mkid like: %s\n", sb.c_str());
+		if (system(sb.c_str()))
+			die("mkid failed: %s", sb.c_str());
 		if (chmod(makepath(dbpath, "ID", NULL), 0644) < 0)
 			die("cannot chmod ID file.");
 		statistics_time_end(tim);
@@ -681,14 +681,14 @@ incremental(const char *dbpath, const char *root)
 				fprintf(stderr, "[%s] Updating '%s'.\n", now(), dbname(GPATH));
 			/* gpath_open(dbpath, 2); */
 			if (!deletelist.empty()) {
-				start = strbuf_value(&deletelist);
+				start = deletelist.c_str();
 				end = start + deletelist.length();
 
 				for (p = start; p < end; p += strlen(p) + 1)
 					gpath_delete(p);
 			}
 			if (!addlist_other.empty()) {
-				start = strbuf_value(&addlist_other);
+				start = addlist_other.c_str();
 				end = start + addlist_other.length();
 
 				for (p = start; p < end; p += strlen(p) + 1) {
@@ -827,7 +827,7 @@ void updatetags(const char *dbpath, const char *root, IDSET *deleteset, STRBUF *
   /*
    * Add tags to GTAGS and GRTAGS.
    */
-  const char* start = strbuf_value(addlist);
+  const char* start = addlist->c_str();
   const char* end   = start + addlist->length();
   int seqno = 0;
   for (const char* path = start; path < end; path += strlen(path) + 1) {
@@ -908,16 +908,16 @@ void createtags(const char *dbpath, const char *root) {
   STRBUF sb;
   if (getconfs("GTAGS_extra", &sb)) {
     tim = statistics_time_start("Time of executing GTAGS_extra command");
-    if (system(strbuf_value(&sb)))
-      fprintf(stderr, "GTAGS_extra command failed: %s\n", strbuf_value(&sb));
+    if (system(sb.c_str()))
+      fprintf(stderr, "GTAGS_extra command failed: %s\n", sb.c_str());
     statistics_time_end(tim);
   }
 
   strbuf_reset(&sb);
   if (getconfs("GRTAGS_extra", &sb)) {
     tim = statistics_time_start("Time of executing GRTAGS_extra command");
-    if (system(strbuf_value(&sb)))
-      fprintf(stderr, "GRTAGS_extra command failed: %s\n", strbuf_value(&sb));
+    if (system(sb.c_str()))
+      fprintf(stderr, "GRTAGS_extra command failed: %s\n", sb.c_str());
     statistics_time_end(tim);
   }
 }
@@ -941,7 +941,7 @@ printconf(const char *name)
 	else {
 		STRBUF sb;
 		if (getconfs(name, &sb))
-			fprintf(stdout, "%s\n", strbuf_value(&sb));
+			fprintf(stdout, "%s\n", sb.c_str());
 		else
 			exist = 0;
 	}

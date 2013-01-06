@@ -127,7 +127,7 @@ anchor_load(const char *path)
 
 	for (db = GTAGS; db < GTAGLIM; db++) {
 		XARGS *xp;
-		char *ctags_xid;
+		const char *ctags_xid;
 
 		if ((xp = anchor_input[db]) == NULL)
 			continue;

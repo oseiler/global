@@ -509,22 +509,22 @@ load_with_replace(const char *file, STRBUF *result, int place)
 	}
 	strbuf_unputc(&sb, '|');
 	strbuf_putc(&sb, ')');
-	if (regcomp(&preg, strbuf_value(&sb), REG_EXTENDED) != 0)
+	if (regcomp(&preg, sb.c_str(), REG_EXTENDED) != 0)
 		die("cannot compile regular expression.");
 	/*
 	 * construct skeleton file name in the system datadir directory.
 	 */
 	strbuf_reset(&sb);
 	strbuf_sprintf(&sb, "%s/gtags/%s.tmpl", datadir, file);
-	ip = fopen(strbuf_value(&sb), "r");
+	ip = fopen(sb.c_str(), "r");
 	if (!ip) {
 #ifdef __DJGPP__
 		strbuf_reset(&sb);
 		strbuf_sprintf(&sb, "%s/gtags/%s", datadir, file);
-		ip = fopen(strbuf_value(&sb), "r");
+		ip = fopen(sb.c_str(), "r");
 		if (!ip)
 #endif
-			die("skeleton file '%s' not found.", strbuf_value(&sb));
+		  die("skeleton file '%s' not found.", sb.c_str());
 	}
 	strbuf_reset(&sb);
 	/*
@@ -583,7 +583,7 @@ generate_file(const char *dist, const char *file, int place)
 	if (!op)
 		die("cannot create file '%s'.", file);
 	load_with_replace(file, &result, place);
-	fputs(strbuf_value(&result), op);
+	fputs(result.c_str(), op);
 	fclose(op);
 	html_count++;
 }
@@ -761,7 +761,7 @@ makesearchpart(const char *target)
 		strbuf_puts_nl(sb, ".)");
 	}
 	strbuf_puts_nl(sb, gen_form_end());
-	return strbuf_value(sb);
+	return sb->c_str();
 }
 /**
  * makeindex: make index file
@@ -983,7 +983,7 @@ loadfile_asis(const char *file, STRBUF *result)
 	if (!ip)
 		die("file '%s' not found.", file);
 	while (strbuf_fgets(&sb, ip, STRBUF_NOCRLF) != NULL)
-		strbuf_puts_nl(result, strbuf_value(&sb));
+		strbuf_puts_nl(result, sb.c_str());
 	fclose(ip);
 }
 void
@@ -1173,7 +1173,7 @@ makecommonpart(const char *title, const char *defines, const char *files)
 		}
 	}
 
-	return check_strdup(strbuf_value(&sb));
+	return check_strdup(sb.c_str());
 }
 /**
  * basic check.
@@ -1259,11 +1259,11 @@ configuration(int argc, char *const *argv)
 	strbuf_reset(&sb);
 	if (!getconfs("datadir", &sb))
 		die("cannot get datadir directory name.");
-	strlimcpy(datadir, strbuf_value(&sb), sizeof(datadir));
+	strlimcpy(datadir, sb.c_str(), sizeof(datadir));
 	strbuf_reset(&sb);
 	if (!getconfs("localstatedir", &sb))
 		die("cannot get localstatedir directory name.");
-	strlimcpy(localstatedir, strbuf_value(&sb), sizeof(localstatedir));
+	strlimcpy(localstatedir, sb.c_str(), sizeof(localstatedir));
 	if (getconfn("ncol", &n)) {
 		if (n < 1 || n > 10)
 			warning("parameter 'ncol' ignored because the value (=%d) is too large or too small.", n);
@@ -1278,23 +1278,23 @@ configuration(int argc, char *const *argv)
 	}
 	strbuf_reset(&sb);
 	if (getconfs("gzipped_suffix", &sb))
-		gzipped_suffix = check_strdup(strbuf_value(&sb));
+		gzipped_suffix = check_strdup(sb.c_str());
 	strbuf_reset(&sb);
 	if (getconfs("normal_suffix", &sb))
-		normal_suffix = check_strdup(strbuf_value(&sb));
+		normal_suffix = check_strdup(sb.c_str());
 	if (getconfb("no_order_list"))
 		no_order_list = 1;
 	strbuf_reset(&sb);
 	if (getconfs("prolog_script", &sb))
-		prolog_script = check_strdup(strbuf_value(&sb));
+		prolog_script = check_strdup(sb.c_str());
 	strbuf_reset(&sb);
 	if (getconfs("epilog_script", &sb))
-		epilog_script = check_strdup(strbuf_value(&sb));
+		epilog_script = check_strdup(sb.c_str());
 	if (getconfb("colorize_warned_line"))
 		colorize_warned_line = 1;
 	strbuf_reset(&sb);
 	if (getconfs("script_alias", &sb)) {
-		p = check_strdup(strbuf_value(&sb));
+		p = check_strdup(sb.c_str());
 		/* remove the last '/' */
 		q = p + strlen(p) - 1;
 		if (*q == '/')
@@ -1303,10 +1303,10 @@ configuration(int argc, char *const *argv)
 	}
 	strbuf_reset(&sb);
 	if (getconfs("body_begin", &sb)) {
-		p = check_strdup(strbuf_value(&sb));
+		p = check_strdup(sb.c_str());
 		strbuf_reset(&sb);
 		if (getconfs("body_end", &sb)) {
-			q = check_strdup(strbuf_value(&sb));
+			q = check_strdup(sb.c_str());
 			body_begin = p;
 			body_end = q;
 		} else {
@@ -1315,10 +1315,10 @@ configuration(int argc, char *const *argv)
 	}
 	strbuf_reset(&sb);
 	if (getconfs("table_begin", &sb)) {
-		p = check_strdup(strbuf_value(&sb));
+		p = check_strdup(sb.c_str());
 		strbuf_reset(&sb);
 		if (getconfs("table_end", &sb)) {
-			q = check_strdup(strbuf_value(&sb));
+			q = check_strdup(sb.c_str());
 			table_begin = p;
 			table_end = q;
 		} else {
@@ -1327,10 +1327,10 @@ configuration(int argc, char *const *argv)
 	}
 	strbuf_reset(&sb);
 	if (getconfs("title_begin", &sb)) {
-		p = check_strdup(strbuf_value(&sb));
+		p = check_strdup(sb.c_str());
 		strbuf_reset(&sb);
 		if (getconfs("title_end", &sb)) {
-			q = check_strdup(strbuf_value(&sb));
+			q = check_strdup(sb.c_str());
 			title_begin = p;
 			title_end = q;
 		} else {
@@ -1339,10 +1339,10 @@ configuration(int argc, char *const *argv)
 	}
 	strbuf_reset(&sb);
 	if (getconfs("comment_begin", &sb)) {
-		p = check_strdup(strbuf_value(&sb));
+		p = check_strdup(sb.c_str());
 		strbuf_reset(&sb);
 		if (getconfs("comment_end", &sb)) {
-			q = check_strdup(strbuf_value(&sb));
+			q = check_strdup(sb.c_str());
 			comment_begin = p;
 			comment_end = q;
 		} else {
@@ -1351,10 +1351,10 @@ configuration(int argc, char *const *argv)
 	}
 	strbuf_reset(&sb);
 	if (getconfs("sharp_begin", &sb)) {
-		p = check_strdup(strbuf_value(&sb));
+		p = check_strdup(sb.c_str());
 		strbuf_reset(&sb);
 		if (getconfs("sharp_end", &sb)) {
-			q = check_strdup(strbuf_value(&sb));
+			q = check_strdup(sb.c_str());
 			sharp_begin = p;
 			sharp_end = q;
 		} else {
@@ -1363,10 +1363,10 @@ configuration(int argc, char *const *argv)
 	}
 	strbuf_reset(&sb);
 	if (getconfs("brace_begin", &sb)) {
-		p = check_strdup(strbuf_value(&sb));
+		p = check_strdup(sb.c_str());
 		strbuf_reset(&sb);
 		if (getconfs("brace_end", &sb)) {
-			q = check_strdup(strbuf_value(&sb));
+			q = check_strdup(sb.c_str());
 			brace_begin = p;
 			brace_end = q;
 		} else {
@@ -1375,10 +1375,10 @@ configuration(int argc, char *const *argv)
 	}
 	strbuf_reset(&sb);
 	if (getconfs("reserved_begin", &sb)) {
-		p = check_strdup(strbuf_value(&sb));
+		p = check_strdup(sb.c_str());
 		strbuf_reset(&sb);
 		if (getconfs("reserved_end", &sb)) {
-			q = check_strdup(strbuf_value(&sb));
+			q = check_strdup(sb.c_str());
 			reserved_begin = p;
 			reserved_end = q;
 		} else {
@@ -1387,10 +1387,10 @@ configuration(int argc, char *const *argv)
 	}
 	strbuf_reset(&sb);
 	if (getconfs("position_begin", &sb)) {
-		p = check_strdup(strbuf_value(&sb));
+		p = check_strdup(sb.c_str());
 		strbuf_reset(&sb);
 		if (getconfs("position_end", &sb)) {
-			q = check_strdup(strbuf_value(&sb));
+			q = check_strdup(sb.c_str());
 			position_begin = p;
 			position_end = q;
 		} else {
@@ -1399,10 +1399,10 @@ configuration(int argc, char *const *argv)
 	}
 	strbuf_reset(&sb);
 	if (getconfs("warned_line_begin", &sb)) {
-		p = check_strdup(strbuf_value(&sb));
+		p = check_strdup(sb.c_str());
 		strbuf_reset(&sb);
 		if (getconfs("warned_line_end", &sb)) {
-			q = check_strdup(strbuf_value(&sb));
+			q = check_strdup(sb.c_str());
 			warned_line_begin = p;
 			warned_line_end = q;
 		} else {
@@ -1411,17 +1411,17 @@ configuration(int argc, char *const *argv)
 	}
 	strbuf_reset(&sb);
 	if (getconfs("include_file_suffixes", &sb))
-		include_file_suffixes = check_strdup(strbuf_value(&sb));
+		include_file_suffixes = check_strdup(sb.c_str());
 	strbuf_reset(&sb);
 	if (getconfs("langmap", &sb))
-		langmap = check_strdup(strbuf_value(&sb));
+		langmap = check_strdup(sb.c_str());
 	strbuf_reset(&sb);
 	if (getconfs("xhtml_version", &sb))
-		xhtml_version = check_strdup(strbuf_value(&sb));
+		xhtml_version = check_strdup(sb.c_str());
 	/* insert htags_options into the head of ARGSV array. */
 	strbuf_reset(&sb);
 	if (getconfs("htags_options", &sb))
-		htags_options = check_strdup(strbuf_value(&sb));
+		htags_options = check_strdup(sb.c_str());
 }
 /**
  * save_environment: save configuration data and arguments.
@@ -1443,7 +1443,7 @@ static void save_environment(int argc, char *const *argv)
 	if ((ip = popen(command, "r")) == NULL)
 		die("cannot execute '%s'.", command);
 	while (strbuf_fgets(&sb, ip, STRBUF_NOCRLF) != NULL) {
-		for (p = strbuf_value(&sb); *p; p++) {
+		for (p = sb.c_str(); *p; p++) {
 			if (*p == '\'') {
 				strbuf_putc(&save_c, '\'');
 				strbuf_putc(&save_c, '"');
@@ -1456,7 +1456,7 @@ static void save_environment(int argc, char *const *argv)
 	}
 	if (pclose(ip) != 0)
 		die("cannot execute '%s'.", command);
-	save_config = check_strdup(strbuf_value(&save_c));
+	save_config = check_strdup(save_c.c_str());
 
 	/*
 	 * save arguments.
@@ -1485,7 +1485,7 @@ static void save_environment(int argc, char *const *argv)
 				strbuf_putc(&save_a, '\'');
 		}
 	}
-	save_argv = check_strdup(strbuf_value(&save_a));
+	save_argv = check_strdup(save_a.c_str());
 }
 
 char **
@@ -1527,7 +1527,7 @@ append_options(int *argc, char *const *argv)
 	}
 	newargv = (const char **)check_malloc(sizeof(char *) * (*argc + count + 1));
 	newargv[i++] = argv[0];
-	p = strbuf_value(sb);
+	p = sb->c_str();
 	while (count--) {
 		newargv[i++] = p;
 		p += strlen(p) + 1;
@@ -1611,7 +1611,7 @@ main(int argc, char **argv)
 				if (!test("r", optarg))
 					die("file '%s' not found.", optarg);
 				loadfile_asis(optarg, sb);
-				html_header = strbuf_value(sb);
+				html_header = sb->c_str();
 			}
 			break;
 		case OPT_ITEM_ORDER:
@@ -1808,7 +1808,7 @@ main(int argc, char **argv)
 			strbuf_putc(&sb, ' ');
 			strbuf_puts(&sb, arg_dbpath);
 		}
-		if (system(strbuf_value(&sb)))
+		if (system(sb.c_str()))
 			die("cannot execute gtags(1) command.");
 	}
 
@@ -1892,7 +1892,7 @@ main(int argc, char **argv)
 		}
 		if (!test("f", path))
 			try_writing = 1;
-		else if (!strcmp(distpath, strbuf_value(&sb)))
+		else if (!strcmp(distpath, sb.c_str()))
 			; /* nothing to do */
 		else if (overwrite_key == 0)
 			die("The site key '%s' is not unique, please change it or use --overwrite-key option.", sitekey);
@@ -2022,7 +2022,7 @@ main(int argc, char **argv)
 			loadfile("jscode_suggest", sb);
 		if (tree_view)
 			loadfile("jscode_treeview", sb);
-		jscode = strbuf_value(sb);
+		jscode = sb->c_str();
 	}
 	/*
 	 * (0) make directories
@@ -2194,7 +2194,7 @@ main(int argc, char **argv)
 		 *     USING @defines @files
 		 */
 		message("[%s] (#) making a common part ...", now());
-		index = makecommonpart(title, strbuf_value(&defines), strbuf_value(&files));
+		index = makecommonpart(title, defines.c_str(), files.c_str());
 	}
 	/*
 	 * (7)make index file (index.html)

@@ -103,7 +103,8 @@ decode_path(const char *path)
 		} else
 			strbuf_putc(sb, *p);
 	}
-	return strbuf_value(sb);
+
+	return sb->c_str();
 }
 /**
  * Path filter for the output of @XREF{global,1}.
@@ -126,10 +127,10 @@ convert_pathname(CONVERT *cv, const char *path)
 		 */
 		switch (cv->type) {
 		case PATH_ABSOLUTE:
-			path = strbuf_value(&cv->abspath);
+			path = cv->abspath.c_str();
 			break;
 		case PATH_RELATIVE:
-			a = strbuf_value(&cv->abspath);
+			a = cv->abspath.c_str();
 			b = cv->basedir;
 #if defined(_WIN32) || defined(__DJGPP__)
 			while (*a != '/')

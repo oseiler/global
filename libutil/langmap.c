@@ -59,7 +59,7 @@ setup_langmap(const char *map)
 
 	active_map = new STRBUF;
 	strbuf_puts(active_map, map);
-	for (p = strbuf_value(active_map); *p; p++) {
+	for (p = active_map->c_str(); *p; p++) {
 		/*
 		 * "c:.c.h,java:.java,cpp:.C.H"
 		 */
@@ -94,7 +94,7 @@ decide_lang(const char *suffix)
 	 */
 	if (!strcmp(suffix, ".h") && getenv("GTAGSFORCECPP") != NULL)
 		return "cpp";
-	lang = strbuf_value(active_map);
+	lang = active_map->c_str();
 	tail = lang + active_map->length();
 
 	/* check whether or not list includes suffix. */

@@ -1184,12 +1184,12 @@ case 15:
 YY_RULE_SETUP
 #line 170 "php.l"
 {
-				DBG_PRINT("<S:%s>", strbuf_value(string));
-				BEGIN PHP;
+  DBG_PRINT("<S:%s>", string->c_str());
+  BEGIN PHP;
 					
-				return PHP_STRING;
-			}
-	YY_BREAK
+  return PHP_STRING;
+}
+YY_BREAK
 case 16:
 YY_RULE_SETUP
 #line 176 "php.l"
@@ -1210,12 +1210,12 @@ case 19:
 YY_RULE_SETUP
 #line 181 "php.l"
 {
-				DBG_PRINT("<L:%s>", strbuf_value(string));
-				BEGIN PHP;
+  DBG_PRINT("<L:%s>", string->c_str());
+  BEGIN PHP;
 					
-				return PHP_STRING;
-			}
-	YY_BREAK
+  return PHP_STRING;
+}
+YY_BREAK
 case 20:
 YY_RULE_SETUP
 #line 187 "php.l"
@@ -2378,7 +2378,7 @@ php(const struct parser_param *param)
 				break;
 			if (LEXLEX(param) != PHP_STRING)
 				break;
-			PUT(PARSER_DEF, strbuf_value(string), LEXLINENO);
+			PUT(PARSER_DEF, string->c_str(), LEXLINENO);
 			break;
 		case PHP_CLASS:
 			if (LEXLEX(param) != PHP_TOKEN)
@@ -2396,8 +2396,7 @@ php(const struct parser_param *param)
 			if (php_reserved_variable(LEXTEXT, LEXLENG)) {
 				PUT(PARSER_REF_SYM, LEXTEXT, LEXLINENO);
 				if (LEXLEX(param) == PHP_LBRACK && LEXLEX(param) == PHP_STRING && LEXLEX(param) == PHP_RBRACK) {
-					const char *str = strbuf_value(string);
-
+					const char *str = string->c_str();
 					if (strchr(str, '$') == NULL)
 						PUT(PARSER_REF_SYM, str, LEXLINENO);
 				}

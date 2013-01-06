@@ -53,7 +53,7 @@ void set_env(const char *var, const char *val) {
 #ifdef HAVE_PUTENV
   STRBUF sb;
   strbuf_sprintf(&sb, "%s=%s", var, val);
-  putenv(check_strdup(strbuf_value(&sb)));
+  putenv(check_strdup(sb.c_str()));
 #else
   setenv(var, val, 1);
 #endif

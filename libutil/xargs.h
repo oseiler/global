@@ -67,7 +67,7 @@ typedef struct {
 	int put_gpath;
 	int trim_line;
 	int skip_assembly;
-	void (*verbose)(char *, int, int);
+	void (*verbose)(const char *, int, int);
 	/** @} */
 
 	/**
@@ -91,8 +91,8 @@ typedef struct {
 	 * @name XARGS_STRBUF
 	 */
 	/** @{ */
-	char *curp;
-	char *endp;
+	const char *curp;
+	const char *endp;
 	/** @} */
 
 	/*
@@ -104,7 +104,7 @@ XARGS *xargs_open_with_file(const char *, int, FILE *);
 XARGS *xargs_open_with_argv(const char *, int, int, char *const *);
 XARGS *xargs_open_with_strbuf(const char *, int, STRBUF *);
 XARGS *xargs_open_with_find(const char *, int);
-char *xargs_read(XARGS *);
+const char *xargs_read(XARGS *);
 void xargs_unread(XARGS *);
 int xargs_close(XARGS *);
 

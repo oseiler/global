@@ -49,7 +49,7 @@
 } while (0)
 
 #define GET_SYM(offset) (assert((offset) < asm_symtable->length()),	\
-			 &strbuf_value(asm_symtable)[offset])
+			 &asm_symtable->c_str()[offset])
 
 STRBUF *asm_symtable;
 

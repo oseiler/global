@@ -82,7 +82,7 @@ linetable_open(const char *path)
 		linetable_put(offset, lineno++);
 	}
 	fclose(ip);
-	curp = filebuf = strbuf_value(ib);
+	curp = filebuf = ib->c_str();
 	filesize = offset;
 	endp = filebuf + filesize;
 

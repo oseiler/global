@@ -82,7 +82,7 @@ quote_string(const char *s)
 			strbuf_putc(sb, '\\');
 		strbuf_putc(sb, *s);
 	}
-	return strbuf_value(sb);
+	return sb->c_str();
 }
 /**
  * quote characters in the string.
@@ -103,7 +103,8 @@ quote_chars(const char *s, unsigned int c)
 			strbuf_putc(sb, '\\');
 		strbuf_putc(sb, *s);
 	}
-	return strbuf_value(sb);
+
+	return sb->c_str();
 }
 #if defined(__DJGPP__) || (defined(_WIN32) && !defined(__CYGWIN__))
 #define SHELL_QUOTE '"'
@@ -140,5 +141,5 @@ quote_shell(const char *s)
 	}
 #endif
 	strbuf_putc(sb, SHELL_QUOTE);
-	return strbuf_value(sb);
+	return sb->c_str();
 }

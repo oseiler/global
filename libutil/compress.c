@@ -245,7 +245,8 @@ compress(const char *in, const char *name)
 			strbuf_putc(sb, '}');
 		}
 	}
-	return strbuf_value(sb);
+
+	return sb->c_str();
 }
 
 /**
@@ -303,5 +304,6 @@ uncompress(const char *in, const char *name)
 			strbuf_putc(sb, *p);
 		}
 	}
-	return strbuf_value(sb);
+
+	return sb->c_str();
 }

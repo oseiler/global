@@ -94,8 +94,8 @@ makedupindex(void)
 #if defined(_WIN32) && !defined(__CYGWIN__)
 		strbuf_putc(&command, '"');
 #endif
-		if ((ip = popen(strbuf_value(&command), "r")) == NULL)
-			die("cannot execute command '%s'.", strbuf_value(&command));
+		if ((ip = popen(command.c_str(), "r")) == NULL)
+			die("cannot execute command '%s'.", command.c_str());
 		while ((ctags_xid = strbuf_fgets(&sb, ip, STRBUF_NOCRLF)) != NULL) {
 			char fid[MAXFIDLEN];
 
@@ -123,7 +123,7 @@ makedupindex(void)
 					strbuf_putn(&tmp, count - 1);
 					strbuf_putc(&tmp, '\0');
 					strbuf_putn(&tmp, entry_count);
-					cache_put(db, prev, strbuf_value(&tmp), tmp.length() + 1);
+					cache_put(db, prev, tmp.c_str(), tmp.length() + 1);
 				}				
 				/* single entry */
 				if (first_line[0]) {
@@ -135,7 +135,7 @@ makedupindex(void)
 					strbuf_puts_withterm(&tmp, lno, ' ');
 					strbuf_putc(&tmp, '\0');
 					strbuf_puts(&tmp, fid);
-					cache_put(db, prev, strbuf_value(&tmp), tmp.length() + 1);
+					cache_put(db, prev, tmp.c_str(), tmp.length() + 1);
 				}
 				/*
 				 * Chop the tail of the line. It is not important.
@@ -175,7 +175,7 @@ makedupindex(void)
 		if (db == GTAGS)
 			definition_count = count;
 		if (pclose(ip) != 0)
-			die("'%s' failed.", strbuf_value(&command));
+			die("'%s' failed.", command.c_str());
 		if (writing) {
 			if (!dynamic) {
 				fputs_nl(gen_list_end(), op);
@@ -192,7 +192,7 @@ makedupindex(void)
 			strbuf_putn(&tmp, count);
 			strbuf_putc(&tmp, '\0');
 			strbuf_putn(&tmp, entry_count);
-			cache_put(db, prev, strbuf_value(&tmp), tmp.length() + 1);
+			cache_put(db, prev, tmp.c_str(), tmp.length() + 1);
 		}
 		if (first_line[0]) {
 			char fid[MAXFIDLEN];
@@ -203,7 +203,7 @@ makedupindex(void)
 			strbuf_puts_withterm(&tmp, lno, ' ');
 			strbuf_putc(&tmp, '\0');
 			strbuf_puts(&tmp, fid);
-			cache_put(db, prev, strbuf_value(&tmp), tmp.length() + 1);
+			cache_put(db, prev, tmp.c_str(), tmp.length() + 1);
 		}
 	}
 

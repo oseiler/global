@@ -93,7 +93,7 @@ makepath(const char *dir, const char *file, const char *suffix)
 			strbuf_putc(sb, '.');
 		strbuf_puts(sb, suffix);
 	}
-	if ((length = strlen(strbuf_value(sb))) > MAXPATHLEN)
-		die("path name too long. '%s'\n", strbuf_value(sb));
-	return strbuf_value(sb);
+	if ((length = strlen(sb->c_str())) > MAXPATHLEN)
+		die("path name too long. '%s'\n", sb->c_str());
+	return sb->c_str();
 }

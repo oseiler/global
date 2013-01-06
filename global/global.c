@@ -303,7 +303,7 @@ finish:
 
 		STRBUF sb;
 		strbuf_puts(&sb, getenv("GTAGSLIBPATH"));
-		for (libdir = strbuf_value(&sb); libdir; libdir = nextp) {
+		for (libdir = sb.c_str(); libdir; libdir = nextp) {
 			 if ((nextp = locatestring(libdir, PATHSEP, MATCH_FIRST)) != NULL)
                                 *nextp++ = 0;
 			if (!gtagsexist(libdir, libdbpath, sizeof(libdbpath), 0))
@@ -646,7 +646,7 @@ main(int argc, char **argv)
 		}
 		strbuf_putc(&sb, ' ');
 		strbuf_puts(&sb, dbpath);
-		if (system(strbuf_value(&sb)))
+		if (system(sb.c_str()))
 			exit(1);
 		exit(0);
 	}
@@ -697,7 +697,7 @@ main(int argc, char **argv)
 			strbuf_puts(&sb, p);
 		}
 		strbuf_putc(&sb, '/');
-		localprefix = check_strdup(strbuf_value(&sb));
+		localprefix = check_strdup(sb.c_str());
 #ifdef DEBUG
 		fprintf(stderr, "root=%s\n", root);
 		fprintf(stderr, "cwd=%s\n", cwd);
@@ -793,7 +793,7 @@ completion_tags(const char *dbpath, const char *root, const char *prefix, int db
 		 */
 		strbuf_putc(&sb, '^');
 		strbuf_puts(&sb, prefix);
-		if (regcomp(&preg, strbuf_value(&sb), REG_ICASE) != 0)
+		if (regcomp(&preg, sb.c_str(), REG_ICASE) != 0)
 			die("invalid regular expression.");
 		/*
 		 * Two prefix reading:
@@ -811,7 +811,7 @@ completion_tags(const char *dbpath, const char *root, const char *prefix, int db
 		for (i = 0; i < 2; i++) {
 			strbuf_reset(&sb);
 			strbuf_putc(&sb, firstchar[i]);
-			for (gtp = gtags_first(gtop, strbuf_value(&sb), flags); gtp; gtp = gtags_next(gtop)) {
+			for (gtp = gtags_first(gtop, sb.c_str(), flags); gtp; gtp = gtags_next(gtop)) {
 				if (regexec(&preg, gtp->tag, 0, 0, 0) == 0) {
 					fputs(gtp->tag, stdout);
 					fputc('\n', stdout);
@@ -860,7 +860,7 @@ completion(const char *dbpath, const char *root, const char *prefix, int db)
 		/*
 		* search for each tree in the library path.
 		*/
-		for (libdir = strbuf_value(&sb); libdir; libdir = nextp) {
+		for (libdir = sb.c_str(); libdir; libdir = nextp) {
 			if ((nextp = locatestring(libdir, PATHSEP, MATCH_FIRST)) != NULL)
 				*nextp++ = 0;
 			if (!gtagsexist(libdir, libdbpath, sizeof(libdbpath), 0))
@@ -914,11 +914,11 @@ completion_idutils(const char *dbpath, const char *root, const char *prefix)
 	strbuf_puts(&sb, prefix);
 	strbuf_putc(&sb, '"');
 	if (debug)
-		fprintf(stderr, "completion_idutils: %s\n", strbuf_value(&sb));
+		fprintf(stderr, "completion_idutils: %s\n", sb.c_str());
 	if (chdir(root) < 0)
 		die("cannot move to '%s' directory.", root);
-	if (!(ip = popen(strbuf_value(&sb), "r")))
-		die("cannot execute '%s'.", strbuf_value(&sb));
+	if (!(ip = popen(sb.c_str(), "r")))
+		die("cannot execute '%s'.", sb.c_str());
 	while ((line = strbuf_fgets(&sb, ip, STRBUF_NOCRLF)) != NULL) {
 		for (p = line; *p && *p != ' '; p++)
 			;
@@ -1073,12 +1073,12 @@ void idutils(const char *pattern, const char *dbpath) {
   strbuf_puts(&ib, quote_string(pattern));
 
   if (debug) {
-    fprintf(stderr, "idutils: %s\n", strbuf_value(&ib));
+    fprintf(stderr, "idutils: %s\n", ib.c_str());
   }
 
   FILE* ip = NULL;
-  if (!(ip = popen(strbuf_value(&ib), "r"))) {
-    die("cannot execute '%s'.", strbuf_value(&ib));
+  if (!(ip = popen(ib.c_str(), "r"))) {
+    die("cannot execute '%s'.", ib.c_str());
   }
 
   CONVERT cv(type, format, root, cwd, dbpath, stdout, NOTAGS);
@@ -1481,12 +1481,12 @@ void parsefile(char *const *argv, const char *cwd, const char *root, const char 
   char *langmap = NULL;
   STRBUF sb;
   if (getconfs("langmap", &sb))
-    langmap = check_strdup(strbuf_value(&sb));
+    langmap = check_strdup(sb.c_str());
   strbuf_reset(&sb);
 
   const char* plugin_parser = NULL;
   if (getconfs("gtags_parser", &sb))
-    plugin_parser = strbuf_value(&sb);
+    plugin_parser = sb.c_str();
 
   if (gpath_open(dbpath, 0) < 0)
     die("GPATH not found.");
@@ -1606,7 +1606,7 @@ int search(const char *pattern, const char *root, const char *cwd, const char *d
       strbuf_putc(sb.get(), '^');
       strbuf_puts(sb.get(), pattern);
       strbuf_putc(sb.get(), '$');
-      pattern = strbuf_value(sb.get());
+      pattern = sb->c_str();
     }
 
     flags |= GTOP_IGNORECASE;
@@ -1846,7 +1846,7 @@ tagsearch(const char *pattern, const char *cwd, const char *root, const char *db
 		/*
 		 * search for each tree in the library path.
 		 */
-		for (libdir = strbuf_value(&sb); libdir; libdir = nextp) {
+		for (libdir = sb.c_str(); libdir; libdir = nextp) {
 			if ((nextp = locatestring(libdir, PATHSEP, MATCH_FIRST)) != NULL)
 				*nextp++ = 0;
 			if (!gtagsexist(libdir, libdbpath, sizeof(libdbpath), 0))

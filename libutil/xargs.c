@@ -150,7 +150,7 @@ repeat_find_next(void)
 #define QUOTE	'\''
 #endif
 #define APPEND_ARGUMENT(p) {\
-	char *path = (p);\
+	const char *path = (p);\
 	length = strlen(path);\
 	if (*path == ' ') {\
 		if (xp->put_gpath && !test("b", ++path))\
@@ -195,7 +195,7 @@ execute_command(XARGS *xp)
 	int count = 0;
 	int length;
 	FILE *pipe = NULL;
-	char *p, *meta_p;
+	const char *p, *meta_p;
 	STRBUF comline;
 
 #if defined(_WIN32) && !defined(__CYGWIN__)
@@ -232,7 +232,7 @@ execute_command(XARGS *xp)
 			/* continuation condition */
 			(LT_MAX &&
 			 ((p = (!xp->path->empty() ?
-				strbuf_value(xp->path) :
+				xp->path->c_str() :
 				strbuf_fgets(xp->path, xp->ip, STRBUF_NOCRLF))) != NULL))
 			  ;
 
@@ -267,9 +267,9 @@ execute_command(XARGS *xp)
 		strbuf_putc(&comline, '"');
 #endif
 	if (count > 0) {
-		pipe = popen(strbuf_value(&comline), "r");
+		pipe = popen(comline.c_str(), "r");
 		if (pipe == NULL)
-			die("cannot execute command '%s'.", strbuf_value(&comline));
+			die("cannot execute command '%s'.", comline.c_str());
 	}
 
 	return pipe;
@@ -379,13 +379,11 @@ xargs_open_with_argv(const char *command, int max_args, int argc, char *const *a
  * If @CODE{'\%s'} doesn't exist, the arguments is appended to the tail of the
  * skeleton.
  */
-XARGS *
-xargs_open_with_strbuf(const char *command, int max_args, STRBUF *sb)
+XARGS *xargs_open_with_strbuf(const char *command, int max_args, STRBUF *sb)
 {
 	XARGS *xp = xargs_open_generic(command, max_args);
-
 	xp->type = XARGS_STRBUF;
-	xp->curp = strbuf_value(sb);
+	xp->curp = sb->c_str();
 	xp->endp = xp->curp + sb->length();
 	return xp;
 }
@@ -414,20 +412,19 @@ xargs_open_with_find(const char *command, int max_args)
  *	@param[in]	xp	xargs structure
  *	@return		result line
  */
-char *
-xargs_read(XARGS *xp)
+const char *xargs_read(XARGS *xp)
 {
 	assert(xp != NULL);
 	if (xp->end_of_arg)
 		return NULL;
 	if (xp->unread) {
 		xp->unread = 0;
-		return strbuf_value(xp->result);
+		return xp->result->c_str();
 	}
 	if (xp->pipe && strbuf_fgets(xp->result, xp->pipe, STRBUF_NOCRLF) != NULL) {
 		if (xp->trim_line)
 			strbuf_trim(xp->result);
-		return strbuf_value(xp->result);
+		return xp->result->c_str();
 	}
 	if (xp->pipe)
 		if (pclose(xp->pipe) != 0 && !xp->ignore_error)
@@ -440,7 +437,7 @@ xargs_read(XARGS *xp)
 		if (xp->pipe && strbuf_fgets(xp->result, xp->pipe, STRBUF_NOCRLF) != NULL) {
 			if (xp->trim_line)
 				strbuf_trim(xp->result);
-			return strbuf_value(xp->result);
+			return xp->result->c_str();
 		}
 		if (xp->pipe) {
 			if (pclose(xp->pipe) != 0 && !xp->ignore_error)

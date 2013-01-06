@@ -168,7 +168,7 @@ WORD		{ALPHA}{ALPHANUM}*
  /* String */
 <PHP>\"			{ strbuf_reset(string); BEGIN STRING; }
 <STRING>\"		{
-				DBG_PRINT("<S:%s>", strbuf_value(string));
+				DBG_PRINT("<S:%s>", string->c_str());
 				BEGIN PHP;
 					
 				return PHP_STRING;
@@ -179,7 +179,7 @@ WORD		{ALPHA}{ALPHANUM}*
  /* Literal */
 <PHP>\'			{ strbuf_reset(string); BEGIN LITERAL; }
 <LITERAL>\'		{
-				DBG_PRINT("<L:%s>", strbuf_value(string));
+				DBG_PRINT("<L:%s>", string->c_str());
 				BEGIN PHP;
 					
 				return PHP_STRING;
@@ -295,7 +295,7 @@ php(const struct parser_param *param)
 				break;
 			if (LEXLEX(param) != PHP_STRING)
 				break;
-			PUT(PARSER_DEF, strbuf_value(string), LEXLINENO);
+			PUT(PARSER_DEF, string->c_str(), LEXLINENO);
 			break;
 		case PHP_CLASS:
 			if (LEXLEX(param) != PHP_TOKEN)
@@ -313,7 +313,7 @@ php(const struct parser_param *param)
 			if (php_reserved_variable(LEXTEXT, LEXLENG)) {
 				PUT(PARSER_REF_SYM, LEXTEXT, LEXLINENO);
 				if (LEXLEX(param) == PHP_LBRACK && LEXLEX(param) == PHP_STRING && LEXLEX(param) == PHP_RBRACK) {
-					const char *str = strbuf_value(string);
+					const char *str = string->c_str();
 
 					if (strchr(str, '$') == NULL)
 						PUT(PARSER_REF_SYM, str, LEXLINENO);

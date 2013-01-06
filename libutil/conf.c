@@ -187,7 +187,7 @@ includelabel(STRBUF *sb, const char *label, int	level)
 		q = locatestring(q, "=", MATCH_FIRST) + 1;
 		for (; *q && *q != ':'; q++)
 			strbuf_putc(&inc, *q);
-		includelabel(sb, strbuf_value(&inc), level);
+		includelabel(sb, inc.c_str(), level);
 		p = q;
 	}
 
@@ -197,8 +197,7 @@ includelabel(STRBUF *sb, const char *label, int	level)
 /**
  * configpath: get path of configuration file.
  */
-static char *
-configpath(void)
+static const char *configpath(void)
 {
 	STATIC_STRBUF(sb);
 	const char *p;
@@ -230,7 +229,7 @@ configpath(void)
 		strbuf_puts(sb, makepath(SYSCONFDIR, "gtags.conf", NULL));
 	else
 		return NULL;
-	return strbuf_value(sb);
+	return sb->c_str();
 }
 /**
  * openconf: load configuration file.
@@ -285,7 +284,7 @@ openconf(void)
 		ib = new STRBUF(MAXBUFLEN);
 		STRBUF sb;
 		includelabel(&sb, label, 0);
-		confline = check_strdup(strbuf_value(&sb));
+		confline = check_strdup(sb.c_str());
 		delete ib;
 		fclose(fp);
 	}
@@ -307,7 +306,7 @@ openconf(void)
 	}
 	strbuf_unputc(&sb, ':');
 	strbuf_putc(&sb, ':');
-	confline = check_strdup(strbuf_value(&sb));
+	confline = check_strdup(sb.c_str());
 	trim(confline);
 }
 

@@ -225,7 +225,7 @@ fill_anchor(const char *root, const char *path)
 		strbuf_puts(sb, gen_href_end());
 		strbuf_putc(sb, '/');
 	}
-        return strbuf_value(sb);
+        return sb->c_str();
 }
 
 /**
@@ -270,7 +270,7 @@ link_format(int ref[A_SIZE])
 		if (i == A_INDEX || i == A_HELP || ref[i] != 0)
 			strbuf_puts(sb, gen_href_end());
 	}
-        return strbuf_value(sb);
+        return sb->c_str();
 }
 /**
  * fixed_guide_link_format: make fixed guide
@@ -337,7 +337,7 @@ fixed_guide_link_format(int ref[A_LIMIT], const char *anchors)
 	strbuf_putc(sb, '\n');
 	strbuf_puts(sb, "<!-- end of fixed guide -->\n");
 
-	return strbuf_value(sb);
+	return sb->c_str();
 }
 /**
  * generate_guide: generate guide string for definition line.
@@ -366,7 +366,7 @@ generate_guide(int lineno)
 			quote_space, position_begin, lineno, curpfile, position_end);
 	strbuf_sprintf(sb, " */%s", comment_end);
 
-	return strbuf_value(sb);
+	return sb->c_str();
 }
 /**
  * tooltip: generate tooltip string
@@ -416,7 +416,7 @@ tooltip(int type, int lno, const char *opt)
 		strbuf_puts(sb, "places");
 	}
 	strbuf_putc(sb, '.');
-	return strbuf_value(sb);
+	return sb->c_str();
 }
 /**
  * put_anchor: output HTML anchor.
@@ -478,7 +478,7 @@ put_anchor(char *name, int type, int lineno)
 					strbuf_puts(sb, "reference");
 				else
 					strbuf_puts(sb, "symbol");
-				file = strbuf_value(sb);
+				file = sb->c_str();
 				dir = (*action == '/') ? NULL : "..";
 			} else {
 				if (type == 'R')
@@ -531,7 +531,7 @@ put_anchor_force(char *name, int length, int lineno)
 	strbuf_clear(sb);
 	strbuf_nputs(sb, name, length);
 	wflag = 0;
-	put_anchor(strbuf_value(sb), 'R', lineno);
+	put_anchor(sb->c_str(), 'R', lineno);
 	wflag = saveflag;
 }
 /**
@@ -544,7 +544,7 @@ void
 put_include_anchor(struct data *inc, const char *path)
 {
 	if (inc->count == 1)
-		strbuf_puts(outbuf, gen_href_begin(NULL, path2fid(strbuf_value(inc->contents)), HTML, NULL));
+		strbuf_puts(outbuf, gen_href_begin(NULL, path2fid(inc->contents->c_str()), HTML, NULL));
 	else {
 		char id[32];
 		snprintf(id, sizeof(id), "%d", inc->id);
@@ -713,7 +713,7 @@ put_end_of_line(int lineno)
 		fputs(warned_line_begin, out);
 
 	/* flush output buffer */
-	fputs(strbuf_value(outbuf), out);
+	fputs(outbuf->c_str(), out);
 	strbuf_reset(outbuf);
 
 	if (warned)
@@ -784,18 +784,18 @@ get_cvs_module(const char *file, const char **basename)
 	}
 	if (basename != NULL)
 		*basename = p;
-	if (strcmp(strbuf_value(dir), prev_dir) != 0) {
-		strlimcpy(prev_dir, strbuf_value(dir), sizeof(prev_dir));
+	if (strcmp(dir->c_str(), prev_dir) != 0) {
+		strlimcpy(prev_dir, dir->c_str(), sizeof(prev_dir));
 		strbuf_clear(module);
 		strbuf_puts(dir, "/CVS/Repository");
-		ip = fopen(strbuf_value(dir), "r");
+		ip = fopen(dir->c_str(), "r");
 		if (ip != NULL) {
 			strbuf_fgets(module, ip, STRBUF_NOCRLF);
 			fclose(ip);
 		}
 	}
 	if (!module->empty())
-		return strbuf_value(module);
+		return module->c_str();
 	return NULL;
 }
 /**
@@ -860,7 +860,7 @@ src2html(const char *src, const char *html, int notsource)
 			strbuf_puts(sb, cvsweb_cvsroot);
 		}
 		fputs(quote_space, out);
-		fputs(gen_href_begin_simple(strbuf_value(sb)), out);
+		fputs(gen_href_begin_simple(sb->c_str()), out);
 		fputs(cvslink_begin, out);
 		fputs("[CVS]", out);
 		fputs(cvslink_end, out);
@@ -926,7 +926,7 @@ src2html(const char *src, const char *html, int notsource)
 				key = NULL;
 				title = tooltip('I', -1, s_count);
 			} else {
-				const char *p = strbuf_value(incref->ref_contents);
+				const char *p = incref->ref_contents->c_str();
 				const char *lno = strmake(p, " ");
 				const char *filename;
 
@@ -969,7 +969,7 @@ src2html(const char *src, const char *html, int notsource)
 			fputs_nl(header_end, out);
 			fputs_nl("This source file includes following definitions.", out);
 			fputs_nl(list_begin, out);
-			fputs(strbuf_value(define_index), out);
+			fputs(define_index->c_str(), out);
 			fputs_nl(list_end, out);
 			fputs_nl(hr, out);
 		}

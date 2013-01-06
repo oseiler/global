@@ -57,11 +57,11 @@ sb = new STRBUF;                        []
                                           v
 strbuf_putc(sb, 'a');                   [a]
                                           v
-char *s = strbuf_value(sb);             [a\0]           s == "a"
+const char *s = sb->c_str();            [a\0]           s == "a"
                                             v
 strbuf_puts(sb, "bc");                  [abc]
                                             v
-char *s = strbuf_value(sb);             [abc\0]         s == "abc"
+const char *s = sb->c_str();            [abc\0]         s == "abc"
                                             v
 size_t len = sb->length();              [abc\0]         len == 3
                                          v
@@ -71,7 +71,7 @@ size_t len = sb->length();              [abc\0]         len == 0
                                            v
 strbuf_puts(sb, "XY");                  [XYc\0]
                                            v
-char *s = strbuf_value(sb);             [XY\0]          s == "XY"
+const char *s = sb->c_str();            [XY\0]          s == "XY"
 
 fp = fopen("/etc/passwd", "r");                                             v
 char *s = strbuf_fgets(sb, fp, 0)       [root:*:0:0:Charlie &:/root:/bin/csh\0]
@@ -281,18 +281,6 @@ strbuf_unputc(STRBUF *sb, int c)
 		return 1;
 	}
 	return 0;
-}
-/**
- * strbuf_value: return the content of string buffer.
- *
- *	@param[in]	sb	#STRBUF structure
- *	@return		string
- */
-char *
-strbuf_value(STRBUF *sb)
-{
-	*sb->curp = 0;
-	return sb->sbuf;
 }
 /**
  * strbuf_trim: trim following blanks.

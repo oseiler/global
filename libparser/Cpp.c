@@ -115,7 +115,7 @@ Cpp(const struct parser_param *param)
 					strlimcpy(savetok, token, sizeof(savetok));
 					strbuf_reset(&sb);
 					strbuf_puts(&sb, sp);
-					saveline = strbuf_value(&sb);
+					saveline = sb.c_str();
 					if (function_definition(param)) {
 						/* ignore constructor */
 						if (strcmp(stack[classlevel].classname, savetok))

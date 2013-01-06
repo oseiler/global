@@ -54,7 +54,6 @@ static const char *suffix[] = {".exe", ".com", ".bat",};
 char *
 usable(const char *command)
 {
-	char *p;
 	const char *dir;
 	static char path[MAXPATHLEN];
 
@@ -85,7 +84,7 @@ usable(const char *command)
 	 * because it brings buffer overflow. */
 	STRBUF sb;
 	strbuf_puts(&sb, getenv("PATH"));
-	p = strbuf_value(&sb);
+	char* p = sb.c_str();
 	while (p) {
 		dir = p;
 		if ((p = locatestring(p, PATHSEP, MATCH_FIRST)) != NULL)

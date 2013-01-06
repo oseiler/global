@@ -282,7 +282,7 @@ main(int argc, char **argv)
 		/*
 		 * Replace with alias value.
 		 */
-		if ((p = alias(strbuf_value(arg))) != NULL) {
+		if ((p = alias(arg->c_str())) != NULL) {
 			strbuf_reset(arg);
 			strbuf_puts(arg, p);
 		}
@@ -291,7 +291,7 @@ main(int argc, char **argv)
 	 * Get URL.
 	 */
 	{
-		char *argument = strbuf_value(arg);
+		char *argument = arg->c_str();
 
 		/*
 		 * Protocol (xxx://...)
@@ -335,7 +335,7 @@ main(int argc, char **argv)
 		}
 	}
 	if (pflag) {
-		fprintf(stdout, "%s\n", strbuf_value(URL));
+		fprintf(stdout, "%s\n", URL->c_str());
 		if (vflag)
 			fprintf(stdout, "using browser '%s'.\n", browser);
 		exit(0);
@@ -343,7 +343,7 @@ main(int argc, char **argv)
 	/*
 	 * Show URL's page.
 	 */
-	show_page_by_url(browser, strbuf_value(URL));
+	show_page_by_url(browser, URL->c_str());
 	exit(0);
 }
 
@@ -405,7 +405,7 @@ getURL(const char *file, const char *htmldir, STRBUF *URL)
 		die("file '%s' not found.", file);
 	p = normalize(file, get_root_with_slash(), cwd, buf, sizeof(buf));
 	if (p != NULL && convertpath(dbpath, htmldir, p, &sb) == 0)
-		makefileurl(strbuf_value(&sb), linenumber, URL);
+		makefileurl(sb.c_str(), linenumber, URL);
 	else
 		makefileurl(realpath(file, buf), 0, URL);
 }
@@ -470,10 +470,10 @@ convertpath(const char *dbpath, const char *htmldir, const char *path, STRBUF *s
 		for (i = 0; i < lim; i++) {
 			int tag2 = sb->length();
 			strbuf_puts(sb, suffix[i]);
-			if (test("f", strbuf_value(sb)))
+			if (test("f", sb->c_str()))
 				return 0;
 			strbuf_puts(sb, gz);
-			if (test("f", strbuf_value(sb)))
+			if (test("f", sb->c_str()))
 				return 0;
 			sb->resize(tag2);
 		}
@@ -487,10 +487,10 @@ convertpath(const char *dbpath, const char *htmldir, const char *path, STRBUF *s
 	for (i = 0; i < lim; i++) {
 		int tag = sb->length();
 		strbuf_puts(sb, suffix[i]);
-		if (test("f", strbuf_value(sb)))
+		if (test("f", sb->c_str()))
 			return 0;
 		strbuf_puts(sb, gz);
-		if (test("f", strbuf_value(sb)))
+		if (test("f", sb->c_str()))
 			return 0;
 		sb->resize(tag);
 	}

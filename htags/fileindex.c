@@ -255,7 +255,7 @@ appendslash(const char *path)
 	strbuf_clear(sb);
 	strbuf_puts(sb, path);
 	strbuf_putc(sb, '/');
-	return strbuf_value(sb);
+	return sb->c_str();
 }
 /**
  * remove @CODE{"./"} at the head of the path name
@@ -490,12 +490,12 @@ print_directory_header(FILE *op, int level, const char *dir)
 	strbuf_clear(sb);
 	strbuf_puts(sb, removedotslash(dir));
 	strbuf_putc(sb, '/');
-	fputs_nl(gen_page_begin(strbuf_value(sb), SUBDIR), op);
+	fputs_nl(gen_page_begin(sb->c_str(), SUBDIR), op);
 	fputs_nl(body_begin, op);
 
 	strbuf_clear(sb);
  	strbuf_sprintf(sb, "%s%sroot%s/", header_begin, gen_href_begin(NULL, top, normal_suffix, NULL), gen_href_end());
-	fputs(strbuf_value(sb), op);
+	fputs(sb->c_str(), op);
 	{
 		char path[MAXPATHLEN];
 		char *p, *q;
@@ -645,7 +645,7 @@ print_file_name(int level, const char *path)
 	else
 		strbuf_puts(sb, br);
 	strbuf_putc(sb, '\n');
-	return (const char *)strbuf_value(sb);
+	return sb->c_str();
 }
 /**
  * print directory name.
@@ -684,7 +684,7 @@ print_directory_name(int level, const char *path, int count)
 	else
 		strbuf_puts(sb, br);
 	strbuf_putc(sb, '\n');
-	return (const char *)strbuf_value(sb);
+	return sb->c_str();
 }
 /**
  * makefileindex: make file index.
@@ -733,8 +733,8 @@ makefileindex(const char *file, STRBUF *a_files)
 		}
 	}
 	strbuf_puts(sb, ")$");
-	if (regcomp(&is_include_file, strbuf_value(sb), flags) != 0)
-		die("cannot compile regular expression '%s'.", strbuf_value(sb));
+	if (regcomp(&is_include_file, sb->c_str(), flags) != 0)
+		die("cannot compile regular expression '%s'.", sb->c_str());
 
 	/*
 	 * Write to files.html.
@@ -780,7 +780,7 @@ makefileindex(const char *file, STRBUF *a_files)
 	gfind_close(gp);
 	regfree(&is_include_file);
 
-	fputs(strbuf_value(files), filesop);
+	fputs(files->c_str(), filesop);
 	if (tree_view)
 		fputs_nl(tree_end, filesop);
 	else if (table_flist)
@@ -873,7 +873,7 @@ makeincludeindex(void)
 			fputs_nl(body_begin, INCLUDE);
 			fputs_nl(verbatim_begin, INCLUDE);
 			{
-				const char *filename = strbuf_value(inc->contents);
+				const char *filename = inc->contents->c_str();
 				int count = inc->count;
 
 				for (; count; filename += strlen(filename) + 1, count--) {
@@ -900,7 +900,7 @@ makeincludeindex(void)
 			SPLIT ptable;
 			char buf[1024];
 
-			if (split(strbuf_value(inc->ref_contents), 4, &ptable) < 4) {
+			if (split(inc->ref_contents->c_str(), 4, &ptable) < 4) {
 				recover(&ptable);
 				die("too small number of parts in makefileindex().");
 			}
@@ -918,7 +918,7 @@ makeincludeindex(void)
 			fputs_nl(body_begin, INCLUDE);
 			fputs_nl(gen_list_begin(), INCLUDE);
 			{
-				const char *line = strbuf_value(inc->ref_contents);
+				const char *line = inc->ref_contents->c_str();
 				int count = inc->ref_count;
 
 				for (; count; line += strlen(line) + 1, count--)

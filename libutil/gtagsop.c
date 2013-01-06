@@ -513,7 +513,7 @@ gtags_put_using(GTOP *gtop, const char *tag, int lno, const char *fid, const cha
 	strbuf_putn(gtop->sb, lno);
 	strbuf_putc(gtop->sb, ' ');
 	strbuf_puts(gtop->sb, (gtop->format & GTAGS_COMPRESS) ? compress(img, key) : img);
-	dbop_put(gtop->dbop, key, strbuf_value(gtop->sb));
+	dbop_put(gtop->dbop, key, gtop->sb->c_str());
 }
 /**
  * gtags_flush: Flush the pool for compact format.
@@ -895,7 +895,7 @@ flush_pool(GTOP *gtop, const char *s_fid)
 						strbuf_putn(gtop->sb, n);
 					}
 					if (gtop->sb->length() > DBOP_PAGESIZE / 4) {
-						dbop_put(gtop->dbop, key, strbuf_value(gtop->sb));
+						dbop_put(gtop->dbop, key, gtop->sb->c_str());
 						gtop->sb->resize(header_offset);
 					}
 				}
@@ -919,14 +919,14 @@ flush_pool(GTOP *gtop, const char *s_fid)
 					strbuf_putc(gtop->sb, ',');
 				strbuf_putn(gtop->sb, n);
 				if (gtop->sb->length() > DBOP_PAGESIZE / 4) {
-					dbop_put(gtop->dbop, key, strbuf_value(gtop->sb));
+					dbop_put(gtop->dbop, key, gtop->sb->c_str());
 					gtop->sb->resize(header_offset);
 				}
 				last = n;
 			}
 		}
 		if (gtop->sb->length() > header_offset) {
-			dbop_put(gtop->dbop, key, strbuf_value(gtop->sb));
+			dbop_put(gtop->dbop, key, gtop->sb->c_str());
 		}
 		/* Free line number table */
 		varray_close(vb);

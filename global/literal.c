@@ -181,7 +181,7 @@ literal_search(CONVERT *cv, const char *file)
 				strbuf_nputs(sb, linep, p - linep);
 				strbuf_unputc(sb, '\n');
 				strbuf_unputc(sb, '\r');
-				convert_put_using(cv, encoded_pattern, file, lineno, strbuf_value(sb), NULL);
+				convert_put_using(cv, encoded_pattern, file, lineno, sb->c_str(), NULL);
 			}
 	nomatch:	lineno++;
 			linep = p;

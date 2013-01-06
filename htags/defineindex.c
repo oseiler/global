@@ -232,7 +232,7 @@ makedefineindex(const char *file, int total, STRBUF *defines)
 		}
 		if (!no_order_list)
 			fputs(item_begin, STDOUT);
-		fputs(gen_href_begin_with_title_target(NULL, strbuf_value(&url), NULL, NULL, guide, target), STDOUT);
+		fputs(gen_href_begin_with_title_target(NULL, url.c_str(), NULL, NULL, guide, target), STDOUT);
 		fputs(tag, STDOUT);
 		fputs(gen_href_end(), STDOUT);
 		if (!no_order_list)
@@ -268,7 +268,7 @@ makedefineindex(const char *file, int total, STRBUF *defines)
 		close_file(fileop_ALPHA);
 		html_count++;
 
-		fputs(strbuf_value(defines), DEFINES);
+		fputs(defines->c_str(), DEFINES);
 	}
 	if (!no_order_list && !aflag)
 		fputs_nl(list_end, DEFINES);

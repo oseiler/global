@@ -159,11 +159,11 @@ prepare_source(void)
 	 */
 	STRBUF sb;
 	if (getconfs("langmap", &sb)) {
-		langmap =  check_strdup(strbuf_value(&sb));
+		langmap =  check_strdup(sb.c_str());
 	}
 	strbuf_reset(&sb);
 	make_suffixes(langmap ? langmap : DEFAULTLANGMAP, &sb);
-	sufflist = check_strdup(strbuf_value(&sb));
+	sufflist = check_strdup(sb.c_str());
 	trim(sufflist);
 	{
 		const char *suffp;
@@ -189,7 +189,7 @@ prepare_source(void)
 		/*
 		 * compile regular expression.
 		 */
-		if (regcomp(&suff_area, strbuf_value(&sb), flags) != 0)
+		if (regcomp(&suff_area, sb.c_str(), flags) != 0)
 			die("cannot compile regular expression.");
 	}
 
@@ -243,7 +243,7 @@ prepare_skip(void)
 	if (!getconfs("skip", &reg)) {
 		return NULL;
 	}
-	skiplist = check_strdup(strbuf_value(&reg));
+	skiplist = check_strdup(reg.c_str());
 	trim(skiplist);
 	strbuf_reset(&reg);
 
@@ -292,12 +292,12 @@ prepare_skip(void)
 	/*
 	 * compile regular expression.
 	 */
-	if (regcomp(&skip_area, strbuf_value(&reg), flags) != 0)
+	if (regcomp(&skip_area, reg.c_str(), flags) != 0)
 		die("cannot compile regular expression.");
 	if (list_count > 0) {
 		int i;
 		listarray = (char **)check_malloc(sizeof(char *) * list_count);
-		p = strbuf_value(list);
+		p = list->c_str();
 		for (i = 0; i < list_count; i++) {
 			listarray[i] = p;
 			p += strlen(p) + 1;
@@ -531,7 +531,7 @@ find_open(const char *start)
 	curp->real = getrealpath(dir);
 	if (getdirs(dir, curp->sb) < 0)
 		die("Work is given up.");
-	curp->start = curp->p = strbuf_value(curp->sb);
+	curp->start = curp->p = curp->sb->c_str();
 	curp->end   = curp->start + curp->sb->length();
 	strlimcpy(cwddir, get_root(), sizeof(cwddir));
 }
@@ -678,7 +678,7 @@ find_read_traverse(void)
 				curp->dirp = dirp + strlen(dirp);
 				curp->real = getrealpath(dir);
 				curp->sb = sb;
-				curp->start = curp->p = strbuf_value(sb);
+				curp->start = curp->p = sb->c_str();
 				curp->end   = curp->start + sb->length();
 			}
 		}
