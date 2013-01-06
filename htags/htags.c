@@ -504,7 +504,7 @@ load_with_replace(const char *file, STRBUF *result, int place)
 	 */
 	strbuf_putc(&sb, '(');
 	for (i = 0; i < tabsize; i++) {
-		strbuf_puts(&sb, tab[i].name);
+		sb += tab[i].name;
 		strbuf_putc(&sb, '|');
 	}
 	strbuf_unputc(&sb, '|');
@@ -713,51 +713,51 @@ makesearchpart(const char *target)
 	STATIC_STRBUF(sb);
 	sb->clear();
 
-	strbuf_puts(sb, header_begin);
+	sb->append(header_begin);
 	if (Fflag)
-		strbuf_puts(sb, gen_href_begin(NULL, "search", normal_suffix, NULL));
-	strbuf_puts(sb, "SEARCH");
+		sb->append(gen_href_begin(NULL, "search", normal_suffix, NULL));
+	sb->append("SEARCH");
 	if (Fflag)
-		strbuf_puts(sb, gen_href_end());
+		sb->append(gen_href_end());
 	strbuf_puts_nl(sb, header_end);
 	if (!target) {
-		strbuf_puts(sb, "Please input object name and select [Search]. POSIX's regular expression is allowed.");
+		sb->append("Please input object name and select [Search]. POSIX's regular expression is allowed.");
 		strbuf_puts_nl(sb, br);
 	}
 	strbuf_puts_nl(sb, gen_form_begin(target));
 	strbuf_puts_nl(sb, gen_input("pattern", NULL, NULL));
 	strbuf_puts_nl(sb, gen_input("id", sitekey, "hidden"));
 	strbuf_puts_nl(sb, gen_input(NULL, "Search", "submit"));
-	strbuf_puts(sb, gen_input(NULL, "Reset", "reset"));
+	sb->append(gen_input(NULL, "Reset", "reset"));
 	strbuf_puts_nl(sb, br);
-	strbuf_puts(sb, gen_input_radio("type", "definition", 1, "Retrieve the definition place of the specified symbol."));
+	sb->append(gen_input_radio("type", "definition", 1, "Retrieve the definition place of the specified symbol."));
 	strbuf_puts_nl(sb, target ? "Def" : "Definition");
-	strbuf_puts(sb, gen_input_radio("type", "reference", 0, "Retrieve the reference place of the specified symbol."));
+	sb->append(gen_input_radio("type", "reference", 0, "Retrieve the reference place of the specified symbol."));
 	strbuf_puts_nl(sb, target ? "Ref" : "Reference");
-	strbuf_puts(sb, gen_input_radio("type", "symbol", 0, "Retrieve the place of the specified symbol is used."));
+	sb->append(gen_input_radio("type", "symbol", 0, "Retrieve the place of the specified symbol is used."));
 	strbuf_puts_nl(sb, target ? "Sym" : "Other symbol");
-	strbuf_puts(sb, gen_input_radio("type", "path", 0, "Look for path name which matches to the specified pattern."));
+	sb->append(gen_input_radio("type", "path", 0, "Look for path name which matches to the specified pattern."));
 	strbuf_puts_nl(sb, target ? "Path" : "Path name");
 	if (enable_grep) {
-		strbuf_puts(sb, gen_input_radio("type", "grep", 0, "Retrieve lines which matches to the specified pattern."));
+		sb->append(gen_input_radio("type", "grep", 0, "Retrieve lines which matches to the specified pattern."));
 		strbuf_puts_nl(sb, target ? "Grep" : "Grep pattern");
 	}
 	if (enable_idutils && test("f", makepath(dbpath, "ID", NULL))) {
-		strbuf_puts(sb, gen_input_radio("type", "idutils", 0, "Retrieve lines which matches to the specified pattern using idutils(1)."));
+		sb->append(gen_input_radio("type", "idutils", 0, "Retrieve lines which matches to the specified pattern using idutils(1)."));
 		strbuf_puts_nl(sb, target ? "Id" : "Id pattern");
 	}
 	strbuf_puts_nl(sb, br);
-	strbuf_puts(sb, gen_input_checkbox("icase", NULL, "Ignore case distinctions in the pattern."));
+	sb->append(gen_input_checkbox("icase", NULL, "Ignore case distinctions in the pattern."));
 	strbuf_puts_nl(sb, target ? "Icase" : "Ignore case");
 	if (other_files) {
-		strbuf_puts(sb, gen_input_checkbox("other", NULL, "Files other than the source code are also retrieved."));
+		sb->append(gen_input_checkbox("other", NULL, "Files other than the source code are also retrieved."));
 		strbuf_puts_nl(sb, target ? "Other" : "Other files");
 	}
 	if (other_files && !target) {
 		strbuf_puts_nl(sb, br);
-		strbuf_puts(sb, "('Other files' is effective only to 'Path name'");
+		sb->append("('Other files' is effective only to 'Path name'");
 		if (enable_grep)
-			strbuf_puts(sb, " and 'Grep pattern'");
+			sb->append(" and 'Grep pattern'");
 		strbuf_puts_nl(sb, ".)");
 	}
 	strbuf_puts_nl(sb, gen_form_end());
@@ -1035,17 +1035,17 @@ makecommonpart(const char *title, const char *defines, const char *files)
 	const char *tips = "Go to the GLOBAL project page.";
 	const char *_, *item;
 
-	strbuf_puts(&sb, title_begin);
-	strbuf_puts(&sb, title);
+	sb += title_begin;
+	sb += title;
 	strbuf_puts_nl(&sb, title_end);
 	strbuf_puts_nl(&sb, poweredby_begin);
 	strbuf_sprintf(&sb, "Last updated %s%s\n", now(), br);
 	if (Iflag) {
 		snprintf(buf, sizeof(buf), "Powered by GLOBAL-%s.", get_version());
-		strbuf_puts(&sb, gen_href_begin_with_title_target(NULL, www, NULL, NULL, tips,"_top"));
-		strbuf_puts(&sb, gen_image(CURRENT, "pglobe", buf));
-		strbuf_puts(&sb, gen_href_end());
-		strbuf_puts(&sb, br);
+		sb += gen_href_begin_with_title_target(NULL, www, NULL, NULL, tips,"_top");
+		sb += gen_image(CURRENT, "pglobe", buf);
+		sb += gen_href_end();
+		sb += br;
 	} else {
 		strbuf_sprintf(&sb, "Powered by %sGLOBAL-%s%s.%s\n",
 			gen_href_begin_with_title_target(NULL, www, NULL, NULL, tips, "_top"),
@@ -1068,8 +1068,8 @@ makecommonpart(const char *title, const char *defines, const char *files)
 				strbuf_puts_nl(&sb, "Please don't download whole hypertext using hypertext copy tools.");
 				strbuf_puts_nl(&sb, "Our network cannot afford such traffic.");
 				strbuf_puts_nl(&sb, "Instead, you can generate same thing in your computer using");
-				strbuf_puts(&sb, gen_href_begin_with_title_target(NULL, www, NULL, NULL, NULL, "_top"));
-				strbuf_puts(&sb, "GLOBAL source code tag system");
+				sb += gen_href_begin_with_title_target(NULL, www, NULL, NULL, NULL, "_top");
+				sb += "GLOBAL source code tag system";
 				strbuf_puts_nl(&sb, gen_href_end());
 				strbuf_puts_nl(&sb, "Thank you.");
 				strbuf_puts_nl(&sb, caution_end);
@@ -1078,24 +1078,24 @@ makecommonpart(const char *title, const char *defines, const char *files)
 			break;
 		case 's':
 			if (fflag) {
-				strbuf_puts(&sb, makesearchpart(NULL));
+				sb += makesearchpart(NULL);
 				strbuf_puts_nl(&sb, hr);
 			}
 			break;
 		case 't':
 			if (call_file || callee_file) {
-				strbuf_puts(&sb, header_begin);
+				sb += header_begin;
 				if (call_file) {
-					strbuf_puts(&sb, gen_href_begin(NULL, "call", normal_suffix, NULL));
-					strbuf_puts(&sb, title_call_tree);
-					strbuf_puts(&sb, gen_href_end());
+					sb += gen_href_begin(NULL, "call", normal_suffix, NULL);
+					sb += title_call_tree;
+					sb += gen_href_end();
 				}
 				if (call_file && callee_file)
-					strbuf_puts(&sb, " / ");
+					sb += " / ";
 				if (callee_file) {
-					strbuf_puts(&sb, gen_href_begin(NULL, "callee", normal_suffix, NULL));
-					strbuf_puts(&sb, title_callee_tree);
-					strbuf_puts(&sb, gen_href_end());
+					sb += gen_href_begin(NULL, "callee", normal_suffix, NULL);
+					sb += title_callee_tree;
+					sb += gen_href_end();
 				}
 				strbuf_puts_nl(&sb, header_end);
 				strbuf_puts_nl(&sb, hr);
@@ -1124,29 +1124,29 @@ makecommonpart(const char *title, const char *defines, const char *files)
 		}
 		case 'd':
 			if (aflag && !Fflag) {
-				strbuf_puts(&sb, header_begin);
-				strbuf_puts(&sb, title_define_index);
+				sb += header_begin;
+				sb += title_define_index;
 				strbuf_puts_nl(&sb, header_end);
-				strbuf_puts(&sb, defines);
+				sb += defines;
 			} else {
-				strbuf_puts(&sb, header_begin);
-				strbuf_puts(&sb, gen_href_begin(NULL, "defines", normal_suffix, NULL));
-				strbuf_puts(&sb, title_define_index);
-				strbuf_puts(&sb, gen_href_end());
+				sb += header_begin;
+				sb += gen_href_begin(NULL, "defines", normal_suffix, NULL);
+				sb += title_define_index;
+				sb += gen_href_end();
 				strbuf_puts_nl(&sb, header_end);
 			}
 			strbuf_puts_nl(&sb, hr);
 			break;
 		case 'f':
 			if (Fflag) {
-				strbuf_puts(&sb, header_begin);
-				strbuf_puts(&sb, gen_href_begin(NULL, "files", normal_suffix, NULL));
-				strbuf_puts(&sb, title_file_index);
-				strbuf_puts(&sb, gen_href_end());
+				sb += header_begin;
+				sb += gen_href_begin(NULL, "files", normal_suffix, NULL);
+				sb += title_file_index;
+				sb += gen_href_end();
 				strbuf_puts_nl(&sb, header_end);
 			} else {
-				strbuf_puts(&sb, header_begin);
-				strbuf_puts(&sb, title_file_index);
+				sb += header_begin;
+				sb += title_file_index;
 				strbuf_puts_nl(&sb, header_end);
 				if (tree_view) {
 					strbuf_puts_nl(&sb, tree_control);
@@ -1155,7 +1155,7 @@ makecommonpart(const char *title, const char *defines, const char *files)
 					strbuf_puts_nl(&sb, flist_begin);
 				else if (!no_order_list)
 					strbuf_puts_nl(&sb, list_begin);
-				strbuf_puts(&sb, files);
+				sb += files;
 				if (tree_view)
 					strbuf_puts_nl(&sb, tree_end);
 				else if (table_flist)
@@ -1165,7 +1165,7 @@ makecommonpart(const char *title, const char *defines, const char *files)
 				else
 					strbuf_puts_nl(&sb, br);
 			}
-			strbuf_puts_nl(&sb, hr);
+			sb += hr;
 			break;
 		default:
 			warning("unknown item '%c'. (Ignored)", *item);
@@ -1480,7 +1480,7 @@ static void save_environment(int argc, char *const *argv)
 			strbuf_putc(&save_a, ' ');
 			if (blank)
 				strbuf_putc(&save_a, '\'');
-			strbuf_puts(&save_a, argv[i]);
+			save_a += argv[i];
 			if (blank)
 				strbuf_putc(&save_a, '\'');
 		}
@@ -1797,16 +1797,16 @@ main(int argc, char **argv)
 	 */
 	if (gflag) {
 		STRBUF sb;
-		strbuf_puts(&sb, gtags_path);
+		sb += gtags_path;
 		if (vflag)
-			strbuf_puts(&sb, " -v");
+			sb += " -v";
 		if (wflag)
-			strbuf_puts(&sb, " -w");
+			sb += " -w";
 		if (suggest2 && enable_idutils && usable("mkid"))
-			strbuf_puts(&sb, " -I");
+			sb += " -I";
 		if (arg_dbpath[0]) {
 			strbuf_putc(&sb, ' ');
-			strbuf_puts(&sb, arg_dbpath);
+			sb += arg_dbpath;
 		}
 		if (system(sb.c_str()))
 			die("cannot execute gtags(1) command.");

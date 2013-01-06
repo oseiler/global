@@ -492,17 +492,17 @@ main(int argc, char **argv)
 		if (vflag)
 			fprintf(stderr, "[%s] Creating indexes for idutils.\n", now());
 		sb.clear();
-		strbuf_puts(&sb, "mkid");
+		sb += "mkid";
 		if (vflag)
-			strbuf_puts(&sb, " -v");
+			sb += " -v";
 		strbuf_sprintf(&sb, " --file='%s/ID'", dbpath);
 		if (vflag) {
 #ifdef __DJGPP__
 			if (is_unixy())	/* test for 4DOS as well? */
 #endif
-			strbuf_puts(&sb, " 1>&2");
+			sb += " 1>&2";
 		} else {
-			strbuf_puts(&sb, " >" NULL_DEVICE);
+			sb += " >" NULL_DEVICE;
 		}
 		if (debug)
 			fprintf(stderr, "executing mkid like: %s\n", sb.c_str());

@@ -166,11 +166,9 @@ prepare_source(void)
 	sufflist = check_strdup(sb.c_str());
 	trim(sufflist);
 	{
-		const char *suffp;
-
 		sb.clear();
-		strbuf_puts(&sb, "\\.(");       /* ) */
-		for (suffp = sufflist; suffp; ) {
+		sb += "\\.(";       /* ) */
+		for (const char* suffp = sufflist; suffp; ) {
 			const char *p;
 
 			for (p = suffp; *p && *p != ','; p++) {
@@ -184,7 +182,7 @@ prepare_source(void)
 			strbuf_putc(&sb, '|');
 			suffp = ++p;
 		}
-		strbuf_puts(&sb, ")$");
+		sb += ")$";
 
 		/*
 		 * compile regular expression.
@@ -259,14 +257,14 @@ prepare_skip(void)
 	 */
 	/* skip files which start with '.' e.g. .cvsignore */
 	if (!accept_dotfiles) {
-		strbuf_puts(&reg, "/\\.[^/]+$|");
-		strbuf_puts(&reg, "/\\.[^/]+/|");
+		reg += "/\\.[^/]+$|";
+		reg += "/\\.[^/]+/|";
 	}
 	/* skip tag files */
-	strbuf_puts(&reg, "/GTAGS$|");
-	strbuf_puts(&reg, "/GRTAGS$|");
-	strbuf_puts(&reg, "/GSYMS$|");
-	strbuf_puts(&reg, "/GPATH$|");
+	reg += "/GTAGS$|";
+	reg += "/GRTAGS$|";
+	reg += "/GSYMS$|";
+	reg += "/GPATH$|";
 	for (p = skiplist; p; ) {
 		char *skipf = p;
 		if ((p = locatestring(p, ",", MATCH_FIRST)) != NULL)
@@ -488,7 +486,7 @@ getdirs(const char *dir, STRBUF *sb)
 			strbuf_putc(sb, 'f');
 		else
 			strbuf_putc(sb, ' ');
-		strbuf_puts(sb, dp->d_name);
+		sb->append(dp->d_name);
 		strbuf_putc(sb, '\0');
 	}
 	(void)closedir(dirp);

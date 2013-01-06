@@ -278,13 +278,13 @@ main(int argc, char **argv)
 	if (definition == NULL) {
 		if (argc == 0)
 			usage();
-		strbuf_puts(arg, argv[0]);
+		arg->append(argv[0]);
 		/*
 		 * Replace with alias value.
 		 */
 		if ((p = alias(arg->c_str())) != NULL) {
 			arg->clear();
-			strbuf_puts(arg, p);
+			arg->append(p);
 		}
 	}
 	/*
@@ -297,7 +297,7 @@ main(int argc, char **argv)
 		 * Protocol (xxx://...)
 		 */
 		if (!definition && isprotocol(argument)) {
-			strbuf_puts(URL, argument);
+			URL->append(argument);
 		} else {
 			const char *HTMLdir = NULL;
 
@@ -327,8 +327,8 @@ main(int argc, char **argv)
 					die("cannot get current directory.");
 				if (rel2abs(argument, cwd, result, sizeof(result)) == NULL)
 					die("rel2abs failed.");
-				strbuf_puts(URL, "file://");
-				strbuf_puts(URL, result);
+				URL->append("file://");
+				URL->append(result);
 			} else {
 				die_with_code(1, "file '%s' not found.", argument);
 			}
@@ -452,8 +452,8 @@ convertpath(const char *dbpath, const char *htmldir, const char *path, STRBUF *s
 	const char *p;
 
 	sb->clear();
-	strbuf_puts(sb, htmldir);
-	strbuf_puts(sb, "/S/");
+	sb->append(htmldir);
+	sb->append("/S/");
 	/*
 	 * new style.
 	 */
@@ -466,13 +466,13 @@ convertpath(const char *dbpath, const char *htmldir, const char *path, STRBUF *s
 			return -1;
 		}
 		gpath_close();
-		strbuf_puts(sb, p);
+		sb->append(p);
 		for (i = 0; i < lim; i++) {
 			int tag2 = sb->length();
-			strbuf_puts(sb, suffix[i]);
+			sb->append(suffix[i]);
 			if (test("f", sb->c_str()))
 				return 0;
-			strbuf_puts(sb, gz);
+			sb->append(gz);
 			if (test("f", sb->c_str()))
 				return 0;
 			sb->resize(tag2);
@@ -486,10 +486,10 @@ convertpath(const char *dbpath, const char *htmldir, const char *path, STRBUF *s
 		strbuf_putc(sb, (*p == '/') ? ' ' : *p);
 	for (i = 0; i < lim; i++) {
 		int tag = sb->length();
-		strbuf_puts(sb, suffix[i]);
+		sb->append(suffix[i]);
 		if (test("f", sb->c_str()))
 			return 0;
-		strbuf_puts(sb, gz);
+		sb->append(gz);
 		if (test("f", sb->c_str()))
 			return 0;
 		sb->resize(tag);
@@ -517,7 +517,7 @@ convertpath(const char *dbpath, const char *htmldir, const char *path, STRBUF *s
 void
 makefileurl(const char *path, int line, STRBUF *url)
 {
-	strbuf_puts(url, "file://");
+	url->append("file://");
 #if _WIN32 || __DJGPP__
 	/*
 	 * copy drive name. (c: -> c|)
@@ -528,9 +528,9 @@ makefileurl(const char *path, int line, STRBUF *url)
 		path += 2;
 	}
 #endif
-	strbuf_puts(url, path);
+	url->append(path);
 	if (line) {
-		strbuf_puts(url, "#L");
+		url->append("#L");
 		strbuf_putn(url, line);
 	}
 }

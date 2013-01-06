@@ -326,7 +326,7 @@ sed(FILE *ip, int place)
 					     curpos - start_position))
 				{
 					sb->resize(start_position);
-					strbuf_puts(sb, parent_dir);
+					sb->append(parent_dir);
 					start_position = -1;
 				} else {
 					start_position = curpos - 1;
@@ -429,8 +429,8 @@ gen_page_generic_begin(const char *title, int place, int use_frameset, const cha
 	}
 	strbuf_puts_nl(sb, html_begin);
 	strbuf_puts_nl(sb, html_head_begin);
-	strbuf_puts(sb, html_title_begin);
-	strbuf_puts(sb, title);
+	sb->append(html_title_begin);
+	sb->append(title);
 	strbuf_puts_nl(sb, html_title_end);
 	strbuf_sprintf(sb, "<meta name='robots' content='noindex,nofollow'%s>\n", empty_element);
 	strbuf_sprintf(sb, "<meta name='generator' content='GLOBAL-%s'%s>\n", get_version(), empty_element);
@@ -439,10 +439,10 @@ gen_page_generic_begin(const char *title, int place, int use_frameset, const cha
 		strbuf_sprintf(sb, "<link rel='stylesheet' type='text/css' href='%sstyle.css'%s>\n", dir, empty_element);
 	}
 	if (header_item)
-		strbuf_puts(sb, header_item);		/* internal use */
+		sb->append(header_item);		/* internal use */
 	if (html_header)
-		strbuf_puts(sb, html_header);		/* --html-header=file */
-	strbuf_puts(sb, html_head_end);
+		sb->append(html_header);		/* --html-header=file */
+	sb->append(html_head_end);
 	return sb->c_str();
 }
 /**
@@ -575,16 +575,16 @@ gen_href_begin_with_title_target(const char *dir, const char *file, const char *
 	 * Construct URL.
 	 * href='dir/file.suffix#key'
 	 */
-	strbuf_puts(sb, "<a href='");
+	sb->append("<a href='");
 	if (file) {
 		if (dir) {
-			strbuf_puts(sb, dir);
+			sb->append(dir);
 			strbuf_putc(sb, '/');
 		}
-		strbuf_puts(sb, file);
+		sb->append(file);
 		if (suffix) {
 			strbuf_putc(sb, '.');
-			strbuf_puts(sb, suffix);
+			sb->append(suffix);
 		}
 	}
 	if (key) {
@@ -595,7 +595,7 @@ gen_href_begin_with_title_target(const char *dir, const char *file, const char *
 		 */
 		if (isdigit(*key))
 			strbuf_putc(sb, 'L');
-		strbuf_puts(sb, key);
+		sb->append(key);
 	}
 	strbuf_putc(sb, '\'');
 	if (Fflag && target)
@@ -671,7 +671,7 @@ gen_list_begin(void)
 					"<th nowrap='nowrap' align='left'>source code</th></tr>");
 			}
 		} else {
-			strbuf_puts(sb, verbatim_begin);
+			sb->append(verbatim_begin);
 		}
 	}
 
@@ -699,19 +699,19 @@ gen_list_body(const char *srcdir, const char *ctags_x, const char *fid)	/* virtu
 	STATIC_STRBUF(sb);
 	sb->clear();
 	if (table_list) {
-		strbuf_puts(sb, current_row_begin);
+		sb->append(current_row_begin);
 		if (enable_xhtml) {
-			strbuf_puts(sb, "<td class='tag'>");
-			strbuf_puts(sb, gen_href_begin(srcdir, fid, HTML, ptable.part[PART_LNO].start));
-			strbuf_puts(sb, ptable.part[PART_TAG].start);
-			strbuf_puts(sb, gen_href_end());
+			sb->append("<td class='tag'>");
+			sb->append(gen_href_begin(srcdir, fid, HTML, ptable.part[PART_LNO].start));
+			sb->append(ptable.part[PART_TAG].start);
+			sb->append(gen_href_end());
 			strbuf_sprintf(sb, "</td><td class='line'>%s</td><td class='file'>%s</td><td class='code'>",
 				ptable.part[PART_LNO].start, path);
 		} else {
-			strbuf_puts(sb, "<td nowrap='nowrap'>");
-			strbuf_puts(sb, gen_href_begin(srcdir, fid, HTML, ptable.part[PART_LNO].start));
-			strbuf_puts(sb, ptable.part[PART_TAG].start);
-			strbuf_puts(sb, gen_href_end());
+			sb->append("<td nowrap='nowrap'>");
+			sb->append(gen_href_begin(srcdir, fid, HTML, ptable.part[PART_LNO].start));
+			sb->append(ptable.part[PART_TAG].start);
+			sb->append(gen_href_end());
 			strbuf_sprintf(sb, "</td><td nowrap='nowrap' align='right'>%s</td>"
 				       "<td nowrap='nowrap' align='left'>%s</td><td nowrap='nowrap'>",
 				ptable.part[PART_LNO].start, path);
@@ -720,49 +720,49 @@ gen_list_body(const char *srcdir, const char *ctags_x, const char *fid)	/* virtu
 			unsigned char c = *p;
 
 			if (c == '&')
-				strbuf_puts(sb, quote_amp);
+				sb->append(quote_amp);
 			else if (c == '<')
-				strbuf_puts(sb, quote_little);
+				sb->append(quote_little);
 			else if (c == '>')
-				strbuf_puts(sb, quote_great);
+				sb->append(quote_great);
 			else if (c == ' ')
-				strbuf_puts(sb, quote_space);
+				sb->append(quote_space);
 			else if (c == '\t') {
-				strbuf_puts(sb, quote_space);
-				strbuf_puts(sb, quote_space);
+				sb->append(quote_space);
+				sb->append(quote_space);
 			} else
 				strbuf_putc(sb, c);
 		}
-		strbuf_puts(sb, "</td>");
-		strbuf_puts(sb, current_row_end);
+		sb->append("</td>");
+		sb->append(current_row_end);
 		recover(&ptable);
 	} else {
 		/* print tag name with anchor */
-		strbuf_puts(sb, current_line_begin);
-		strbuf_puts(sb, gen_href_begin(srcdir, fid, HTML, ptable.part[PART_LNO].start));
-		strbuf_puts(sb, ptable.part[PART_TAG].start);
-		strbuf_puts(sb, gen_href_end());
+		sb->append(current_line_begin);
+		sb->append(gen_href_begin(srcdir, fid, HTML, ptable.part[PART_LNO].start));
+		sb->append(ptable.part[PART_TAG].start);
+		sb->append(gen_href_end());
 		recover(&ptable);
 
 		/* print line number */
 		for (const char* p = ptable.part[PART_TAG].end; p < ptable.part[PART_PATH].start; p++)
 			strbuf_putc(sb, *p);
 		/* print file name */
-		strbuf_puts(sb, path);
+		sb->append(path);
 		/* print the rest */
 		for (const char* p = ptable.part[PART_PATH].end; *p; p++) {
 			unsigned char c = *p;
 
 			if (c == '&')
-				strbuf_puts(sb, quote_amp);
+				sb->append(quote_amp);
 			else if (c == '<')
-				strbuf_puts(sb, quote_little);
+				sb->append(quote_little);
 			else if (c == '>')
-				strbuf_puts(sb, quote_great);
+				sb->append(quote_great);
 			else
 				strbuf_putc(sb, c);
 		}
-		strbuf_puts(sb, current_line_end);
+		sb->append(current_line_end);
 	}
 	return sb->c_str();
 }
@@ -788,7 +788,7 @@ gen_form_begin(const char *target)
 	strbuf_sprintf(sb, "<form method='get' action='%s'", fix_attr_value(action));
 	if (Fflag && target)
 		strbuf_sprintf(sb, " target='%s'", fix_attr_value(target));
-	strbuf_puts(sb, ">");
+	sb->append(">");
 	return sb->c_str();
 }
 /**
@@ -843,7 +843,7 @@ gen_input_with_title_checked(const char *name, const char *value, const char *ty
 	STATIC_STRBUF(sb);
 	sb->clear();
 
-	strbuf_puts(sb, "<input");
+	sb->append("<input");
 	if (type)
 		strbuf_sprintf(sb, " type='%s'", type);
 	if (name)
@@ -852,9 +852,9 @@ gen_input_with_title_checked(const char *name, const char *value, const char *ty
 		strbuf_sprintf(sb, " value='%s'", fix_attr_value(value));
 	if (checked) {
 		if (enable_xhtml)
-			strbuf_puts(sb, " checked='checked'");
+			sb->append(" checked='checked'");
 		else
-			strbuf_puts(sb, " checked");
+			sb->append(" checked");
 	}
 	if (title)
 		strbuf_sprintf(sb, " title='%s'", fix_attr_value(title));
@@ -917,7 +917,7 @@ fix_attr_value(const char *value)
 	char c;
 	while((c = *cptr) != '\0') {
 		if(c == ATTR_DELIM)
-			strbuf_puts(sb, "&#39;");
+			sb->append("&#39;");
 		else
 			strbuf_putc(sb, c);
 		++cptr;

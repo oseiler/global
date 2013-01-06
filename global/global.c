@@ -302,7 +302,7 @@ finish:
 		char *libdir = NULL, *nextp = NULL;
 
 		STRBUF sb;
-		strbuf_puts(&sb, getenv("GTAGSLIBPATH"));
+		sb += getenv("GTAGSLIBPATH");
 		for (libdir = sb.c_str(); libdir; libdir = nextp) {
 			 if ((nextp = locatestring(libdir, PATHSEP, MATCH_FIRST)) != NULL)
                                 *nextp++ = 0;
@@ -627,10 +627,10 @@ main(int argc, char **argv)
 			die("gtags command not found.");
 		if (chdir(root) < 0)
 			die("cannot change directory to '%s'.", root);
-		strbuf_puts(&sb, quote_shell(gtags_path));
-		strbuf_puts(&sb, " -i");
+		sb += quote_shell(gtags_path);
+		sb += " -i";
 		if (vflag)
-			strbuf_puts(&sb, " -v");
+			sb += " -v";
 		if (single_update) {
 			if (!isabspath(single_update)) {
 				static char regular_path_name[MAXPATHLEN];
@@ -639,13 +639,13 @@ main(int argc, char **argv)
 					die("rel2abs failed.");
 				single_update = regular_path_name;
 			}
-			strbuf_puts(&sb, " --single-update=");
+			sb += " --single-update=";
 			strbuf_putc(&sb, '"');
-			strbuf_puts(&sb, single_update);
+			sb += single_update;
 			strbuf_putc(&sb, '"');
 		}
 		strbuf_putc(&sb, ' ');
-		strbuf_puts(&sb, dbpath);
+		sb += dbpath;
 		if (system(sb.c_str()))
 			exit(1);
 		exit(0);
@@ -694,7 +694,7 @@ main(int argc, char **argv)
 			const char *p = cwd + strlen(root);
 			if (*p != '/')
 				strbuf_putc(&sb, '/');
-			strbuf_puts(&sb, p);
+			sb += p;
 		}
 		strbuf_putc(&sb, '/');
 		localprefix = check_strdup(sb.c_str());
@@ -792,7 +792,7 @@ completion_tags(const char *dbpath, const char *root, const char *prefix, int db
 		 * make regular expression.
 		 */
 		strbuf_putc(&sb, '^');
-		strbuf_puts(&sb, prefix);
+		sb += prefix;
 		if (regcomp(&preg, sb.c_str(), REG_ICASE) != 0)
 			die("invalid regular expression.");
 		/*
@@ -853,10 +853,11 @@ completion(const char *dbpath, const char *root, const char *prefix, int db)
 	 * search in library path.
 	 */
 	if (db == GTAGS && getenv("GTAGSLIBPATH") && (count == 0 || Tflag) && !lflag) {
-		STRBUF sb;
 		char *libdir, *nextp = NULL;
 
-		strbuf_puts(&sb, getenv("GTAGSLIBPATH"));
+		STRBUF sb;
+		sb += getenv("GTAGSLIBPATH");
+
 		/*
 		* search for each tree in the library path.
 		*/
@@ -903,15 +904,15 @@ completion_idutils(const char *dbpath, const char *root, const char *prefix)
 	 */
 	if (!lid)
 		die("lid(idutils) not found.");
-	strbuf_puts(&sb, lid);
+	sb += lid;
 	strbuf_sprintf(&sb, " --file='%s/ID'", dbpath);
-	strbuf_puts(&sb, " --key=token");
+	sb += " --key=token";
 	if (iflag)
-		strbuf_puts(&sb, " --ignore-case");
+		sb += " --ignore-case";
 	strbuf_putc(&sb, ' ');
 	strbuf_putc(&sb, '"');
 	strbuf_putc(&sb, '^');
-	strbuf_puts(&sb, prefix);
+	sb += prefix;
 	strbuf_putc(&sb, '"');
 	if (debug)
 		fprintf(stderr, "completion_idutils: %s\n", sb.c_str());
@@ -1057,20 +1058,20 @@ void idutils(const char *pattern, const char *dbpath) {
    * Invoke lid with the --result=grep option to generate grep format.
    */
   STRBUF ib;
-  strbuf_puts(&ib, lid);
+  ib += lid;
   strbuf_sprintf(&ib, " --file='%s/ID'", dbpath);
-  strbuf_puts(&ib, " --separator=newline");
+  ib += " --separator=newline";
   if (format == FORMAT_PATH) {
-    strbuf_puts(&ib, " --result=filenames --key=none");
+    ib += " --result=filenames --key=none";
   } else {
-    strbuf_puts(&ib, " --result=grep");
+    ib += " --result=grep";
   }
 
   if (iflag) {
-    strbuf_puts(&ib, " --ignore-case");
+    ib += " --ignore-case";
   }
   strbuf_putc(&ib, ' ');
-  strbuf_puts(&ib, quote_string(pattern));
+  ib += quote_string(pattern);
 
   if (debug) {
     fprintf(stderr, "idutils: %s\n", ib.c_str());
@@ -1604,7 +1605,7 @@ int search(const char *pattern, const char *root, const char *cwd, const char *d
     if (!isregex(pattern)) {
       sb.reset(new STRBUF);
       strbuf_putc(sb.get(), '^');
-      strbuf_puts(sb.get(), pattern);
+      sb->append(pattern);
       strbuf_putc(sb.get(), '$');
       pattern = sb->c_str();
     }
@@ -1839,10 +1840,11 @@ tagsearch(const char *pattern, const char *cwd, const char *root, const char *db
 	 * search in library path.
 	 */
 	if (db == GTAGS && getenv("GTAGSLIBPATH") && (count == 0 || Tflag) && !lflag) {
-		STRBUF sb;
 		char *libdir, *nextp = NULL;
 
-		strbuf_puts(&sb, getenv("GTAGSLIBPATH"));
+		STRBUF sb;
+		sb += getenv("GTAGSLIBPATH");
+
 		/*
 		 * search for each tree in the library path.
 		 */

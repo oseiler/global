@@ -173,7 +173,7 @@ WORD		{ALPHA}{ALPHANUM}*
 					
 				return PHP_STRING;
 			}
-<STRING>\\.		strbuf_puts(string, LEXTEXT);
+<STRING>\\.		string->append(LEXTEXT);
 <STRING>.		strbuf_putc(string, LEXTEXT[0]);
 
  /* Literal */
@@ -184,7 +184,7 @@ WORD		{ALPHA}{ALPHANUM}*
 					
 				return PHP_STRING;
 			}
-<LITERAL>\\.		strbuf_puts(string, LEXTEXT);
+<LITERAL>\\.		string->append(LEXTEXT);
 <LITERAL>.		strbuf_putc(string, LEXTEXT[0]);
 
  /* Here document */
@@ -216,7 +216,7 @@ WORD		{ALPHA}{ALPHANUM}*
 				 * ${abc}\0
 				 */
 				if (YY_START == STRING)
-					strbuf_puts(string, LEXTEXT);
+					string->append(LEXTEXT);
 				memcpy(LEXTEXT, &LEXTEXT[2], LEXLENG - 3);
 				LEXTEXT[LEXLENG - 3] = '\0';
 				LEXLENG = LEXLENG - 3;
@@ -230,7 +230,7 @@ WORD		{ALPHA}{ALPHANUM}*
 				 * $abc\0
 				 */
 				if (YY_START == STRING)
-					strbuf_puts(string, LEXTEXT);
+					string->append(LEXTEXT);
 				memcpy(LEXTEXT, &LEXTEXT[1], LEXLENG - 1);
 				LEXTEXT[LEXLENG - 1] = '\0';
 				LEXLENG = LEXLENG - 1;

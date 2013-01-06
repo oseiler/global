@@ -83,7 +83,7 @@ usable(const char *command)
 	/* Don't use fixed length buffer for environment variable
 	 * because it brings buffer overflow. */
 	STRBUF sb;
-	strbuf_puts(&sb, getenv("PATH"));
+	sb += getenv("PATH");
 	char* p = sb.c_str();
 	while (p) {
 		dir = p;

@@ -201,7 +201,7 @@ makedirectories(const char *base, const char *rest, int verbose)
 		return -2;
 
 	STRBUF sb;
-	strbuf_puts(&sb, base);
+	sb += base;
 	if (*rest == SEP)
 		rest++;
 	for (q = rest; *q;) {

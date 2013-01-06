@@ -506,13 +506,13 @@ gtags_put_using(GTOP *gtop, const char *tag, int lno, const char *fid, const cha
 		key = tag;
 	}
 	gtop->sb->clear();
-	strbuf_puts(gtop->sb, fid);
+	gtop->sb->append(fid);
 	strbuf_putc(gtop->sb, ' ');
-	strbuf_puts(gtop->sb, (gtop->format & GTAGS_COMPNAME) ? compress(tag, key) : tag);
+	gtop->sb->append((gtop->format & GTAGS_COMPNAME) ? compress(tag, key) : tag);
 	strbuf_putc(gtop->sb, ' ');
 	strbuf_putn(gtop->sb, lno);
 	strbuf_putc(gtop->sb, ' ');
-	strbuf_puts(gtop->sb, (gtop->format & GTAGS_COMPRESS) ? compress(img, key) : img);
+	gtop->sb->append((gtop->format & GTAGS_COMPRESS) ? compress(img, key) : img);
 	dbop_put(gtop->dbop, key, gtop->sb->c_str());
 }
 /**
@@ -846,12 +846,12 @@ flush_pool(GTOP *gtop, const char *s_fid)
 		qsort(lno_array, vb->length, sizeof(int), compare_lineno); 
 
 		gtop->sb->clear();
-		strbuf_puts(gtop->sb, s_fid);
+		gtop->sb->append(s_fid);
 		strbuf_putc(gtop->sb, ' ');
 		if (gtop->format & GTAGS_COMPNAME) {
-			strbuf_puts(gtop->sb, compress(entry->name, key));
+			gtop->sb->append(compress(entry->name, key));
 		} else {
-			strbuf_puts(gtop->sb, entry->name);
+			gtop->sb->append(entry->name);
 		}
 		strbuf_putc(gtop->sb, ' ');
 		header_offset = gtop->sb->length();

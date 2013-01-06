@@ -97,6 +97,12 @@ struct STRBUF {
     curp = sbuf;
   }
 
+  void append(const char* s);
+  inline STRBUF& operator+=(const char* s) {
+    append(s);
+    return *this;
+  }
+
   inline void resize(size_t new_length) {
     if (new_length < length()) {
       curp = sbuf + new_length;
@@ -123,7 +129,7 @@ struct STRBUF {
  *              STATIC_STRBUF(sb);
  *              sb->clear();
  *              ...
- *		strbuf_puts(sb, "xxxxx");
+ *		sb->append("xxxxx");
  *              ...
  *              return sb->c_str();
  *      }
@@ -137,7 +143,6 @@ struct STRBUF {
 
 void strbuf_nputs(STRBUF *, const char *, int);
 void strbuf_nputc(STRBUF *, int, int);
-void strbuf_puts(STRBUF *, const char *);
 void strbuf_puts_withterm(STRBUF *, const char *, int);
 void strbuf_puts_nl(STRBUF *, const char *);
 void strbuf_putn(STRBUF *, int);
@@ -155,7 +160,7 @@ inline void strbuf_putc(STRBUF* sb, char c) {
 }
 
 inline void strbuf_puts0(STRBUF* sb, const char* s) {
-  strbuf_puts(sb, s);
+  sb->append(s);
   strbuf_putc(sb, '\0');
 }
 

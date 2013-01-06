@@ -166,7 +166,7 @@ echoc(int c)
 void
 echos(const char *s)
 {
-        strbuf_puts(outbuf, s);
+        outbuf->append(s);
 }
 /*----------------------------------------------------------------------*/
 /* HTML output								*/
@@ -216,14 +216,14 @@ fill_anchor(const char *root, const char *path)
 		const char *next = p + strlen(p) + 1;
 
 		if (next > limit) {
-			strbuf_puts(sb, unit);
+			sb->append(unit);
 			break;
 		}
 		if (p > buf)
 			*(p - 1) = sep;
-		strbuf_puts(sb, gen_href_begin("../files", path2fid(path), HTML, NULL));
-		strbuf_puts(sb, unit);
-		strbuf_puts(sb, gen_href_end());
+		sb->append(gen_href_begin("../files", path2fid(path), HTML, NULL));
+		sb->append(unit);
+		sb->append(gen_href_end());
 		strbuf_putc(sb, '/');
 	}
         return sb->c_str();
@@ -247,9 +247,9 @@ link_format(int ref[A_SIZE])
 
 	for (int i = 0; i < A_LIMIT; i++) {
 		if (i == A_INDEX) {
-			strbuf_puts(sb, gen_href_begin("..", "mains", normal_suffix, NULL));
+			sb->append(gen_href_begin("..", "mains", normal_suffix, NULL));
 		} else if (i == A_HELP) {
-			strbuf_puts(sb, gen_href_begin("..", "help", normal_suffix, NULL));
+			sb->append(gen_href_begin("..", "help", normal_suffix, NULL));
 		} else if (ref[i]) {
 			char tmp[32], *key = tmp;
 
@@ -259,17 +259,17 @@ link_format(int ref[A_SIZE])
 				key = "BOTTOM";
 			else
 				snprintf(tmp, sizeof(tmp), "%d", ref[i]);
-			strbuf_puts(sb, gen_href_begin(NULL, NULL, NULL, key));
+			sb->append(gen_href_begin(NULL, NULL, NULL, key));
 		}
 		if (Iflag) {
 			char tmp[MAXPATHLEN];
 			snprintf(tmp, sizeof(tmp), "%s%s", (i != A_INDEX && i != A_HELP && ref[i] == 0) ? "n_" : "", icons[i]);
-			strbuf_puts(sb, gen_image(PARENT, tmp, label[i]));
+			sb->append(gen_image(PARENT, tmp, label[i]));
 		} else {
 			strbuf_sprintf(sb, "[%s]", label[i]);
 		}
 		if (i == A_INDEX || i == A_HELP || ref[i] != 0)
-			strbuf_puts(sb, gen_href_end());
+			sb->append(gen_href_end());
 	}
         return sb->c_str();
 }
@@ -287,55 +287,55 @@ fixed_guide_link_format(int ref[A_LIMIT], const char *anchors)
 	STATIC_STRBUF(sb);
 	sb->clear();
 
-	strbuf_puts(sb, "<!-- beginning of fixed guide -->\n");
-	strbuf_puts(sb, guide_begin);
+	sb->append("<!-- beginning of fixed guide -->\n");
+	sb->append(guide_begin);
 	strbuf_putc(sb, '\n');
 	for (int i = 0; i < A_LIMIT; i++) {
 		if (i == A_PREV || i == A_NEXT)
 			continue;
-		strbuf_puts(sb, guide_unit_begin);
+		sb->append(guide_unit_begin);
 		switch (i) {
 		case A_FIRST:
 		case A_LAST:
 			if (ref[i] == 0)
-				strbuf_puts(sb, gen_href_begin(NULL, NULL, NULL, (i == A_FIRST) ? "TOP" : "BOTTOM"));
+				sb->append(gen_href_begin(NULL, NULL, NULL, (i == A_FIRST) ? "TOP" : "BOTTOM"));
 			else {
 				char lineno[32];
 				snprintf(lineno, sizeof(lineno), "%d", ref[i]);
-				strbuf_puts(sb, gen_href_begin(NULL, NULL, NULL, lineno));
+				sb->append(gen_href_begin(NULL, NULL, NULL, lineno));
 			}
 			break;
 		case A_TOP:
-			strbuf_puts(sb, gen_href_begin(NULL, NULL, NULL, "TOP"));
+			sb->append(gen_href_begin(NULL, NULL, NULL, "TOP"));
 			break;
 		case A_BOTTOM:
-			strbuf_puts(sb, gen_href_begin(NULL, NULL, NULL, "BOTTOM"));
+			sb->append(gen_href_begin(NULL, NULL, NULL, "BOTTOM"));
 			break;
 		case A_INDEX:
-			strbuf_puts(sb, gen_href_begin("..", "mains", normal_suffix, NULL));
+			sb->append(gen_href_begin("..", "mains", normal_suffix, NULL));
 			break;
 		case A_HELP:
-			strbuf_puts(sb, gen_href_begin("..", "help", normal_suffix, NULL));
+			sb->append(gen_href_begin("..", "help", normal_suffix, NULL));
 			break;
 		default:
 			die("fixed_guide_link_format: something is wrong.(%d)", i);
 			break;
 		}
 		if (Iflag)
-			strbuf_puts(sb, gen_image(PARENT, anchor_icons[i], anchor_label[i]));
+			sb->append(gen_image(PARENT, anchor_icons[i], anchor_label[i]));
 		else
 			strbuf_sprintf(sb, "[%s]", anchor_label[i]);
-		strbuf_puts(sb, gen_href_end());
-		strbuf_puts(sb, guide_unit_end);
+		sb->append(gen_href_end());
+		sb->append(guide_unit_end);
 		strbuf_putc(sb, '\n');
 	}
-	strbuf_puts(sb, guide_path_begin);
-	strbuf_puts(sb, anchors);
-	strbuf_puts(sb, guide_path_end);
+	sb->append(guide_path_begin);
+	sb->append(anchors);
+	sb->append(guide_path_end);
 	strbuf_putc(sb, '\n');
-	strbuf_puts(sb, guide_end);
+	sb->append(guide_end);
 	strbuf_putc(sb, '\n');
-	strbuf_puts(sb, "<!-- end of fixed guide -->\n");
+	sb->append("<!-- end of fixed guide -->\n");
 
 	return sb->c_str();
 }
@@ -360,7 +360,7 @@ generate_guide(int lineno)
 		for (; i > 0; i--)
 			strbuf_putc(sb, ' ');
 	strbuf_sprintf(sb, "%s/* ", comment_begin);
-	strbuf_puts(sb, link_format(anchor_getlinks(lineno)));
+	sb->append(link_format(anchor_getlinks(lineno)));
 	if (show_position)
 		strbuf_sprintf(sb, "%s%s[+%d %s]%s",
 			quote_space, position_begin, lineno, curpfile, position_end);
@@ -387,33 +387,33 @@ tooltip(int type, int lno, const char *opt)
 
 	if (lno > 0) {
 		if (type == 'I')
-			strbuf_puts(sb, "Included from");
+			sb->append("Included from");
 		else if (type == 'R')
-			strbuf_puts(sb, "Defined at");
+			sb->append("Defined at");
 		else if (type == 'Y')
-			strbuf_puts(sb, "Used at");
+			sb->append("Used at");
 		else
-			strbuf_puts(sb, "Referred from");
+			sb->append("Referred from");
 		strbuf_putc(sb, ' ');
 		strbuf_putn(sb, lno);
 		if (opt) {
-			strbuf_puts(sb, " in ");
-			strbuf_puts(sb, opt);
+			sb->append(" in ");
+			sb->append(opt);
 		}
 	} else {
-		strbuf_puts(sb, "Multiple ");
+		sb->append("Multiple ");
 		if (type == 'I')
-			strbuf_puts(sb, "included from");
+			sb->append("included from");
 		else if (type == 'R')
-			strbuf_puts(sb, "defined in");
+			sb->append("defined in");
 		else if (type == 'Y')
-			strbuf_puts(sb, "used in");
+			sb->append("used in");
 		else
-			strbuf_puts(sb, "referred from");
+			sb->append("referred from");
 		strbuf_putc(sb, ' ');
-		strbuf_puts(sb, opt);
+		sb->append(opt);
 		strbuf_putc(sb, ' ');
-		strbuf_puts(sb, "places");
+		sb->append("places");
 	}
 	strbuf_putc(sb, '.');
 	return sb->c_str();
@@ -447,7 +447,7 @@ put_anchor(char *name, int type, int lineno)
 			if (colorize_warned_line)
 				warned = 1;
 		}
-		strbuf_puts(outbuf, name);
+		outbuf->append(name);
 	} else {
 		/*
 		 * About the format of 'line', please see the head comment of cache.c.
@@ -461,23 +461,23 @@ put_anchor(char *name, int type, int lineno)
 				STATIC_STRBUF(sb);
 				sb->clear();
 
-				strbuf_puts(sb, action);
+				sb->append(action);
 				strbuf_putc(sb, '?');
-				strbuf_puts(sb, "pattern=");
-				strbuf_puts(sb, name);
-				strbuf_puts(sb, quote_amp);
+				sb->append("pattern=");
+				sb->append(name);
+				sb->append(quote_amp);
 				if (Sflag) {
-					strbuf_puts(sb, "id=");
-					strbuf_puts(sb, sitekey);
-					strbuf_puts(sb, quote_amp);
+					sb->append("id=");
+					sb->append(sitekey);
+					sb->append(quote_amp);
 				}
-				strbuf_puts(sb, "type=");
+				sb->append("type=");
 				if (db == GTAGS)
-					strbuf_puts(sb, "definitions");
+					sb->append("definitions");
 				else if (db == GRTAGS)
-					strbuf_puts(sb, "reference");
+					sb->append("reference");
 				else
-					strbuf_puts(sb, "symbol");
+					sb->append("symbol");
 				file = sb->c_str();
 				dir = (*action == '/') ? NULL : "..";
 			} else {
@@ -490,9 +490,9 @@ put_anchor(char *name, int type, int lineno)
 				file = fid;
 				suffix = HTML;
 			}
-			strbuf_puts(outbuf, gen_href_begin_with_title(dir, file, suffix, NULL, tooltip(type, -1, count)));
-			strbuf_puts(outbuf, name);
-			strbuf_puts(outbuf, gen_href_end());
+			outbuf->append(gen_href_begin_with_title(dir, file, suffix, NULL, tooltip(type, -1, count)));
+			outbuf->append(name);
+			outbuf->append(gen_href_end());
 		} else {
 			const char *lno = line;
 			const char *fid = nextstring(line);
@@ -504,12 +504,12 @@ put_anchor(char *name, int type, int lineno)
 			 * Being used only once means that it is a self link.
 			 */
 			if (db == GSYMS) {
-				strbuf_puts(outbuf, name);
+				outbuf->append(name);
 				return;
 			}
-			strbuf_puts(outbuf, gen_href_begin_with_title(upperdir(SRCS), fid, HTML, lno, tooltip(type, atoi(lno), path)));
-			strbuf_puts(outbuf, name);
-			strbuf_puts(outbuf, gen_href_end());
+			outbuf->append(gen_href_begin_with_title(upperdir(SRCS), fid, HTML, lno, tooltip(type, atoi(lno), path)));
+			outbuf->append(name);
+			outbuf->append(gen_href_end());
 		}
 	}
 }
@@ -544,14 +544,14 @@ void
 put_include_anchor(struct data *inc, const char *path)
 {
 	if (inc->count == 1)
-		strbuf_puts(outbuf, gen_href_begin(NULL, path2fid(inc->contents->c_str()), HTML, NULL));
+		outbuf->append(gen_href_begin(NULL, path2fid(inc->contents->c_str()), HTML, NULL));
 	else {
 		char id[32];
 		snprintf(id, sizeof(id), "%d", inc->id);
-		strbuf_puts(outbuf, gen_href_begin(upperdir(INCS), id, HTML, NULL));
+		outbuf->append(gen_href_begin(upperdir(INCS), id, HTML, NULL));
 	}
-	strbuf_puts(outbuf, path);
-	strbuf_puts(outbuf, gen_href_end());
+	outbuf->append(path);
+	outbuf->append(gen_href_end());
 }
 /**
  * put_include_anchor_direct: output HTML anchor.
@@ -562,9 +562,9 @@ put_include_anchor(struct data *inc, const char *path)
 void
 put_include_anchor_direct(const char *file, const char *path)
 {
-	strbuf_puts(outbuf, gen_href_begin(NULL, path2fid(file), HTML, NULL));
-	strbuf_puts(outbuf, path);
-	strbuf_puts(outbuf, gen_href_end());
+	outbuf->append(gen_href_begin(NULL, path2fid(file), HTML, NULL));
+	outbuf->append(path);
+	outbuf->append(gen_href_end());
 }
 /**
  * Put a reserved word (@CODE{if}, @CODE{while}, ...)
@@ -572,9 +572,9 @@ put_include_anchor_direct(const char *file, const char *path)
 void
 put_reserved_word(const char *word)
 {
-	strbuf_puts(outbuf, reserved_begin);
-	strbuf_puts(outbuf, word);
-	strbuf_puts(outbuf, reserved_end);
+	outbuf->append(reserved_begin);
+	outbuf->append(word);
+	outbuf->append(reserved_end);
 }
 /**
  * Put a macro (@CODE{\#define}, @CODE{\#undef}, ...) 
@@ -582,9 +582,9 @@ put_reserved_word(const char *word)
 void
 put_macro(const char *word)
 {
-	strbuf_puts(outbuf, sharp_begin);
-	strbuf_puts(outbuf, word);
-	strbuf_puts(outbuf, sharp_end);
+	outbuf->append(sharp_begin);
+	outbuf->append(word);
+	outbuf->append(sharp_end);
 }
 /**
  * Print warning message when unknown preprocessing directive is found.
@@ -640,7 +640,7 @@ put_char(int c)
 	const char *quoted = HTML_quoting(c);
 
 	if (quoted)
-		strbuf_puts(outbuf, quoted);
+		outbuf->append(quoted);
 	else
 		strbuf_putc(outbuf, c);
 }
@@ -663,9 +663,9 @@ put_string(const char *s)
 void
 put_brace(const char *text)
 {
-	strbuf_puts(outbuf, brace_begin);
-	strbuf_puts(outbuf, text);
-	strbuf_puts(outbuf, brace_end);
+	outbuf->append(brace_begin);
+	outbuf->append(text);
+	outbuf->append(brace_end);
 }
 
 /**
@@ -785,7 +785,7 @@ get_cvs_module(const char *file, const char **basename)
 	if (strcmp(dir->c_str(), prev_dir) != 0) {
 		strlimcpy(prev_dir, dir->c_str(), sizeof(prev_dir));
 		module->clear();
-		strbuf_puts(dir, "/CVS/Repository");
+		dir->append("/CVS/Repository");
 		FILE* ip = fopen(dir->c_str(), "r");
 		if (ip != NULL) {
 			strbuf_fgets(module, ip, STRBUF_NOCRLF);
@@ -845,7 +845,7 @@ src2html(const char *src, const char *html, int notsource)
 		STATIC_STRBUF(sb);
 		sb->clear();
 
-		strbuf_puts(sb, cvsweb_url);
+		sb->append(cvsweb_url);
 		if (use_cvs_module
 		 && (module = get_cvs_module(src, &basename)) != NULL) {
 			encode(sb, module);
@@ -855,8 +855,8 @@ src2html(const char *src, const char *html, int notsource)
 			encode(sb, src);
 		}
 		if (cvsweb_cvsroot) {
-			strbuf_puts(sb, "?cvsroot=");
-			strbuf_puts(sb, cvsweb_cvsroot);
+			sb->append("?cvsroot=");
+			sb->append(cvsweb_cvsroot);
 		}
 		fputs(quote_space, out);
 		fputs(gen_href_begin_simple(sb->c_str()), out);
@@ -956,10 +956,10 @@ src2html(const char *src, const char *html, int notsource)
 			if (ancref->type == 'D') {
 				char tmp[32];
 				snprintf(tmp, sizeof(tmp), "%d", ancref->lineno);
-				strbuf_puts(define_index, item_begin);
-				strbuf_puts(define_index, gen_href_begin_with_title(NULL, NULL, NULL, tmp, tooltip('R', ancref->lineno, NULL)));
-				strbuf_puts(define_index, gettag(ancref));
-				strbuf_puts(define_index, gen_href_end());
+				define_index->append(item_begin);
+				define_index->append(gen_href_begin_with_title(NULL, NULL, NULL, tmp, tooltip('R', ancref->lineno, NULL)));
+				define_index->append(gettag(ancref));
+				define_index->append(gen_href_end());
 				strbuf_puts_nl(define_index, item_end);
 			}
 		}

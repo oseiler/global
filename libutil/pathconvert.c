@@ -121,7 +121,7 @@ convert_pathname(CONVERT *cv, const char *path)
 		 * 'path + 1' means skipping "." at the head.
 		 */
 		cv->abspath.resize(cv->start_point);
-		strbuf_puts(&cv->abspath, path + 1);
+		cv->abspath += (path+1);
 		/*
 		 * print path name with converting.
 		 */
@@ -400,7 +400,7 @@ CONVERT::CONVERT(int type, int format, const char *root, const char *cwd, const 
   op(op), type(type), format(format), abspath(MAXPATHLEN), start_point(0), db(db)
 {
   // set base directory.
-  strbuf_puts(&abspath, root);
+  abspath += root;
   strbuf_unputc(&abspath, '/');
   start_point = abspath.length();
 

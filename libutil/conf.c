@@ -191,7 +191,7 @@ includelabel(STRBUF *sb, const char *label, int	level)
 		p = q;
 	}
 
-	strbuf_puts(sb, p);
+	sb->append(p);
 	free((void *)savep);
 }
 /**
@@ -208,26 +208,26 @@ static const char *configpath(void)
 	 * at first, check environment variable GTAGSCONF.
 	 */
 	if (getenv("GTAGSCONF") != NULL)
-		strbuf_puts(sb, getenv("GTAGSCONF"));
+		sb->append(getenv("GTAGSCONF"));
 	/*
 	 * if GTAGSCONF not set then check standard config files.
 	 */
 	else if ((p = get_home_directory()) && test("r", makepath(p, GTAGSRC, NULL)))
-		strbuf_puts(sb, makepath(p, GTAGSRC, NULL));
+		sb->append(makepath(p, GTAGSRC, NULL));
 #ifdef __DJGPP__
 	else if ((p = get_home_directory()) && test("r", makepath(p, DOS_GTAGSRC, NULL)))
-		strbuf_puts(sb, makepath(p, DOS_GTAGSRC, NULL));
+		sb->append(makepath(p, DOS_GTAGSRC, NULL));
 #endif
 	else if (test("r", GTAGSCONF))
-		strbuf_puts(sb, GTAGSCONF);
+		sb->append(GTAGSCONF);
 	else if (test("r", OLD_GTAGSCONF))
-		strbuf_puts(sb, OLD_GTAGSCONF);
+		sb->append(OLD_GTAGSCONF);
 	else if (test("r", DEBIANCONF))
-		strbuf_puts(sb, DEBIANCONF);
+		sb->append(DEBIANCONF);
 	else if (test("r", OLD_DEBIANCONF))
-		strbuf_puts(sb, OLD_DEBIANCONF);
+		sb->append(OLD_DEBIANCONF);
 	else if (test("r", makepath(SYSCONFDIR, "gtags.conf", NULL)))
-		strbuf_puts(sb, makepath(SYSCONFDIR, "gtags.conf", NULL));
+		sb->append(makepath(SYSCONFDIR, "gtags.conf", NULL));
 	else
 		return NULL;
 	return sb->c_str();
@@ -294,16 +294,16 @@ openconf(void)
 	 * make up required variables.
 	 */
 	STRBUF sb;
-	strbuf_puts(&sb, confline);
+	sb += confline;
 	strbuf_unputc(&sb, ':');
 
 	if (!getconfs("langmap", NULL)) {
-		strbuf_puts(&sb, ":langmap=");
-		strbuf_puts(&sb, quote_chars(DEFAULTLANGMAP, ':'));
+		sb += ":langmap=";
+		sb += quote_chars(DEFAULTLANGMAP, ':');
 	}
 	if (!getconfs("skip", NULL)) {
-		strbuf_puts(&sb, ":skip=");
-		strbuf_puts(&sb, DEFAULTSKIP);
+		sb += ":skip=";
+		sb += DEFAULTSKIP;
 	}
 	strbuf_unputc(&sb, ':');
 	strbuf_putc(&sb, ':');
@@ -375,7 +375,7 @@ getconfs(const char *name, STRBUF *sb)
 	 */
 	if (!exist) {
 		if (!strcmp(name, "bindir")) {
-			strbuf_puts(sb, BINDIR);
+			sb->append(BINDIR);
 			exist = 1;
 		} else if (!strcmp(name, "datadir")) {
 #if defined(_WIN32) && !defined(__CYGWIN__)
@@ -384,22 +384,22 @@ getconfs(const char *name, STRBUF *sb)
 			 * directory relative to the binary.
 			 */
 			if (test("d", DATADIR))
-				strbuf_puts(sb, DATADIR);
+				sb->append(DATADIR);
 			else {
 				const char *name = strrchr(_pgmptr, '\\');
 				if (name)
 					strbuf_nputs(sb, _pgmptr, name+1 - _pgmptr);
-				strbuf_puts(sb, "..\\share");
+				sb->append("..\\share");
 			}
 #else
-			strbuf_puts(sb, DATADIR);
+			sb->append(DATADIR);
 #endif
 			exist = 1;
 		} else if (!strcmp(name, "localstatedir")) {
-			strbuf_puts(sb, LOCALSTATEDIR);
+			sb->append(LOCALSTATEDIR);
 			exist = 1;
 		} else if (!strcmp(name, "sysconfdir")) {
-			strbuf_puts(sb, SYSCONFDIR);
+			sb->append(SYSCONFDIR);
 			exist = 1;
 		}
 	}

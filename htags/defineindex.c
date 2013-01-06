@@ -116,7 +116,7 @@ makedefineindex(const char *file, int total, STRBUF *defines)
 			if (alpha[0]) {
 				char tmp[128];
 				snprintf(tmp, sizeof(tmp), "%d %s", alpha_count, msg);
-				strbuf_puts(defines, gen_href_begin_with_title("defines", alpha_f, HTML, NULL, tmp));
+				defines->append(gen_href_begin_with_title("defines", alpha_f, HTML, NULL, tmp));
 				strbuf_sprintf(defines, "[%s]", alpha);
 				strbuf_puts_nl(defines, gen_href_end());
 				alpha_count = 0;
@@ -208,12 +208,12 @@ makedefineindex(const char *file, int total, STRBUF *defines)
 				DEFS, fid, HTML);
 			if (dynamic) {
 				if (*action != '/' && aflag)
-					strbuf_puts(&url, "../");
-				strbuf_puts(&url, action);
+					url += "../";
+				url += action;
 				strbuf_sprintf(&url, "?pattern=%s%stype=definitions", tag, quote_amp);
 			} else {
 				if (aflag)
-					strbuf_puts(&url, "../");
+					url += "../";
 				strbuf_sprintf(&url, "%s/%s.%s", DEFS, fid, HTML);
 			}
 			snprintf(guide, sizeof(guide), "Multiple defined in %s places.", enumber);
@@ -226,7 +226,7 @@ makedefineindex(const char *file, int total, STRBUF *defines)
 			snprintf(url_for_map, sizeof(url_for_map), "%s/%s.%s#L%s",
 				SRCS, fid, HTML, lno);
 			if (aflag)
-				strbuf_puts(&url, "../");
+				url += "../";
 			strbuf_sprintf(&url, "%s/%s.%s#L%s", SRCS, fid, HTML, lno);
 			snprintf(guide, sizeof(guide), "Defined at %s in %s.", lno, path);
 		}
@@ -250,7 +250,7 @@ makedefineindex(const char *file, int total, STRBUF *defines)
 		const char *msg = (alpha_count == 1) ? "definition" : "definitions";
 
 		snprintf(tmp, sizeof(tmp), "%d %s", alpha_count, msg);
-		strbuf_puts(defines, gen_href_begin_with_title("defines", alpha_f, HTML, NULL, tmp));
+		defines->append(gen_href_begin_with_title("defines", alpha_f, HTML, NULL, tmp));
 		strbuf_sprintf(defines, "[%s]", alpha);
 		strbuf_puts_nl(defines, gen_href_end());
 		if (!no_order_list)

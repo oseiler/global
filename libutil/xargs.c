@@ -170,7 +170,7 @@ repeat_find_next(void)
 			xp->verbose(path + 2, xp->seqno, 0);\
 		strbuf_putc(&comline, ' ');\
 		strbuf_putc(&comline, QUOTE);\
-		strbuf_puts(&comline, path);\
+		comline += path;\
 		strbuf_putc(&comline, QUOTE);\
 		count++;\
 	}\
@@ -216,7 +216,7 @@ execute_command(XARGS *xp)
 		strbuf_nputs(&comline, xp->command, meta_p - xp->command);
 		limit = exec_line_limit(strlen(meta_p + 2));
 	} else {
-		strbuf_puts(&comline, xp->command);
+		comline += xp->command;
 		limit = exec_line_limit(0);
 	}
 	/*
@@ -260,7 +260,7 @@ execute_command(XARGS *xp)
 	 */
 	if (meta_p) {
 		strbuf_putc(&comline, ' ');
-		strbuf_puts(&comline, meta_p + 2);
+		comline += (meta_p+2);
 	}
 #if defined(_WIN32) && !defined(__CYGWIN__)
 	if (*xp->command == '"')

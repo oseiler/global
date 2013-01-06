@@ -64,7 +64,7 @@
  * Here are safe functions.
  * - functions in standard C library.
  * - following libutil functions: <br>
- *   test(), dbop_open(), strlimcpy(), strbuf_puts(), die()
+ *   test(), dbop_open(), strlimcpy(), STRBUF::append(), die()
  */
 const char *
 makepath(const char *dir, const char *file, const char *suffix)
@@ -83,15 +83,15 @@ makepath(const char *dir, const char *file, const char *suffix)
 		if (dir[0] == '\\' || dir[2] == '\\')
 			sep = '\\';
 #endif
-		strbuf_puts(sb, dir);
+		sb->append(dir);
 		strbuf_unputc(sb, sep);
 		strbuf_putc(sb, sep);
 	}
-	strbuf_puts(sb, file);
+	sb->append(file);
 	if (suffix) {
 		if (*suffix != '.')
 			strbuf_putc(sb, '.');
-		strbuf_puts(sb, suffix);
+		sb->append(suffix);
 	}
 	if ((length = strlen(sb->c_str())) > MAXPATHLEN)
 		die("path name too long. '%s'\n", sb->c_str());

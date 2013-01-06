@@ -252,7 +252,7 @@ appendslash(const char *path)
 {
 	STATIC_STRBUF(sb);
 	sb->clear();
-	strbuf_puts(sb, path);
+	sb->append(path);
 	strbuf_putc(sb, '/');
 	return sb->c_str();
 }
@@ -346,7 +346,7 @@ int src_count;
 #define PUT(s) do {						\
 		if (level == 0)	{				\
 			if (tree_view == 0)			\
-				strbuf_puts(files, s);		\
+				files->append(s);		\
 		} else						\
 			 fputs(s, op);				\
 } while (0)
@@ -370,12 +370,12 @@ print_directory(int level, char *basedir)
 		if (tree_view) {
 			const char *target = (Fflag) ? "mains" : "_top";
 
-			strbuf_puts(files, dir_begin);
-			strbuf_puts(files, gen_href_begin_with_title_target("files", path2fid(basedir), HTML, NULL, NULL, target));
-			strbuf_puts(files, full_path ? removedotslash(basedir) : lastpart(basedir));
-			strbuf_puts(files, gen_href_end());
-			strbuf_puts(files, dir_end);
-			strbuf_puts(files, "\n<ul>\n");
+			files->append(dir_begin);
+			files->append(gen_href_begin_with_title_target("files", path2fid(basedir), HTML, NULL, NULL, target));
+			files->append(full_path ? removedotslash(basedir) : lastpart(basedir));
+			files->append(gen_href_end());
+			files->append(dir_end);
+			files->append("\n<ul>\n");
 		}
 	}
 	while ((path = getpath()) != NULL) {
@@ -466,7 +466,7 @@ print_directory(int level, char *basedir)
 		print_directory_footer(op, level, basedir);
 		close_file(fileop);
 		if (tree_view)
-			strbuf_puts(files, "</ul>\n");
+			files->append("</ul>\n");
 	}
 	html_count++;
 	return count;
@@ -488,7 +488,7 @@ print_directory_header(FILE *op, int level, const char *dir)
 
 	STATIC_STRBUF(sb);
 	sb->clear();
-	strbuf_puts(sb, removedotslash(dir));
+	sb->append(removedotslash(dir));
 	strbuf_putc(sb, '/');
 	fputs_nl(gen_page_begin(sb->c_str(), SUBDIR), op);
 	fputs_nl(body_begin, op);
@@ -616,14 +616,14 @@ print_file_name(int level, const char *path)
 	sb->clear();
 
 	if (table_flist)
-		strbuf_puts(sb, fitem_begin);
+		sb->append(fitem_begin);
 	else if (!no_order_list)
-		strbuf_puts(sb, item_begin);
+		sb->append(item_begin);
 	if (size > 1)
 		snprintf(tips, sizeof(tips), "%s bytes", insert_comma(size));
 	else
 		snprintf(tips, sizeof(tips), "%s byte", insert_comma(size));
-	strbuf_puts(sb, gen_href_begin_with_title_target(level == 0 ? SRCS: upperdir(SRCS),
+	sb->append(gen_href_begin_with_title_target(level == 0 ? SRCS: upperdir(SRCS),
 			path2fid(path), HTML, NULL, tips, target));
 	if (Iflag) {
 		const char *lang, *suffix, *text_icon;
@@ -635,17 +635,17 @@ print_file_name(int level, const char *path)
 			text_icon = c_icon;
 		else
 			text_icon = file_icon;
-		strbuf_puts(sb, gen_image(level == 0 ? CURRENT : PARENT, text_icon, removedotslash(path)));
-		strbuf_puts(sb, quote_space);
+		sb->append(gen_image(level == 0 ? CURRENT : PARENT, text_icon, removedotslash(path)));
+		sb->append(quote_space);
 	}
-	strbuf_puts(sb, full_path ? removedotslash(path) : lastpart(path));
-	strbuf_puts(sb, gen_href_end());
+	sb->append(full_path ? removedotslash(path) : lastpart(path));
+	sb->append(gen_href_end());
 	if (table_flist)
-		strbuf_puts(sb, fitem_end);
+		sb->append(fitem_end);
 	else if (!no_order_list)
-		strbuf_puts(sb, item_end);
+		sb->append(item_end);
 	else
-		strbuf_puts(sb, br);
+		sb->append(br);
 	strbuf_putc(sb, '\n');
 	return sb->c_str();
 }
@@ -670,22 +670,22 @@ print_directory_name(int level, const char *path, int count)
 	STATIC_STRBUF(sb);
 	sb->clear();
 	if (table_flist)
-		strbuf_puts(sb, fitem_begin);
+		sb->append(fitem_begin);
 	else if (!no_order_list)
-		strbuf_puts(sb, item_begin);
-	strbuf_puts(sb, gen_href_begin_with_title(level == 0 ? "files" : NULL,
+		sb->append(item_begin);
+	sb->append(gen_href_begin_with_title(level == 0 ? "files" : NULL,
 			path2fid(path), HTML, NULL, tips));
 	if (Iflag) {
-		strbuf_puts(sb, gen_image(level == 0 ? CURRENT : PARENT, dir_icon, appendslash(path)));
-		strbuf_puts(sb, quote_space);
+		sb->append(gen_image(level == 0 ? CURRENT : PARENT, dir_icon, appendslash(path)));
+		sb->append(quote_space);
 	}
 	strbuf_sprintf(sb, "%s/%s", lastpart(path), gen_href_end());
 	if (table_flist)
-		strbuf_puts(sb, fitem_end);
+		sb->append(fitem_end);
 	else if (!no_order_list)
-		strbuf_puts(sb, item_end);
+		sb->append(item_end);
 	else
-		strbuf_puts(sb, br);
+		sb->append(br);
 	strbuf_putc(sb, '\n');
 	return sb->c_str();
 }
@@ -723,7 +723,7 @@ makefileindex(const char *file, STRBUF *a_files)
 
 	STATIC_STRBUF(sb);
 	sb->clear();
-	strbuf_puts(sb, "\\.(");
+	sb->append("\\.(");
 	{
 		const char *p = include_file_suffixes;
 		int c;
@@ -736,7 +736,7 @@ makefileindex(const char *file, STRBUF *a_files)
 			strbuf_putc(sb, c);
 		}
 	}
-	strbuf_puts(sb, ")$");
+	sb->append(")$");
 	if (regcomp(&is_include_file, sb->c_str(), flags) != 0)
 		die("cannot compile regular expression '%s'.", sb->c_str());
 
@@ -777,7 +777,7 @@ makefileindex(const char *file, STRBUF *a_files)
 
 	(void)print_directory(0, basedir);
 	if (tree_view)
-		strbuf_puts(files, tree_end);
+		files->append(tree_end);
 
 	if (filemap_file)
 		fclose(FILEMAP);
@@ -911,7 +911,7 @@ makeincludeindex(void)
 			snprintf(buf, sizeof(buf), "%s %s", ptable.part[PART_LNO].start, decode_path(ptable.part[PART_PATH].start));
 			recover(&ptable);
 			inc->ref_contents->clear();
-			strbuf_puts(inc->ref_contents, buf);
+			inc->ref_contents->append(buf);
 		} else {
 			char path[MAXPATHLEN];
 

@@ -58,7 +58,7 @@ setup_langmap(const char *map)
 	int onsuffix = 0;		/* not on suffix string */
 
 	active_map = new STRBUF;
-	strbuf_puts(active_map, map);
+	active_map->append(map);
 	for (p = active_map->c_str(); *p; p++) {
 		/*
 		 * "c:.c.h,java:.java,cpp:.C.H"

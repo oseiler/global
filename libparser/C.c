@@ -131,7 +131,7 @@ C_family(const struct parser_param *param, int type)
 
 					strlimcpy(savetok, token, sizeof(savetok));
 					sb.clear();
-					strbuf_puts(&sb, sp);
+					sb += sp;
 					saveline = sb.c_str();
 					arg1[0] = '\0';
 					/*

@@ -59,7 +59,7 @@ strbuf_putc(sb, 'a');                   [a]
                                           v
 const char *s = sb->c_str();            [a\0]           s == "a"
                                             v
-strbuf_puts(sb, "bc");                  [abc]
+sb->append("bc");                       [abc]
                                             v
 const char *s = sb->c_str();            [abc\0]         s == "abc"
                                             v
@@ -69,7 +69,7 @@ sb->clear();                            [abc\0]
                                          v
 size_t len = sb->length();              [abc\0]         len == 0
                                            v
-strbuf_puts(sb, "XY");                  [XYc\0]
+sb->append("XY");                       [XYc\0]
                                            v
 const char *s = sb->c_str();            [XY\0]          s == "XY"
 
@@ -111,20 +111,7 @@ strbuf_nputc(STRBUF *sb, int c, int len)
 	while (len-- > 0)
 		*sb->curp++ = c;
 }
-/**
- * strbuf_puts: Put string
- *
- *	@param[in]	sb	string buffer
- *	@param[in]	s	string
- */
-void
-strbuf_puts(STRBUF *sb, const char *s)
-{
-	while (*s) {
-		sb->reserve(sb->length() + 1);
-		*sb->curp++ = *s++;
-	}
-}
+
 /**
  * strbuf_puts_withterm: Put string until the terminator
  *
@@ -338,9 +325,9 @@ strbuf_vsprintf(STRBUF *sb, const char *s, va_list ap)
 					snprintf(buf, sizeof(buf), format, va_arg(ap, char *));
 				else
 					die("Unsupported control character '%c'.", c);
-				strbuf_puts(sb, buf);
+				sb->append(buf);
 			} else if (c == 's') {
-				strbuf_puts(sb, va_arg(ap, char *));
+				sb->append(va_arg(ap, char *));
 			} else if (c == 'd') {
 				strbuf_putn(sb, va_arg(ap, int));
 			} else {
@@ -363,8 +350,14 @@ STRBUF::~STRBUF() {
   delete [] sbuf;
 }
 
-void STRBUF::reserve(size_t new_capacity)
-{
+void STRBUF::append(const char* s) {
+  while (*s) {
+    reserve(length()+1);
+    *curp++ = *s++;
+  }
+}
+
+void STRBUF::reserve(size_t new_capacity) {
   if (capacity() >= new_capacity) {
     return;
   } else if ((new_capacity - capacity()) < EXPANDSIZE) {

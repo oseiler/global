@@ -86,11 +86,11 @@ makedupindex(void)
 		 * Optimization when the --dynamic option is specified.
 		 */
 		if (dynamic) {
-			strbuf_puts(&command, " --nosource");
+			command += " --nosource";
 			if (db != GSYMS)
-				strbuf_puts(&command, " --nofilter=sort");
+				command += " --nofilter=sort";
 		}
-		strbuf_puts(&command, " \".*\"");
+		command += " \".*\"";
 #if defined(_WIN32) && !defined(__CYGWIN__)
 		strbuf_putc(&command, '"');
 #endif
@@ -134,7 +134,7 @@ makedupindex(void)
 					tmp.clear();
 					strbuf_puts_withterm(&tmp, lno, ' ');
 					strbuf_putc(&tmp, '\0');
-					strbuf_puts(&tmp, fid);
+					tmp += fid;
 					cache_put(db, prev, tmp.c_str(), tmp.length() + 1);
 				}
 				/*
@@ -202,7 +202,7 @@ makedupindex(void)
 			tmp.clear();
 			strbuf_puts_withterm(&tmp, lno, ' ');
 			strbuf_putc(&tmp, '\0');
-			strbuf_puts(&tmp, fid);
+			tmp += fid;
 			cache_put(db, prev, tmp.c_str(), tmp.length() + 1);
 		}
 	}

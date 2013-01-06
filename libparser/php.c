@@ -1193,7 +1193,7 @@ YY_BREAK
 case 16:
 YY_RULE_SETUP
 #line 176 "php.l"
-strbuf_puts(string, LEXTEXT);
+string->append(LEXTEXT);
 	YY_BREAK
 case 17:
 YY_RULE_SETUP
@@ -1219,7 +1219,7 @@ YY_BREAK
 case 20:
 YY_RULE_SETUP
 #line 187 "php.l"
-strbuf_puts(string, LEXTEXT);
+string->append(LEXTEXT);
 	YY_BREAK
 case 21:
 YY_RULE_SETUP
@@ -1273,7 +1273,7 @@ YY_RULE_SETUP
 				 * ${abc}\0
 				 */
 				if (YY_START == STRING)
-					strbuf_puts(string, LEXTEXT);
+					string->append(LEXTEXT);
 				memcpy(LEXTEXT, &LEXTEXT[2], LEXLENG - 3);
 				LEXTEXT[LEXLENG - 3] = '\0';
 				LEXLENG = LEXLENG - 3;
@@ -1291,7 +1291,7 @@ YY_RULE_SETUP
 				 * $abc\0
 				 */
 				if (YY_START == STRING)
-					strbuf_puts(string, LEXTEXT);
+					string->append(LEXTEXT);
 				memcpy(LEXTEXT, &LEXTEXT[1], LEXLENG - 1);
 				LEXTEXT[LEXLENG - 1] = '\0';
 				LEXLENG = LEXLENG - 1;

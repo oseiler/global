@@ -207,10 +207,10 @@ compress(const char *in, const char *name)
 		}
 		spaces = 0;
 		if (*p == '@') {
-			strbuf_puts(sb, "@@");
+			sb->append("@@");
 			p++;
 		} else if (!strncmp(p, name, length)) {
-			strbuf_puts(sb, "@n");
+			sb->append("@n");
 			p += length;
 		} else if (name2ab) {
 			int i, limit = name2ab->length;
@@ -272,7 +272,7 @@ uncompress(const char *in, const char *name)
 				strbuf_putc(sb, '@');
 				break;
 			case 'n':
-				strbuf_puts(sb, name);
+				sb->append(name);
 				break;
 			case '{':	/* } */
 				for (p++; *p && isdigit((unsigned char)*p); p++)
@@ -295,7 +295,7 @@ uncompress(const char *in, const char *name)
 					die("Abbrev character must be a lower alphabetic character. (%c)", *p);
 				int i = *p - 'a';
 				if (ab2name[i].name)
-					strbuf_puts(sb, ab2name[i].name);
+					sb->append(ab2name[i].name);
 				break;
 			}
                         }
