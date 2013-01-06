@@ -81,41 +81,6 @@ delete sb;                              (not exist)
 @endcode
 */
 
-static void print_and_abort (void);
-void (*strbuf_alloc_failed_handler) (void) = print_and_abort;
-
-static void
-print_and_abort(void)
-{
-	die("short of memory.");
-}
-
-/**
- * __strbuf_expandbuf: expand buffer so that afford to the length data at least.
- *
- *	@param[in]	sb	#STRBUF structure
- *	@param[in]	length	required room
- */
-void
-__strbuf_expandbuf(STRBUF *sb, int length)
-{
-	if (sb->alloc_failed)
-		return;
-
-	int count = sb->curp - sb->sbuf;
-	int newsize = sb->sbufsize + (length > EXPANDSIZE ? length : EXPANDSIZE);
-
-	char* newbuf = new char[newsize+1];
-	std::copy(sb->sbuf, sb->sbuf+count, newbuf);
-	delete[] sb->sbuf;
-
-	sb->sbufsize = newsize;
-	sb->sbuf = newbuf;
-
-	sb->curp = sb->sbuf + count;
-	sb->endp = sb->sbuf + sb->sbufsize;
-}
-
 /**
  * strbuf_nputs: Put string with length
  *
@@ -126,12 +91,9 @@ __strbuf_expandbuf(STRBUF *sb, int length)
 void
 strbuf_nputs(STRBUF *sb, const char *s, int len)
 {
-	if (!sb->alloc_failed && len > 0) {
-		if (sb->curp + len > sb->endp)
-			__strbuf_expandbuf(sb, len);
-		while (len-- > 0)
-			*sb->curp++ = *s++;
-	}
+	sb->reserve(sb->length() + len);
+	while (len-- > 0)
+		*sb->curp++ = *s++;
 }
 /**
  * strbuf_nputc: Put a character, @a len (number) times
@@ -145,12 +107,9 @@ strbuf_nputs(STRBUF *sb, const char *s, int len)
 void
 strbuf_nputc(STRBUF *sb, int c, int len)
 {
-	if (!sb->alloc_failed && len > 0) {
-		if (sb->curp + len > sb->endp)
-			__strbuf_expandbuf(sb, len);
-		while (len-- > 0)
-			*sb->curp++ = c;
-	}
+	sb->reserve(sb->length() + len);
+	while (len-- > 0)
+		*sb->curp++ = c;
 }
 /**
  * strbuf_puts: Put string
@@ -161,12 +120,9 @@ strbuf_nputc(STRBUF *sb, int c, int len)
 void
 strbuf_puts(STRBUF *sb, const char *s)
 {
-	if (!sb->alloc_failed) {
-		while (*s) {
-			if (sb->curp >= sb->endp)
-				__strbuf_expandbuf(sb, 0);
-			*sb->curp++ = *s++;
-		}
+	while (*s) {
+		sb->reserve(sb->length() + 1);
+		*sb->curp++ = *s++;
 	}
 }
 /**
@@ -180,12 +136,9 @@ strbuf_puts(STRBUF *sb, const char *s)
 void
 strbuf_puts_withterm(STRBUF *sb, const char *s, int c)
 {
-	if (!sb->alloc_failed) {
-		while (*s && *s != c) {
-			if (sb->curp >= sb->endp)
-				__strbuf_expandbuf(sb, 0);
-			*sb->curp++ = *s++;
-		}
+	while (*s && *s != c) {
+		sb->reserve(sb->length() + 1);
+		*sb->curp++ = *s++;
 	}
 }
 /**
@@ -197,16 +150,13 @@ strbuf_puts_withterm(STRBUF *sb, const char *s, int c)
 void
 strbuf_puts_nl(STRBUF *sb, const char *s)
 {
-	if (!sb->alloc_failed) {
-		while (*s) {
-			if (sb->curp >= sb->endp)
-				__strbuf_expandbuf(sb, 0);
-			*sb->curp++ = *s++;
-		}
-		if (sb->curp >= sb->endp)
-			__strbuf_expandbuf(sb, 0);
-		*sb->curp++ = '\n';
+	while (*s) {
+		sb->reserve(sb->length() + 1);
+		*sb->curp++ = *s++;
 	}
+
+	sb->reserve(sb->length() + 1);
+	*sb->curp++ = '\n';
 }
 /**
  * strbuf_putn: put digit string at the last of buffer.
@@ -285,9 +235,7 @@ strbuf_fgets(STRBUF *sb, FILE *ip, int flags)
 		sb->clear();
 
 	if (sb->curp >= sb->endp)
-		__strbuf_expandbuf(sb, EXPANDSIZE);	/* expand buffer */
-	if (sb->alloc_failed)
-		return sb->sbuf;
+		sb->reserve(sb->length() + EXPANDSIZE);	/* expand buffer */
 
 	for (;;) {
 		if (!fgets(sb->curp, sb->endp - sb->curp, ip)) {
@@ -303,9 +251,7 @@ strbuf_fgets(STRBUF *sb, FILE *ip, int flags)
 		else if (feof(ip)) {
 			return sb->sbuf;
 		}
-		__strbuf_expandbuf(sb, EXPANDSIZE);	/* expand buffer */
-		if (sb->alloc_failed)
-			return sb->sbuf;
+		sb->reserve(sb->length() + EXPANDSIZE);
 	}
 	if (flags & STRBUF_NOCRLF) {
 		if (*(sb->curp - 1) == '\n')
@@ -344,8 +290,6 @@ strbuf_sprintf(STRBUF *sb, const char *s, ...)
 void
 strbuf_vsprintf(STRBUF *sb, const char *s, va_list ap)
 {
-	if (sb->alloc_failed)
-		return;
 	for (; *s; s++) {
 		/*
 		 * Put the before part of '%'.
@@ -408,8 +352,7 @@ strbuf_vsprintf(STRBUF *sb, const char *s, va_list ap)
 
 STRBUF::STRBUF(int init) :
   sbuf(NULL), endp(NULL), curp(NULL),
-  sbufsize(init > 0 ? init : INITIALSIZE),
-  alloc_failed(0)
+  sbufsize(init > 0 ? init : INITIALSIZE)
 {
   sbuf = new char[sbufsize+1];
   curp = sbuf;
@@ -418,4 +361,24 @@ STRBUF::STRBUF(int init) :
 
 STRBUF::~STRBUF() {
   delete [] sbuf;
+}
+
+void STRBUF::reserve(size_t new_capacity)
+{
+  if (capacity() >= new_capacity) {
+    return;
+  } else if ((new_capacity - capacity()) < EXPANDSIZE) {
+    new_capacity = capacity() + EXPANDSIZE;
+  }
+
+  size_t count = length();
+  char* newbuf = new char[new_capacity+1];
+  std::copy(sbuf, sbuf+count, newbuf);
+
+  delete[] sbuf;
+  sbufsize = new_capacity;
+  sbuf = newbuf;
+
+  curp = sbuf+count;
+  endp = sbuf+sbufsize;
 }

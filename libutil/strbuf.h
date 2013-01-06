@@ -60,15 +60,11 @@
 #define STRBUF_SHARPSKIP	4
 /** @} */
 
-struct STRBUF;
-void __strbuf_expandbuf(STRBUF *, int);
-
 struct STRBUF {
   char	*sbuf;
   char	*endp;
   char	*curp;
   int	 sbufsize;
-  int	 alloc_failed;
 
   /// open string buffer.
   /// \param[in]	init	initial buffer size <br>
@@ -89,25 +85,25 @@ struct STRBUF {
     return (curp - sbuf);
   }
 
+  inline size_t capacity() const {
+    return sbufsize;
+  }
+
   inline bool empty() const {
     return length() == 0;
   }
 
   inline void clear() {
     curp = sbuf;
-    alloc_failed = 0;
   }
 
   inline void resize(size_t new_length) {
-    if (!alloc_failed) {
-      size_t current = length();
-      if (new_length < current) {
-	curp = sbuf + new_length;
-      } else if (new_length > current) {
-	__strbuf_expandbuf(this, new_length - current);
-      }
+    if (new_length < length()) {
+      curp = sbuf + new_length;
     }
   }
+
+  void reserve(size_t new_capacity);
 };
 
 /**
@@ -154,13 +150,8 @@ void strbuf_vsprintf(STRBUF *, const char *, va_list)
 	__attribute__ ((__format__ (__printf__, 2, 0)));
 
 inline void strbuf_putc(STRBUF* sb, char c) {
-  if (!sb->alloc_failed) {
-    if (sb->curp >= sb->endp) {
-      __strbuf_expandbuf(sb, 0);
-    }
-
-    *sb->curp++ = c;		     
-  }
+  sb->reserve(sb->length() + 1);
+  *sb->curp++ = c;		     
 }
 
 inline void strbuf_puts0(STRBUF* sb, const char* s) {
