@@ -1851,12 +1851,12 @@ assembly(const struct parser_param *param)
 	if (linetable_open(param->file) == -1)
 		die("'%s' cannot open.", param->file);
 
-	asm_symtable = strbuf_open(0);
+	asm_symtable = new STRBUF;
 	asm_initscan();
 
 	asm_parse(param);
 
-	strbuf_close(asm_symtable);
+	delete asm_symtable;
 	linetable_close();
 }
 

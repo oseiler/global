@@ -39,7 +39,7 @@
 int
 makecflowindex(const char *output, const char *cflow_file)
 {
-	STRBUF *input = strbuf_open(0);
+	STRBUF input;
 	FILE *ip, *op;
 	char *cflow_posix, *p;
 	const char *m0 = "Gave up making call-tree because of illegal POSIX cflow format.";
@@ -89,7 +89,7 @@ makecflowindex(const char *output, const char *cflow_file)
 	 *     ^      ^     ^
 	 * anchor     name  lineno
 	 */
-	while ((cflow_posix = strbuf_fgets(input, ip, STRBUF_NOCRLF)) != NULL) {
+	while ((cflow_posix = strbuf_fgets(&input, ip, STRBUF_NOCRLF)) != NULL) {
 		char *anchor, *name, *path, *lineno;
 		char *anchor_end, *name_end, *path_end, *lineno_end;
 
@@ -210,7 +210,6 @@ finish:
         fputs_nl(verbatim_end, op);
         fputs_nl(body_end, op);
         fputs_nl(gen_page_end(), op);
-	strbuf_close(input);
 	fclose(ip);
 	fclose(op);
 	return status;

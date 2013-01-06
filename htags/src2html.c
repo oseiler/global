@@ -881,17 +881,16 @@ src2html(const char *src, const char *html, int notsource)
          * It is not source file.
          */
         if (notsource) {
-		STRBUF *sb = strbuf_open(0);
+		STRBUF sb;
 		const char *_;
 
 		fputs_nl(verbatim_begin, out);
 		last_lineno = 0;
-		while ((_ = strbuf_fgets(sb, in, STRBUF_NOCRLF)) != NULL) {
+		while ((_ = strbuf_fgets(&sb, in, STRBUF_NOCRLF)) != NULL) {
 			fputs(gen_name_number(++last_lineno), out);
 			detab_replacing(out, _, HTML_quoting);
 		}
 		fputs_nl(verbatim_end, out);
-		strbuf_close(sb);
         }
 	/*
 	 * It's source code.

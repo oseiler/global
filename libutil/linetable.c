@@ -69,7 +69,7 @@ linetable_open(const char *path)
 
 	if (stat(path, &sb) < 0)
 		return -1;
-	ib = strbuf_open(sb.st_size);
+	ib = new STRBUF(sb.st_size);
 	vb = varray_open(sizeof(int), EXPAND);
 	if ((ip = fopen(path, "r")) == NULL)
 		return -1;
@@ -85,7 +85,6 @@ linetable_open(const char *path)
 	curp = filebuf = strbuf_value(ib);
 	filesize = offset;
 	endp = filebuf + filesize;
-	/* strbuf_close(ib); */
 
 	return 0;
 }
@@ -154,7 +153,7 @@ void
 linetable_close(void)
 {
 	varray_close(vb);
-	strbuf_close(ib);
+	delete ib;
 }
 /**
  * linetable_print: print a line.

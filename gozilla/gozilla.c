@@ -107,35 +107,39 @@ help(void)
  * |www	http://www.xxx.yyy/
  * @endcode
  */
-static void
-load_alias(void)
+static void load_alias(void)
 {
 	FILE *ip;
-	STRBUF *sb = strbuf_open(0);
+	STRBUF sb;
 	char *p;
 	int flag = STRBUF_NOCRLF;
 	struct sh_entry *ent;
 
 	sh = strhash_open(10);
-	if (!(p = get_home_directory()))
-		goto end;
-	if (!test("r", makepath(p, gozillarc, NULL)))
+	if (!(p = get_home_directory())) {
+	  return;
+	}
+	if (!test("r", makepath(p, gozillarc, NULL))) {
 #ifdef __DJGPP__
-		if (!test("r", makepath(p, dos_gozillarc, NULL)))
+	  if (!test("r", makepath(p, dos_gozillarc, NULL)))
 #endif
-			goto end;
-	if (!(ip = fopen(makepath(p, gozillarc, NULL), "r")))
+	    return;
+	}
+
+	if (!(ip = fopen(makepath(p, gozillarc, NULL), "r"))) {
 #ifdef __DJGPP__
-		if (!(ip = fopen(makepath(p, dos_gozillarc, NULL), "r")))
+	  if (!(ip = fopen(makepath(p, dos_gozillarc, NULL), "r")))
 #endif
-			goto end;
-	while ((p = strbuf_fgets(sb, ip, flag)) != NULL) {
+	    return;
+	}
+
+	while ((p = strbuf_fgets(&sb, ip, flag)) != NULL) {
 		char *name, *value;
 
 		flag &= ~STRBUF_APPEND;
 		if (*p == '#')
 			continue;
-		if (strbuf_unputc(sb, '\\')) {
+		if (strbuf_unputc(&sb, '\\')) {
 			flag |= STRBUF_APPEND;
 			continue;
 		}
@@ -153,10 +157,10 @@ load_alias(void)
 			(void)free(ent->value);
 		ent->value = check_strdup(value);
 	}
+
 	fclose(ip);
-end:
-	strbuf_close(sb);
 }
+
 /**
  * alias: get alias value.
  *
@@ -198,8 +202,8 @@ main(int argc, char **argv)
 {
 	char c;
 	const char *p, *browser = NULL, *definition = NULL;
-	STRBUF *arg = strbuf_open(0);
-	STRBUF *URL = strbuf_open(0);
+	STRBUF *arg = new STRBUF;
+	STRBUF *URL = new STRBUF;
 
 	while (--argc > 0 && ((c = (++argv)[0][0]) == '-' || c == '+')) {
 		if (argv[0][1] == '-') {
@@ -357,7 +361,7 @@ getdefinitionURL(const char *arg, const char *htmldir, STRBUF *URL)
 	char *p;
 	SPLIT ptable;
 	int status = -1;
-	STRBUF *sb = strbuf_open(0);
+	STRBUF sb;
 	const char *path = makepath(htmldir, "MAP", NULL);
 
 	if (!test("f", path))
@@ -365,7 +369,7 @@ getdefinitionURL(const char *arg, const char *htmldir, STRBUF *URL)
 	fp = fopen(path, "r");
 	if (!fp)
 		die("cannot open '%s'.", path);
-	while ((p = strbuf_fgets(sb, fp, STRBUF_NOCRLF)) != NULL) {
+	while ((p = strbuf_fgets(&sb, fp, STRBUF_NOCRLF)) != NULL) {
 		if (split(p, 2, &ptable) != 2)
 			die("illegal format.");
 		if (!strcmp(arg, ptable.part[0].start)) {
@@ -382,7 +386,6 @@ getdefinitionURL(const char *arg, const char *htmldir, STRBUF *URL)
 	 */
 	makefileurl(makepath(htmldir, ptable.part[1].start, NULL), 0, URL);
 	recover(&ptable);
-	strbuf_close(sb);
 }
 /**
  * getURL: get URL of the specified @a file.
@@ -396,16 +399,15 @@ getURL(const char *file, const char *htmldir, STRBUF *URL)
 {
 	char *p;
 	char buf[MAXPATHLEN];
-	STRBUF *sb = strbuf_open(0);
+	STRBUF sb;
 
 	if (!test("f", file) && !test("d", file))
 		die("file '%s' not found.", file);
 	p = normalize(file, get_root_with_slash(), cwd, buf, sizeof(buf));
-	if (p != NULL && convertpath(dbpath, htmldir, p, sb) == 0)
-		makefileurl(strbuf_value(sb), linenumber, URL);
+	if (p != NULL && convertpath(dbpath, htmldir, p, &sb) == 0)
+		makefileurl(strbuf_value(&sb), linenumber, URL);
 	else
 		makefileurl(realpath(file, buf), 0, URL);
-	strbuf_close(sb);
 }
 /**
  * isprotocol: return 1 if @a url has a procotol.

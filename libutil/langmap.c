@@ -57,7 +57,7 @@ setup_langmap(const char *map)
 	char *p;
 	int onsuffix = 0;		/* not on suffix string */
 
-	active_map = strbuf_open(0);
+	active_map = new STRBUF;
 	strbuf_puts(active_map, map);
 	for (p = strbuf_value(active_map); *p; p++) {
 		/*
@@ -72,7 +72,6 @@ setup_langmap(const char *map)
 	}
 	if (onsuffix == 0)
 		die_with_code(2, "syntax error in langmap '%s'.", map);
-	/* strbuf_close(active_map); */
 }
 
 /**

@@ -92,7 +92,7 @@ C_family(const struct parser_param *param, int type)
 	int savelevel;
 	int startmacro, startsharp;
 	const char *interested = "{}=;";
-	STRBUF *sb = strbuf_open(0);
+	STRBUF sb;
 	/*
 	 * yacc file format is like the following.
 	 *
@@ -130,9 +130,9 @@ C_family(const struct parser_param *param, int type)
 					int savelineno = lineno;
 
 					strlimcpy(savetok, token, sizeof(savetok));
-					strbuf_reset(sb);
-					strbuf_puts(sb, sp);
-					saveline = strbuf_value(sb);
+					strbuf_reset(&sb);
+					strbuf_puts(&sb, sp);
+					saveline = strbuf_value(&sb);
 					arg1[0] = '\0';
 					/*
 					 * Guile function entry using guile-snarf is like follows:
@@ -464,7 +464,6 @@ C_family(const struct parser_param *param, int type)
 			break;
 		}
 	}
-	strbuf_close(sb);
 	if (param->flags & PARSER_WARNING) {
 		if (level != 0)
 			warning("unmatched {} block. (last at level %d.)[+%d %s]", level, lineno, curfile);

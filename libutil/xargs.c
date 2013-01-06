@@ -157,7 +157,7 @@ repeat_find_next(void)
 			gpath_put(path, GPATH_OTHER);\
 		continue;\
 	}\
-	if (strbuf_getlen(comline) + length + 2 > limit)\
+	if (strbuf_getlen(&comline) + length + 2 > limit)\
 		break;\
 	xp->seqno++;\
 	if (xp->put_gpath)\
@@ -168,10 +168,10 @@ repeat_find_next(void)
 	} else {\
 		if (xp->verbose)\
 			xp->verbose(path + 2, xp->seqno, 0);\
-		strbuf_putc(comline, ' ');\
-		strbuf_putc(comline, QUOTE);\
-		strbuf_puts(comline, path);\
-		strbuf_putc(comline, QUOTE);\
+		strbuf_putc(&comline, ' ');\
+		strbuf_putc(&comline, QUOTE);\
+		strbuf_puts(&comline, path);\
+		strbuf_putc(&comline, QUOTE);\
 		count++;\
 	}\
 }
@@ -192,19 +192,20 @@ static FILE *
 execute_command(XARGS *xp)
 {
 	int limit;
-	STRBUF *comline = strbuf_open(0);
 	int count = 0;
 	int length;
 	FILE *pipe = NULL;
 	char *p, *meta_p;
+	STRBUF comline;
 
 #if defined(_WIN32) && !defined(__CYGWIN__)
 	/*
 	 * If the command starts with a quote, CMD.EXE requires the entire
 	 * command line to be quoted.
 	 */
+
 	if (*xp->command == '"')
-		strbuf_putc(comline, '"');
+		strbuf_putc(&comline, '"');
 #endif
 	/*
 	 * Copy the part before '%s' of the command skeleton.
@@ -212,10 +213,10 @@ execute_command(XARGS *xp)
 	 */
 	meta_p = locatestring(xp->command, "%s", MATCH_FIRST);
 	if (meta_p) {
-		strbuf_nputs(comline, xp->command, meta_p - xp->command);
+		strbuf_nputs(&comline, xp->command, meta_p - xp->command);
 		limit = exec_line_limit(strlen(meta_p + 2));
 	} else {
-		strbuf_puts(comline, xp->command);
+		strbuf_puts(&comline, xp->command);
 		limit = exec_line_limit(0);
 	}
 	/*
@@ -256,19 +257,19 @@ execute_command(XARGS *xp)
 	 * Copy the left part of the command skeleton.
 	 */
 	if (meta_p) {
-		strbuf_putc(comline, ' ');
-		strbuf_puts(comline, meta_p + 2);
+		strbuf_putc(&comline, ' ');
+		strbuf_puts(&comline, meta_p + 2);
 	}
 #if defined(_WIN32) && !defined(__CYGWIN__)
 	if (*xp->command == '"')
-		strbuf_putc(comline, '"');
+		strbuf_putc(&comline, '"');
 #endif
 	if (count > 0) {
-		pipe = popen(strbuf_value(comline), "r");
+		pipe = popen(strbuf_value(&comline), "r");
 		if (pipe == NULL)
-			die("cannot execute command '%s'.", strbuf_value(comline));
+			die("cannot execute command '%s'.", strbuf_value(&comline));
 	}
-	strbuf_close(comline);
+
 	return pipe;
 }
 /**
@@ -287,7 +288,7 @@ xargs_open_generic(const char *command, int max_args)
 	xp->command = check_strdup(command);
 	xp->type = 0;
 	xp->pipe = NULL;
-	xp->result = strbuf_open(0);
+	xp->result = new STRBUF;
 	xp->end_of_arg = 0;
 	xp->unread = 0;
 	xp->max_args = max_args;
@@ -335,10 +336,9 @@ XARGS *
 xargs_open_with_file(const char *command, int max_args, FILE *ip)
 {
 	XARGS *xp = xargs_open_generic(command, max_args);
-
 	xp->type = XARGS_FILE;
 	xp->ip = ip;
-	xp->path = strbuf_open(0);
+	xp->path = new STRBUF;
 	xp->fptr = 0;
 	return xp;
 }
@@ -475,11 +475,11 @@ xargs_close(XARGS *xp)
 	count = xp->seqno;
 	assert(xp->pipe == NULL);
 	free(xp->command);
-	strbuf_close(xp->result);
+	delete xp->result;
 
 	switch (xp->type) {
 	case XARGS_FILE:
-		strbuf_close(xp->path);
+		delete xp->path;
 		break;
 	case XARGS_ARGV:
 	case XARGS_STRBUF:

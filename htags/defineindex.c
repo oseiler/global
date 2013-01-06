@@ -52,8 +52,8 @@ makedefineindex(const char *file, int total, STRBUF *defines)
 	FILEOP *fileop_MAP = NULL, *fileop_DEFINES, *fileop_ALPHA = NULL;
 	FILE *MAP = NULL;
 	FILE *DEFINES, *STDOUT, *TAGS, *ALPHA = NULL;
-	STRBUF *sb = strbuf_open(0);
-	STRBUF *url = strbuf_open(0);
+	STRBUF sb;
+	STRBUF url;
 	/* Index link */
 	const char *target = (Fflag) ? "mains" : "_top";
 	const char *indexlink;
@@ -102,7 +102,7 @@ makedefineindex(const char *file, int total, STRBUF *defines)
 	if ((TAGS = popen(command, "r")) == NULL)
 		die("cannot fork.");
 	alpha[0] = '\0';
-	while ((_ = strbuf_fgets(sb, TAGS, STRBUF_NOCRLF)) != NULL) {
+	while ((_ = strbuf_fgets(&sb, TAGS, STRBUF_NOCRLF)) != NULL) {
 		const char *tag, *line;
 		char guide[1024], url_for_map[1024];
 
@@ -193,7 +193,7 @@ makedefineindex(const char *file, int total, STRBUF *defines)
 		 * generating url for function definition.
 	 	 */
 		line = cache_get(GTAGS, tag);
-		strbuf_reset(url);
+		strbuf_reset(&url);
 
 		if (line == NULL)
 			die("internal error in makedefineindex()."); 
@@ -208,13 +208,13 @@ makedefineindex(const char *file, int total, STRBUF *defines)
 				DEFS, fid, HTML);
 			if (dynamic) {
 				if (*action != '/' && aflag)
-					strbuf_puts(url, "../");
-				strbuf_puts(url, action);
-				strbuf_sprintf(url, "?pattern=%s%stype=definitions", tag, quote_amp);
+					strbuf_puts(&url, "../");
+				strbuf_puts(&url, action);
+				strbuf_sprintf(&url, "?pattern=%s%stype=definitions", tag, quote_amp);
 			} else {
 				if (aflag)
-					strbuf_puts(url, "../");
-				strbuf_sprintf(url, "%s/%s.%s", DEFS, fid, HTML);
+					strbuf_puts(&url, "../");
+				strbuf_sprintf(&url, "%s/%s.%s", DEFS, fid, HTML);
 			}
 			snprintf(guide, sizeof(guide), "Multiple defined in %s places.", enumber);
 		} else {
@@ -226,13 +226,13 @@ makedefineindex(const char *file, int total, STRBUF *defines)
 			snprintf(url_for_map, sizeof(url_for_map), "%s/%s.%s#L%s",
 				SRCS, fid, HTML, lno);
 			if (aflag)
-				strbuf_puts(url, "../");
-			strbuf_sprintf(url, "%s/%s.%s#L%s", SRCS, fid, HTML, lno);
+				strbuf_puts(&url, "../");
+			strbuf_sprintf(&url, "%s/%s.%s#L%s", SRCS, fid, HTML, lno);
 			snprintf(guide, sizeof(guide), "Defined at %s in %s.", lno, path);
 		}
 		if (!no_order_list)
 			fputs(item_begin, STDOUT);
-		fputs(gen_href_begin_with_title_target(NULL, strbuf_value(url), NULL, NULL, guide, target), STDOUT);
+		fputs(gen_href_begin_with_title_target(NULL, strbuf_value(&url), NULL, NULL, guide, target), STDOUT);
 		fputs(tag, STDOUT);
 		fputs(gen_href_end(), STDOUT);
 		if (!no_order_list)
@@ -286,7 +286,5 @@ makedefineindex(const char *file, int total, STRBUF *defines)
 	html_count++;
 	if (map_file)
 		close_file(fileop_MAP);
-	strbuf_close(sb);
-	strbuf_close(url);
 	return count;
 }

@@ -441,7 +441,7 @@ gtags_open(const char *dbpath, const char *root, int db, int mode, int flags)
 			die("GPATH not found.");
 	}
 	if (gtop->mode != GTAGS_READ)
-		gtop->sb = strbuf_open(0);	/* This buffer is used for working area. */
+		gtop->sb = new STRBUF;
 	/*
 	 * Stuff for compact format.
 	 */
@@ -791,7 +791,7 @@ gtags_close(GTOP *gtop)
 	if (gtop->path_array)
 		free(gtop->path_array);
 	if (gtop->sb)
-		strbuf_close(gtop->sb);
+		delete gtop->sb;
 	if (gtop->vb)
 		varray_close(gtop->vb);
 	if (gtop->path_hash)

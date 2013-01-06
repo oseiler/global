@@ -50,9 +50,9 @@ static const char *options[] = {NULL, "",           "r",         "s"};
 int
 makedupindex(void)
 {
-	STRBUF *sb = strbuf_open(0);
-	STRBUF *tmp = strbuf_open(0);
-	STRBUF *command = strbuf_open(0);
+	STRBUF sb;
+	STRBUF tmp;
+	STRBUF command;
 	int definition_count = 0;
 	char srcdir[MAXPATHLEN];
 	int db;
@@ -77,26 +77,26 @@ makedupindex(void)
 		/*
 		 * construct command line.
 		 */
-		strbuf_reset(command);
+		strbuf_reset(&command);
 #if defined(_WIN32) && !defined(__CYGWIN__)
-		strbuf_putc(command, '"');
+		strbuf_putc(&command, '"');
 #endif
-		strbuf_sprintf(command, "%s -x%s --result=ctags-xid --encode-path=\" \t\" --nofilter=path", quote_shell(global_path), option);
+		strbuf_sprintf(&command, "%s -x%s --result=ctags-xid --encode-path=\" \t\" --nofilter=path", quote_shell(global_path), option);
 		/*
 		 * Optimization when the --dynamic option is specified.
 		 */
 		if (dynamic) {
-			strbuf_puts(command, " --nosource");
+			strbuf_puts(&command, " --nosource");
 			if (db != GSYMS)
-				strbuf_puts(command, " --nofilter=sort");
+				strbuf_puts(&command, " --nofilter=sort");
 		}
-		strbuf_puts(command, " \".*\"");
+		strbuf_puts(&command, " \".*\"");
 #if defined(_WIN32) && !defined(__CYGWIN__)
-		strbuf_putc(command, '"');
+		strbuf_putc(&command, '"');
 #endif
-		if ((ip = popen(strbuf_value(command), "r")) == NULL)
-			die("cannot execute command '%s'.", strbuf_value(command));
-		while ((ctags_xid = strbuf_fgets(sb, ip, STRBUF_NOCRLF)) != NULL) {
+		if ((ip = popen(strbuf_value(&command), "r")) == NULL)
+			die("cannot execute command '%s'.", strbuf_value(&command));
+		while ((ctags_xid = strbuf_fgets(&sb, ip, STRBUF_NOCRLF)) != NULL) {
 			char fid[MAXFIDLEN];
 
 			ctags_x = parse_xid(ctags_xid, fid, NULL);
@@ -118,12 +118,12 @@ makedupindex(void)
 					/*
 					 * cache record: " <fid>\0<entry number>\0"
 					 */
-					strbuf_reset(tmp);
-					strbuf_putc(tmp, ' ');
-					strbuf_putn(tmp, count - 1);
-					strbuf_putc(tmp, '\0');
-					strbuf_putn(tmp, entry_count);
-					cache_put(db, prev, strbuf_value(tmp), strbuf_getlen(tmp) + 1);
+					strbuf_reset(&tmp);
+					strbuf_putc(&tmp, ' ');
+					strbuf_putn(&tmp, count - 1);
+					strbuf_putc(&tmp, '\0');
+					strbuf_putn(&tmp, entry_count);
+					cache_put(db, prev, strbuf_value(&tmp), strbuf_getlen(&tmp) + 1);
 				}				
 				/* single entry */
 				if (first_line[0]) {
@@ -131,11 +131,11 @@ makedupindex(void)
 					const char *ctags_x = parse_xid(first_line, fid, NULL);
 					const char *lno = nextelement(ctags_x);
 
-					strbuf_reset(tmp);
-					strbuf_puts_withterm(tmp, lno, ' ');
-					strbuf_putc(tmp, '\0');
-					strbuf_puts(tmp, fid);
-					cache_put(db, prev, strbuf_value(tmp), strbuf_getlen(tmp) + 1);
+					strbuf_reset(&tmp);
+					strbuf_puts_withterm(&tmp, lno, ' ');
+					strbuf_putc(&tmp, '\0');
+					strbuf_puts(&tmp, fid);
+					cache_put(db, prev, strbuf_value(&tmp), strbuf_getlen(&tmp) + 1);
 				}
 				/*
 				 * Chop the tail of the line. It is not important.
@@ -175,7 +175,7 @@ makedupindex(void)
 		if (db == GTAGS)
 			definition_count = count;
 		if (pclose(ip) != 0)
-			die("'%s' failed.", strbuf_value(command));
+			die("'%s' failed.", strbuf_value(&command));
 		if (writing) {
 			if (!dynamic) {
 				fputs_nl(gen_list_end(), op);
@@ -187,27 +187,25 @@ makedupindex(void)
 			/*
 			 * cache record: " <fid>\0<entry number>\0"
 			 */
-			strbuf_reset(tmp);
-			strbuf_putc(tmp, ' ');
-			strbuf_putn(tmp, count);
-			strbuf_putc(tmp, '\0');
-			strbuf_putn(tmp, entry_count);
-			cache_put(db, prev, strbuf_value(tmp), strbuf_getlen(tmp) + 1);
+			strbuf_reset(&tmp);
+			strbuf_putc(&tmp, ' ');
+			strbuf_putn(&tmp, count);
+			strbuf_putc(&tmp, '\0');
+			strbuf_putn(&tmp, entry_count);
+			cache_put(db, prev, strbuf_value(&tmp), strbuf_getlen(&tmp) + 1);
 		}
 		if (first_line[0]) {
 			char fid[MAXFIDLEN];
 			const char *ctags_x = parse_xid(first_line, fid, NULL);
 			const char *lno = nextelement(ctags_x);
 
-			strbuf_reset(tmp);
-			strbuf_puts_withterm(tmp, lno, ' ');
-			strbuf_putc(tmp, '\0');
-			strbuf_puts(tmp, fid);
-			cache_put(db, prev, strbuf_value(tmp), strbuf_getlen(tmp) + 1);
+			strbuf_reset(&tmp);
+			strbuf_puts_withterm(&tmp, lno, ' ');
+			strbuf_putc(&tmp, '\0');
+			strbuf_puts(&tmp, fid);
+			cache_put(db, prev, strbuf_value(&tmp), strbuf_getlen(&tmp) + 1);
 		}
 	}
-	strbuf_close(sb);
-	strbuf_close(tmp);
-	strbuf_close(command);
+
 	return definition_count;
 }

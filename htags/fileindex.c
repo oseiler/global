@@ -800,7 +800,7 @@ void
 makeincludeindex(void)
 {
 	FILE *PIPE;
-	STRBUF *input = strbuf_open(0);
+	STRBUF input;
 	char *ctags_x;
 	struct data *inc;
 	const char *target = (Fflag) ? "mains" : "_top";
@@ -819,8 +819,7 @@ makeincludeindex(void)
 	snprintf(command, sizeof(command), PQUOTE "%s -gnx --encode-path=\" \t\" \"^[ \t]*(#[ \t]*(import|include)|include[ \t]*\\()\"" PQUOTE, quote_shell(global_path));
 	if ((PIPE = popen(command, "r")) == NULL)
 		die("cannot fork.");
-	strbuf_reset(input);
-	while ((ctags_x = strbuf_fgets(input, PIPE, STRBUF_NOCRLF)) != NULL) {
+	while ((ctags_x = strbuf_fgets(&input, PIPE, STRBUF_NOCRLF)) != NULL) {
 		SPLIT ptable;
 		char buf[MAXBUFLEN];
 		int is_php = 0;
@@ -892,7 +891,7 @@ makeincludeindex(void)
 			 * inc->contents == NULL means that information already
 			 * written to file.
 			 */
-			strbuf_close(inc->contents);
+			delete inc->contents;
 			inc->contents = NULL;
 		}
 		if (!inc->ref_count)
@@ -934,9 +933,8 @@ makeincludeindex(void)
 			 * inc->ref_contents == NULL means that information already
 			 * written to file.
 			 */
-			strbuf_close(inc->ref_contents);
+			delete inc->ref_contents;
 			inc->ref_contents = NULL;
 		}
 	}
-	strbuf_close(input);
 }

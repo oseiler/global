@@ -2365,7 +2365,7 @@ php(const struct parser_param *param)
 	int token;
 
 	level = 0;
-	string = strbuf_open(0);
+	string = new STRBUF;
 	if (linetable_open(param->file) == -1)
 		die("'%s' cannot open.", param->file);
 
@@ -2436,6 +2436,6 @@ php(const struct parser_param *param)
 		}
 	}
 	linetable_close();
-	strbuf_close(string);
+	delete string;
 }
 

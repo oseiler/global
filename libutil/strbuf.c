@@ -51,7 +51,7 @@ Function call                           Memory status
 ----------------------------------------------------------
                                         (not exist)
                                          v
-sb = strbuf_open(0);                    []
+sb = new STRBUF;                        []
                                           v
 strbuf_putc(sb, 'a');                   [a]
                                           v
@@ -75,7 +75,7 @@ fp = fopen("/etc/passwd", "r");                                             v
 char *s = strbuf_fgets(sb, fp, 0)       [root:*:0:0:Charlie &:/root:/bin/csh\0]
 fclose(fp)				s == "root:*:0:0:Charlie &:/root:/bin/csh"
 
-strbuf_close(sb);                       (not exist)
+delete sb;                              (not exist)
 @endcode
 */
 
@@ -110,25 +110,7 @@ __strbuf_expandbuf(STRBUF *sb, int length)
 	sb->curp = sb->sbuf + count;
 	sb->endp = sb->sbuf + sb->sbufsize;
 }
-/**
- * strbuf_open: open string buffer.
- *
- *	@param[in]	init	initial buffer size <br>
- *			if 0 (zero) is specified then use default value (#INITIALSIZE).
- *	@return	sb	#STRBUF structure
- */
-STRBUF *
-strbuf_open(int init)
-{
-	STRBUF *sb = (STRBUF *)check_calloc(sizeof(STRBUF), 1);
 
-	sb->sbufsize = (init > 0) ? init : INITIALSIZE;
-	sb->sbuf = (char *)check_malloc(sb->sbufsize + 1);
-	sb->curp = sb->sbuf;
-	sb->endp = sb->sbuf + sb->sbufsize;
-
-	return sb;
-}
 /**
  * strbuf_reset: reset string buffer.
  *
@@ -463,19 +445,7 @@ strbuf_vsprintf(STRBUF *sb, const char *s, va_list ap)
 		}
 	}
 }
-/**
- * strbuf_close: close string buffer.
- *
- *	@param[in]	sb	#STRBUF structure
- */
-void
-strbuf_close(STRBUF *sb)
-{
-	if (sb->name)
-		(void)free(sb->name);
-	(void)free(sb->sbuf);
-	(void)free(sb);
-}
+
 /**
  * @fn STRBUF *strbuf_open_tempbuf(void)
  *
@@ -508,4 +478,22 @@ void
 strbuf_release_tempbuf(STRBUF *sb)
 {
 	used = 0;
+}
+
+STRBUF::STRBUF(int init) :
+  name(NULL), sbuf(NULL), endp(NULL), curp(NULL),
+  sbufsize(init > 0 ? init : INITIALSIZE),
+  alloc_failed(0)
+{
+  sbuf = new char[sbufsize+1];
+  curp = sbuf;
+  endp = sbuf + sbufsize;
+}
+
+STRBUF::~STRBUF() {
+  if (name) {
+    free(name); // TODO - not sure if this is actually being assigned...
+  }
+
+  delete [] sbuf;
 }

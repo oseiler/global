@@ -63,29 +63,27 @@ static void
 load_notfunction(const char *filename)
 {
 	FILE *ip;
-	STRBUF *sb = strbuf_open(0);
-	STRBUF *ib = strbuf_open(0);
+	STRBUF sb;
+	STRBUF ib;
 	char *p;
 	int i;
 
 	if ((ip = fopen(filename, "r")) == NULL)
 		die("'%s' cannot read.", filename);
-	for (tablesize = 0; (p = strbuf_fgets(ib, ip, STRBUF_NOCRLF)) != NULL; tablesize++)
-		strbuf_puts0(sb, p);
+	for (tablesize = 0; (p = strbuf_fgets(&ib, ip, STRBUF_NOCRLF)) != NULL; tablesize++)
+		strbuf_puts0(&sb, p);
 	fclose(ip);
 	words = (struct words *)check_malloc(sizeof(struct words) * tablesize);
 	/*
 	 * Don't free *p.
 	 */
-	p = (char *)check_malloc(strbuf_getlen(sb) + 1);
-	memcpy(p, strbuf_value(sb), strbuf_getlen(sb) + 1);
+	p = (char *)check_malloc(strbuf_getlen(&sb) + 1);
+	memcpy(p, strbuf_value(&sb), strbuf_getlen(&sb) + 1);
 	for (i = 0; i < tablesize; i++) {
 		words[i].name = p;
 		p += strlen(p) + 1;
 	}
 	qsort(words, tablesize, sizeof(struct words), cmp);
-	strbuf_close(sb);
-	strbuf_close(ib);
 }
 
 static int

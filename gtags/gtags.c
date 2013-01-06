@@ -170,7 +170,7 @@ main(int argc, char **argv)
 {
 	char dbpath[MAXPATHLEN];
 	char cwd[MAXPATHLEN];
-	STRBUF *sb = strbuf_open(0);
+	STRBUF sb;
 	int optchar;
 	int option_index = 0;
 	STATISTICS_TIME *tim;
@@ -306,15 +306,14 @@ main(int argc, char **argv)
 		 * main      10 /prj/xxx/src/main.c  main(argc, argv)\n
 		 * main      22 /prj/xxx/libc/func.c   main(argc, argv)\n
 		 */
-		STRBUF *ib = strbuf_open(MAXBUFLEN);
+		STRBUF ib(MAXBUFLEN);
 		char *ctags_x;
 
 		if (argc < 3)
 			die("gtags --path: 3 arguments needed.");
 		CONVERT cv(convert_type, FORMAT_CTAGS_X, argv[0], argv[1], argv[2], stdout, NOTAGS);
-		while ((ctags_x = strbuf_fgets(ib, stdin, STRBUF_NOCRLF)) != NULL)
+		while ((ctags_x = strbuf_fgets(&ib, stdin, STRBUF_NOCRLF)) != NULL)
 			convert_put(&cv, ctags_x);
-		strbuf_close(ib);
 		exit(0);
 	} else if (dump_target) {
 		/*
@@ -442,12 +441,12 @@ main(int argc, char **argv)
 	openconf();
 	if (getconfb("extractmethod"))
 		extractmethod = 1;
-	strbuf_reset(sb);
-	if (getconfs("langmap", sb))
-		langmap = check_strdup(strbuf_value(sb));
-	strbuf_reset(sb);
-	if (getconfs("gtags_parser", sb))
-		gtags_parser = check_strdup(strbuf_value(sb));
+	strbuf_reset(&sb);
+	if (getconfs("langmap", &sb))
+		langmap = check_strdup(strbuf_value(&sb));
+	strbuf_reset(&sb);
+	if (getconfs("gtags_parser", &sb))
+		gtags_parser = check_strdup(strbuf_value(&sb));
 	/*
 	 * initialize parser.
 	 */
@@ -492,23 +491,23 @@ main(int argc, char **argv)
 		tim = statistics_time_start("Time of creating ID");
 		if (vflag)
 			fprintf(stderr, "[%s] Creating indexes for idutils.\n", now());
-		strbuf_reset(sb);
-		strbuf_puts(sb, "mkid");
+		strbuf_reset(&sb);
+		strbuf_puts(&sb, "mkid");
 		if (vflag)
-			strbuf_puts(sb, " -v");
-		strbuf_sprintf(sb, " --file='%s/ID'", dbpath);
+			strbuf_puts(&sb, " -v");
+		strbuf_sprintf(&sb, " --file='%s/ID'", dbpath);
 		if (vflag) {
 #ifdef __DJGPP__
 			if (is_unixy())	/* test for 4DOS as well? */
 #endif
-			strbuf_puts(sb, " 1>&2");
+			strbuf_puts(&sb, " 1>&2");
 		} else {
-			strbuf_puts(sb, " >" NULL_DEVICE);
+			strbuf_puts(&sb, " >" NULL_DEVICE);
 		}
 		if (debug)
-			fprintf(stderr, "executing mkid like: %s\n", strbuf_value(sb));
-		if (system(strbuf_value(sb)))
-			die("mkid failed: %s", strbuf_value(sb));
+			fprintf(stderr, "executing mkid like: %s\n", strbuf_value(&sb));
+		if (system(strbuf_value(&sb)))
+			die("mkid failed: %s", strbuf_value(&sb));
 		if (chmod(makepath(dbpath, "ID", NULL), 0644) < 0)
 			die("cannot chmod ID file.");
 		statistics_time_end(tim);
@@ -516,7 +515,6 @@ main(int argc, char **argv)
 	if (vflag)
 		fprintf(stderr, "[%s] Done.\n", now());
 	closeconf();
-	strbuf_close(sb);
 	print_statistics(statistics);
 
 	return 0;
@@ -534,9 +532,9 @@ incremental(const char *dbpath, const char *root)
 	STATISTICS_TIME *tim;
 	struct stat statp;
 	time_t gtags_mtime;
-	STRBUF *addlist = strbuf_open(0);
-	STRBUF *deletelist = strbuf_open(0);
-	STRBUF *addlist_other = strbuf_open(0);
+	STRBUF addlist;
+	STRBUF deletelist;
+	STRBUF addlist_other;
 	IDSET *deleteset, *findset;
 	int updated = 0;
 	const char *path;
@@ -583,9 +581,9 @@ incremental(const char *dbpath, const char *root)
 			/* new file */
 			type = issourcefile(single_update) ? GPATH_SOURCE : GPATH_OTHER;
 			if (type == GPATH_OTHER)
-				strbuf_puts0(addlist_other, single_update);
+				strbuf_puts0(&addlist_other, single_update);
 			else {
-				strbuf_puts0(addlist, single_update);
+				strbuf_puts0(&addlist, single_update);
 				total++;
 			}
 		} else {
@@ -593,7 +591,7 @@ incremental(const char *dbpath, const char *root)
 			if (type == GPATH_OTHER)
 				goto exit;
 			idset_add(deleteset, atoi(fid));
-			strbuf_puts0(addlist, single_update);
+			strbuf_puts0(&addlist, single_update);
 			total++;
 		}
 	} else {
@@ -621,13 +619,13 @@ incremental(const char *dbpath, const char *root)
 			}
 			if (other) {
 				if (fid == NULL)
-					strbuf_puts0(addlist_other, path);
+					strbuf_puts0(&addlist_other, path);
 			} else {
 				if (fid == NULL) {
-					strbuf_puts0(addlist, path);
+					strbuf_puts0(&addlist, path);
 					total++;
 				} else if (gtags_mtime < statp.st_mtime) {
-					strbuf_puts0(addlist, path);
+					strbuf_puts0(&addlist, path);
 					total++;
 					idset_add(deleteset, n_fid);
 				}
@@ -655,10 +653,10 @@ incremental(const char *dbpath, const char *root)
 			 */
 			if (type == GPATH_OTHER) {
 				if (!idset_contains(findset, id) || !test("f", path) || test("b", path))
-					strbuf_puts0(deletelist, path);
+					strbuf_puts0(&deletelist, path);
 			} else {
 				if (!idset_contains(findset, id) || !test("f", path)) {
-					strbuf_puts0(deletelist, path);
+					strbuf_puts0(&deletelist, path);
 					idset_add(deleteset, id);
 				}
 			}
@@ -668,30 +666,30 @@ incremental(const char *dbpath, const char *root)
 	/*
 	 * execute updating.
 	 */
-	if ((!idset_empty(deleteset) || strbuf_getlen(addlist) > 0) ||
-	    (strbuf_getlen(deletelist) + strbuf_getlen(addlist_other) > 0))
+	if ((!idset_empty(deleteset) || strbuf_getlen(&addlist) > 0) ||
+	    (strbuf_getlen(&deletelist) + strbuf_getlen(&addlist_other) > 0))
 	{
 		int db;
 		updated = 1;
 		tim = statistics_time_start("Time of updating %s and %s.", dbname(GTAGS), dbname(GRTAGS));
-		if (!idset_empty(deleteset) || strbuf_getlen(addlist) > 0)
-			updatetags(dbpath, root, deleteset, addlist);
-		if (strbuf_getlen(deletelist) + strbuf_getlen(addlist_other) > 0) {
+		if (!idset_empty(deleteset) || strbuf_getlen(&addlist) > 0)
+			updatetags(dbpath, root, deleteset, &addlist);
+		if (strbuf_getlen(&deletelist) + strbuf_getlen(&addlist_other) > 0) {
 			const char *start, *end, *p;
 
 			if (vflag)
 				fprintf(stderr, "[%s] Updating '%s'.\n", now(), dbname(GPATH));
 			/* gpath_open(dbpath, 2); */
-			if (strbuf_getlen(deletelist) > 0) {
-				start = strbuf_value(deletelist);
-				end = start + strbuf_getlen(deletelist);
+			if (strbuf_getlen(&deletelist) > 0) {
+				start = strbuf_value(&deletelist);
+				end = start + strbuf_getlen(&deletelist);
 
 				for (p = start; p < end; p += strlen(p) + 1)
 					gpath_delete(p);
 			}
-			if (strbuf_getlen(addlist_other) > 0) {
-				start = strbuf_value(addlist_other);
-				end = start + strbuf_getlen(addlist_other);
+			if (strbuf_getlen(&addlist_other) > 0) {
+				start = strbuf_value(&addlist_other);
+				end = start + strbuf_getlen(&addlist_other);
 
 				for (p = start; p < end; p += strlen(p) + 1) {
 					gpath_put(p, GPATH_OTHER);
@@ -715,9 +713,6 @@ exit:
 			fprintf(stderr, " Global databases are up to date.\n");
 		fprintf(stderr, "[%s] Done.\n", now());
 	}
-	strbuf_close(addlist);
-	strbuf_close(deletelist);
-	strbuf_close(addlist_other);
 	gpath_close();
 	idset_close(deleteset);
 	idset_close(findset);
@@ -910,24 +905,21 @@ void createtags(const char *dbpath, const char *root) {
   tim = statistics_time_start("Time of flushing B-tree cache");
   statistics_time_end(tim);
 
-  STRBUF *sb = strbuf_open(0);
-  strbuf_reset(sb);
-  if (getconfs("GTAGS_extra", sb)) {
+  STRBUF sb;
+  if (getconfs("GTAGS_extra", &sb)) {
     tim = statistics_time_start("Time of executing GTAGS_extra command");
-    if (system(strbuf_value(sb)))
-      fprintf(stderr, "GTAGS_extra command failed: %s\n", strbuf_value(sb));
+    if (system(strbuf_value(&sb)))
+      fprintf(stderr, "GTAGS_extra command failed: %s\n", strbuf_value(&sb));
     statistics_time_end(tim);
   }
 
-  strbuf_reset(sb);
-  if (getconfs("GRTAGS_extra", sb)) {
+  strbuf_reset(&sb);
+  if (getconfs("GRTAGS_extra", &sb)) {
     tim = statistics_time_start("Time of executing GRTAGS_extra command");
-    if (system(strbuf_value(sb)))
-      fprintf(stderr, "GRTAGS_extra command failed: %s\n", strbuf_value(sb));
+    if (system(strbuf_value(&sb)))
+      fprintf(stderr, "GRTAGS_extra command failed: %s\n", strbuf_value(&sb));
     statistics_time_end(tim);
   }
-
-  strbuf_close(sb);
 }
 
 /**
@@ -947,12 +939,12 @@ printconf(const char *name)
 	else if (getconfb(name))
 		fprintf(stdout, "1\n");
 	else {
-		STRBUF *sb = strbuf_open(0);
-		if (getconfs(name, sb))
-			fprintf(stdout, "%s\n", strbuf_value(sb));
+		STRBUF sb;
+		if (getconfs(name, &sb))
+			fprintf(stdout, "%s\n", strbuf_value(&sb));
 		else
 			exist = 0;
-		strbuf_close(sb);
 	}
+
 	return exist;
 }

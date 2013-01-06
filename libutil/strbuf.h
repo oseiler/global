@@ -60,14 +60,20 @@
 #define STRBUF_SHARPSKIP	4
 /** @} */
 
-typedef struct _strbuf {
-	char *name;
-	char *sbuf;
-	char *endp;
-	char *curp;
-	int sbufsize;
-	int alloc_failed;
-} STRBUF;
+struct STRBUF {
+  char	*name;
+  char	*sbuf;
+  char	*endp;
+  char	*curp;
+  int	 sbufsize;
+  int	 alloc_failed;
+
+  /// open string buffer.
+  /// \param[in]	init	initial buffer size <br>
+  /// \return	sb	#STRBUF structure
+  explicit STRBUF(int init = INITIALSIZE);
+  ~STRBUF();
+};
 
 /**
  * STATIC_STRBUF(sb):
@@ -78,7 +84,7 @@ typedef struct _strbuf {
  *
  * @attention
  * You must call strbuf_clear() every time before using. <br>
- * You must @STRONG{not} call strbuf_close() for it.
+ * You must @STRONG{not} call delete for it.
  *
  * @par Usage:
  * @code
@@ -93,40 +99,12 @@ typedef struct _strbuf {
  *      }
  * @endcode
  */
-#define STATIC_STRBUF(sb) static STRBUF sb[1]
-
-#define strbuf_empty(sb) (sb->sbufsize == 0)
-
-#define strbuf_putc(sb, c)	do {\
-	if (!sb->alloc_failed) {\
-		if (sb->curp >= sb->endp)\
-			__strbuf_expandbuf(sb, 0);\
-		*sb->curp++ = c;\
-	}\
-} while (0)
-
-#define strbuf_puts0(sb, s) do {\
-	strbuf_puts(sb, s);\
-	strbuf_putc(sb, '\0');\
-} while (0)
-
-#define strbuf_getlen(sb) (sb->curp - sb->sbuf)
-#define strbuf_setlen(sb, len) do {\
-	unsigned int _length = len;\
-	if (!sb->alloc_failed) {\
-		if (_length < strbuf_getlen(sb))\
-			sb->curp = sb->sbuf + _length;\
-		else if (_length > strbuf_getlen(sb))\
-			__strbuf_expandbuf(sb, _length - strbuf_getlen(sb));\
-	}\
-} while (0)
-#define strbuf_lastchar(sb) (*(sb->curp - 1))
+#define STATIC_STRBUF(sb) static STRBUF sb##_instance; STRBUF* sb = & sb##_instance
 
 #ifdef DEBUG
 void strbuf_dump(char *);
 #endif
 void __strbuf_expandbuf(STRBUF *, int);
-STRBUF *strbuf_open(int);
 void strbuf_reset(STRBUF *);
 void strbuf_clear(STRBUF *);
 void strbuf_nputs(STRBUF *, const char *, int);
@@ -138,7 +116,6 @@ void strbuf_putn(STRBUF *, int);
 int strbuf_unputc(STRBUF *, int);
 char *strbuf_value(STRBUF *);
 void strbuf_trim(STRBUF *);
-void strbuf_close(STRBUF *);
 char *strbuf_fgets(STRBUF *, FILE *, int);
 void strbuf_sprintf(STRBUF *, const char *, ...)
 	__attribute__ ((__format__ (__printf__, 2, 3)));
@@ -146,5 +123,42 @@ void strbuf_vsprintf(STRBUF *, const char *, va_list)
 	__attribute__ ((__format__ (__printf__, 2, 0)));
 STRBUF *strbuf_open_tempbuf(void);
 void strbuf_release_tempbuf(STRBUF *);
+
+inline bool strbuf_empty(const STRBUF* sb) {
+  return (sb->sbufsize == 0);
+}
+
+inline void strbuf_putc(STRBUF* sb, char c) {
+  if (!sb->alloc_failed) {
+    if (sb->curp >= sb->endp) {
+      __strbuf_expandbuf(sb, 0);
+    }
+
+    *sb->curp++ = c;		     
+  }
+}
+
+inline void strbuf_puts0(STRBUF* sb, const char* s) {
+  strbuf_puts(sb, s);
+  strbuf_putc(sb, '\0');
+}
+
+inline int strbuf_getlen(const STRBUF* sb) {
+  return (sb->curp - sb->sbuf);
+}
+
+inline void strbuf_setlen(STRBUF* sb, unsigned int len) {
+  if (!sb->alloc_failed) {
+    if (len < strbuf_getlen(sb)) {
+      sb->curp = sb->sbuf + len;
+    } else if (len > strbuf_getlen(sb)) {
+      __strbuf_expandbuf(sb, len - strbuf_getlen(sb));
+    }
+  }
+}
+
+inline char strbuf_lastchar(const STRBUF* sb) {
+  return *(sb->curp - 1);
+}
 
 #endif /* ! _STRBUF_H */

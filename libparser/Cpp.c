@@ -80,7 +80,7 @@ Cpp(const struct parser_param *param)
 		int level;
 	} stack[MAXCLASSSTACK];
 	const char *interested = "{}=;~";
-	STRBUF *sb = strbuf_open(0);
+	STRBUF sb;
 
 	*classname = *completename = 0;
 	stack[0].classname = completename;
@@ -113,9 +113,9 @@ Cpp(const struct parser_param *param)
 					int savelineno = lineno;
 
 					strlimcpy(savetok, token, sizeof(savetok));
-					strbuf_reset(sb);
-					strbuf_puts(sb, sp);
-					saveline = strbuf_value(sb);
+					strbuf_reset(&sb);
+					strbuf_puts(&sb, sp);
+					saveline = strbuf_value(&sb);
 					if (function_definition(param)) {
 						/* ignore constructor */
 						if (strcmp(stack[classlevel].classname, savetok))
@@ -515,7 +515,6 @@ Cpp(const struct parser_param *param)
 			break;
 		}
 	}
-	strbuf_close(sb);
 	if (param->flags & PARSER_WARNING) {
 		if (level != 0)
 			warning("unmatched {} block. (last at level %d.)[+%d %s]", level, lineno, curfile);

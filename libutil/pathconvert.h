@@ -27,7 +27,7 @@ struct CONVERT {
   FILE		*op;
   int		 type;		/**< #PATH_ABSOLUTE, #PATH_RELATIVE */
   int		 format;	/**< defined in @FILE{format.h} */
-  STRBUF	*abspath;
+  STRBUF	 abspath;
   char		 basedir[MAXPATHLEN];
   int		 start_point;
   int		 db;		/**< for @NAME{gtags-cscope} */

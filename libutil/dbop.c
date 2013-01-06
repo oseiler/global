@@ -711,7 +711,6 @@ dbop_close(DBOP *dbop)
 	 * Load sorted tag records and write them to the tag file.
 	 */
 	if (dbop->sortout != NULL) {
-		STRBUF *sb = strbuf_open(256);
 		char *p;
 
 		/*
@@ -726,16 +725,16 @@ dbop_close(DBOP *dbop)
 		/*
 		 * The last stage of sorted writing.
 		 */
-		while (strbuf_fgets(sb, dbop->sortin, STRBUF_NOCRLF)) {
-			for (p = strbuf_value(sb); *p && *p != SORT_SEP; p++)
+		STRBUF sb(256);
+		while (strbuf_fgets(&sb, dbop->sortin, STRBUF_NOCRLF)) {
+			for (p = strbuf_value(&sb); *p && *p != SORT_SEP; p++)
 				;
 			if (!*p)
 				die("unexpected end of record.");
 			*p++ = '\0';
-			dbop_put(dbop, strbuf_value(sb), p);
+			dbop_put(dbop, strbuf_value(&sb), p);
 		}
 		fclose(dbop->sortin);
-		strbuf_close(sb);
 		terminate_sort_process(dbop);
 	}
 #ifdef USE_DB185_COMPAT

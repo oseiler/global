@@ -454,7 +454,7 @@ make_file_in_distpath(const char *name, const char *data)
 void
 load_with_replace(const char *file, STRBUF *result, int place)
 {
-	STRBUF *sb = strbuf_open(0);
+	STRBUF sb;
 	FILE *ip;
 	regex_t preg;
 	regmatch_t pmatch[2];
@@ -502,35 +502,35 @@ load_with_replace(const char *file, STRBUF *result, int place)
 	/*
 	 * construct regular expression.
 	 */
-	strbuf_putc(sb, '(');
+	strbuf_putc(&sb, '(');
 	for (i = 0; i < tabsize; i++) {
-		strbuf_puts(sb, tab[i].name);
-		strbuf_putc(sb, '|');
+		strbuf_puts(&sb, tab[i].name);
+		strbuf_putc(&sb, '|');
 	}
-	strbuf_unputc(sb, '|');
-	strbuf_putc(sb, ')');
-	if (regcomp(&preg, strbuf_value(sb), REG_EXTENDED) != 0)
+	strbuf_unputc(&sb, '|');
+	strbuf_putc(&sb, ')');
+	if (regcomp(&preg, strbuf_value(&sb), REG_EXTENDED) != 0)
 		die("cannot compile regular expression.");
 	/*
 	 * construct skeleton file name in the system datadir directory.
 	 */
-	strbuf_reset(sb);
-	strbuf_sprintf(sb, "%s/gtags/%s.tmpl", datadir, file);
-	ip = fopen(strbuf_value(sb), "r");
+	strbuf_reset(&sb);
+	strbuf_sprintf(&sb, "%s/gtags/%s.tmpl", datadir, file);
+	ip = fopen(strbuf_value(&sb), "r");
 	if (!ip) {
 #ifdef __DJGPP__
-		strbuf_reset(sb);
-		strbuf_sprintf(sb, "%s/gtags/%s", datadir, file);
-		ip = fopen(strbuf_value(sb), "r");
+		strbuf_reset(&sb);
+		strbuf_sprintf(&sb, "%s/gtags/%s", datadir, file);
+		ip = fopen(strbuf_value(&sb), "r");
 		if (!ip)
 #endif
-			die("skeleton file '%s' not found.", strbuf_value(sb));
+			die("skeleton file '%s' not found.", strbuf_value(&sb));
 	}
-	strbuf_reset(sb);
+	strbuf_reset(&sb);
 	/*
 	 * Read template file and evaluate macros.
 	 */
-	while ((_ = strbuf_fgets(sb, ip, STRBUF_NOCRLF)) != NULL) {
+	while ((_ = strbuf_fgets(&sb, ip, STRBUF_NOCRLF)) != NULL) {
 		const char *p;
 
 		/* Pick up macro name */
@@ -564,7 +564,6 @@ load_with_replace(const char *file, STRBUF *result, int place)
 		strbuf_puts_nl(result, p);
 	}
 	fclose(ip);
-	strbuf_close(sb);
 	regfree(&preg);
 }
 /**
@@ -578,16 +577,15 @@ static void
 generate_file(const char *dist, const char *file, int place)
 {
 	FILE *op;
-	STRBUF *result = strbuf_open(0);
+	STRBUF result;
 
 	op = fopen(makepath(dist, file, NULL), "w");
 	if (!op)
 		die("cannot create file '%s'.", file);
-	load_with_replace(file, result, place);
-	fputs(strbuf_value(result), op);
+	load_with_replace(file, &result, place);
+	fputs(strbuf_value(&result), op);
 	fclose(op);
 	html_count++;
-	strbuf_close(result);
 }
 /**
  * makeprogram: make @NAME{CGI} program
@@ -980,14 +978,13 @@ makehtml(int total)
 void
 loadfile_asis(const char *file, STRBUF *result)
 {
-	STRBUF *sb = strbuf_open(0);
+	STRBUF sb;
 	FILE *ip = fopen(file, "r");
 	if (!ip)
 		die("file '%s' not found.", file);
-	while (strbuf_fgets(sb, ip, STRBUF_NOCRLF) != NULL)
-		strbuf_puts_nl(result, strbuf_value(sb));
+	while (strbuf_fgets(&sb, ip, STRBUF_NOCRLF) != NULL)
+		strbuf_puts_nl(result, strbuf_value(&sb));
 	fclose(ip);
-	strbuf_close(sb);
 }
 void
 loadfile(const char *file, STRBUF *result)
@@ -1033,32 +1030,31 @@ static char *
 makecommonpart(const char *title, const char *defines, const char *files)
 {
 	FILE *ip;
-	STRBUF *sb = strbuf_open(0);
-	STRBUF *ib = strbuf_open(0);
+	STRBUF sb;
 	char buf[MAXFILLEN];
 	const char *tips = "Go to the GLOBAL project page.";
 	const char *_, *item;
 
-	strbuf_puts(sb, title_begin);
-	strbuf_puts(sb, title);
-	strbuf_puts_nl(sb, title_end);
-	strbuf_puts_nl(sb, poweredby_begin);
-	strbuf_sprintf(sb, "Last updated %s%s\n", now(), br);
+	strbuf_puts(&sb, title_begin);
+	strbuf_puts(&sb, title);
+	strbuf_puts_nl(&sb, title_end);
+	strbuf_puts_nl(&sb, poweredby_begin);
+	strbuf_sprintf(&sb, "Last updated %s%s\n", now(), br);
 	if (Iflag) {
 		snprintf(buf, sizeof(buf), "Powered by GLOBAL-%s.", get_version());
-		strbuf_puts(sb, gen_href_begin_with_title_target(NULL, www, NULL, NULL, tips,"_top"));
-		strbuf_puts(sb, gen_image(CURRENT, "pglobe", buf));
-		strbuf_puts(sb, gen_href_end());
-		strbuf_puts(sb, br);
+		strbuf_puts(&sb, gen_href_begin_with_title_target(NULL, www, NULL, NULL, tips,"_top"));
+		strbuf_puts(&sb, gen_image(CURRENT, "pglobe", buf));
+		strbuf_puts(&sb, gen_href_end());
+		strbuf_puts(&sb, br);
 	} else {
-		strbuf_sprintf(sb, "Powered by %sGLOBAL-%s%s.%s\n",
+		strbuf_sprintf(&sb, "Powered by %sGLOBAL-%s%s.%s\n",
 			gen_href_begin_with_title_target(NULL, www, NULL, NULL, tips, "_top"),
 			get_version(),
 			gen_href_end(),
 			br);
 	}
-	strbuf_puts_nl(sb, poweredby_end);
-	strbuf_puts_nl(sb, hr);
+	strbuf_puts_nl(&sb, poweredby_end);
+	strbuf_puts_nl(&sb, hr);
 	/*
 	 * Print items according to the value of variable 'item_order'.
 	 */
@@ -1066,118 +1062,118 @@ makecommonpart(const char *title, const char *defines, const char *files)
 		switch (*item) {
 		case 'c':
 			if (caution) {
-				strbuf_puts_nl(sb, caution_begin);
-				strbuf_sprintf(sb, "<font size='+2' color='red'>CAUTION</font>%s\n", br);
-				strbuf_sprintf(sb, "This hypertext consist of %d files.\n", html_count);
-				strbuf_puts_nl(sb, "Please don't download whole hypertext using hypertext copy tools.");
-				strbuf_puts_nl(sb, "Our network cannot afford such traffic.");
-				strbuf_puts_nl(sb, "Instead, you can generate same thing in your computer using");
-				strbuf_puts(sb, gen_href_begin_with_title_target(NULL, www, NULL, NULL, NULL, "_top"));
-				strbuf_puts(sb, "GLOBAL source code tag system");
-				strbuf_puts_nl(sb, gen_href_end());
-				strbuf_puts_nl(sb, "Thank you.");
-				strbuf_puts_nl(sb, caution_end);
-				strbuf_sprintf(sb, "\n%s\n", hr);
+				strbuf_puts_nl(&sb, caution_begin);
+				strbuf_sprintf(&sb, "<font size='+2' color='red'>CAUTION</font>%s\n", br);
+				strbuf_sprintf(&sb, "This hypertext consist of %d files.\n", html_count);
+				strbuf_puts_nl(&sb, "Please don't download whole hypertext using hypertext copy tools.");
+				strbuf_puts_nl(&sb, "Our network cannot afford such traffic.");
+				strbuf_puts_nl(&sb, "Instead, you can generate same thing in your computer using");
+				strbuf_puts(&sb, gen_href_begin_with_title_target(NULL, www, NULL, NULL, NULL, "_top"));
+				strbuf_puts(&sb, "GLOBAL source code tag system");
+				strbuf_puts_nl(&sb, gen_href_end());
+				strbuf_puts_nl(&sb, "Thank you.");
+				strbuf_puts_nl(&sb, caution_end);
+				strbuf_sprintf(&sb, "\n%s\n", hr);
 			}
 			break;
 		case 's':
 			if (fflag) {
-				strbuf_puts(sb, makesearchpart(NULL));
-				strbuf_puts_nl(sb, hr);
+				strbuf_puts(&sb, makesearchpart(NULL));
+				strbuf_puts_nl(&sb, hr);
 			}
 			break;
 		case 't':
 			if (call_file || callee_file) {
-				strbuf_puts(sb, header_begin);
+				strbuf_puts(&sb, header_begin);
 				if (call_file) {
-					strbuf_puts(sb, gen_href_begin(NULL, "call", normal_suffix, NULL));
-					strbuf_puts(sb, title_call_tree);
-					strbuf_puts(sb, gen_href_end());
+					strbuf_puts(&sb, gen_href_begin(NULL, "call", normal_suffix, NULL));
+					strbuf_puts(&sb, title_call_tree);
+					strbuf_puts(&sb, gen_href_end());
 				}
 				if (call_file && callee_file)
-					strbuf_puts(sb, " / ");
+					strbuf_puts(&sb, " / ");
 				if (callee_file) {
-					strbuf_puts(sb, gen_href_begin(NULL, "callee", normal_suffix, NULL));
-					strbuf_puts(sb, title_callee_tree);
-					strbuf_puts(sb, gen_href_end());
+					strbuf_puts(&sb, gen_href_begin(NULL, "callee", normal_suffix, NULL));
+					strbuf_puts(&sb, title_callee_tree);
+					strbuf_puts(&sb, gen_href_end());
 				}
-				strbuf_puts_nl(sb, header_end);
-				strbuf_puts_nl(sb, hr);
+				strbuf_puts_nl(&sb, header_end);
+				strbuf_puts_nl(&sb, hr);
 			}
 			break;
-		case 'm':
-			strbuf_sprintf(sb, "%sMAINS%s\n", header_begin, header_end);
+		case 'm': {
+			strbuf_sprintf(&sb, "%sMAINS%s\n", header_begin, header_end);
 
 			snprintf(buf, sizeof(buf), PQUOTE "%s --result=ctags-xid --encode-path=\" \t\" --nofilter=path %s" PQUOTE, quote_shell(global_path), main_func);
 			ip = popen(buf, "r");
 			if (!ip)
 				die("cannot execute command '%s'.", buf);
-			strbuf_puts_nl(sb, gen_list_begin());
-			while ((_ = strbuf_fgets(ib, ip, STRBUF_NOCRLF)) != NULL) {
+			strbuf_puts_nl(&sb, gen_list_begin());
+			STRBUF ib;
+			while ((_ = strbuf_fgets(&ib, ip, STRBUF_NOCRLF)) != NULL) {
 				char fid[MAXFIDLEN];
 				const char *ctags_x = parse_xid(_, fid, NULL);
 
-				strbuf_puts_nl(sb, gen_list_body(SRCS, ctags_x, fid));
+				strbuf_puts_nl(&sb, gen_list_body(SRCS, ctags_x, fid));
 			}
-			strbuf_puts_nl(sb, gen_list_end());
+			strbuf_puts_nl(&sb, gen_list_end());
 			if (pclose(ip) != 0)
 			die("cannot execute command '%s'.", buf);
-			strbuf_puts_nl(sb, hr);
+			strbuf_puts_nl(&sb, hr);
 			break;
+		}
 		case 'd':
 			if (aflag && !Fflag) {
-				strbuf_puts(sb, header_begin);
-				strbuf_puts(sb, title_define_index);
-				strbuf_puts_nl(sb, header_end);
-				strbuf_puts(sb, defines);
+				strbuf_puts(&sb, header_begin);
+				strbuf_puts(&sb, title_define_index);
+				strbuf_puts_nl(&sb, header_end);
+				strbuf_puts(&sb, defines);
 			} else {
-				strbuf_puts(sb, header_begin);
-				strbuf_puts(sb, gen_href_begin(NULL, "defines", normal_suffix, NULL));
-				strbuf_puts(sb, title_define_index);
-				strbuf_puts(sb, gen_href_end());
-				strbuf_puts_nl(sb, header_end);
+				strbuf_puts(&sb, header_begin);
+				strbuf_puts(&sb, gen_href_begin(NULL, "defines", normal_suffix, NULL));
+				strbuf_puts(&sb, title_define_index);
+				strbuf_puts(&sb, gen_href_end());
+				strbuf_puts_nl(&sb, header_end);
 			}
-			strbuf_puts_nl(sb, hr);
+			strbuf_puts_nl(&sb, hr);
 			break;
 		case 'f':
 			if (Fflag) {
-				strbuf_puts(sb, header_begin);
-				strbuf_puts(sb, gen_href_begin(NULL, "files", normal_suffix, NULL));
-				strbuf_puts(sb, title_file_index);
-				strbuf_puts(sb, gen_href_end());
-				strbuf_puts_nl(sb, header_end);
+				strbuf_puts(&sb, header_begin);
+				strbuf_puts(&sb, gen_href_begin(NULL, "files", normal_suffix, NULL));
+				strbuf_puts(&sb, title_file_index);
+				strbuf_puts(&sb, gen_href_end());
+				strbuf_puts_nl(&sb, header_end);
 			} else {
-				strbuf_puts(sb, header_begin);
-				strbuf_puts(sb, title_file_index);
-				strbuf_puts_nl(sb, header_end);
+				strbuf_puts(&sb, header_begin);
+				strbuf_puts(&sb, title_file_index);
+				strbuf_puts_nl(&sb, header_end);
 				if (tree_view) {
-					strbuf_puts_nl(sb, tree_control);
-					strbuf_puts_nl(sb, tree_begin);
+					strbuf_puts_nl(&sb, tree_control);
+					strbuf_puts_nl(&sb, tree_begin);
 				} else if (table_flist)
-					strbuf_puts_nl(sb, flist_begin);
+					strbuf_puts_nl(&sb, flist_begin);
 				else if (!no_order_list)
-					strbuf_puts_nl(sb, list_begin);
-				strbuf_puts(sb, files);
+					strbuf_puts_nl(&sb, list_begin);
+				strbuf_puts(&sb, files);
 				if (tree_view)
-					strbuf_puts_nl(sb, tree_end);
+					strbuf_puts_nl(&sb, tree_end);
 				else if (table_flist)
-					strbuf_puts_nl(sb, flist_end);
+					strbuf_puts_nl(&sb, flist_end);
 				else if (!no_order_list)
-					strbuf_puts_nl(sb, list_end);
+					strbuf_puts_nl(&sb, list_end);
 				else
-					strbuf_puts_nl(sb, br);
+					strbuf_puts_nl(&sb, br);
 			}
-			strbuf_puts_nl(sb, hr);
+			strbuf_puts_nl(&sb, hr);
 			break;
 		default:
 			warning("unknown item '%c'. (Ignored)", *item);
 			break;
 		}
 	}
-	strbuf_close(ib);
 
-	return strbuf_value(sb);
-	/* doesn't close string buffer */
+	return check_strdup(strbuf_value(&sb));
 }
 /**
  * basic check.
@@ -1210,7 +1206,7 @@ basic_check(void)
 static void
 configuration(int argc, char *const *argv)
 {
-	STRBUF *sb = strbuf_open(0);
+	STRBUF sb;
 	int i, n;
 	char *p, *q;
 
@@ -1260,14 +1256,14 @@ configuration(int argc, char *const *argv)
 	/*
 	 * Config variables.
 	 */
-	strbuf_reset(sb);
-	if (!getconfs("datadir", sb))
+	strbuf_reset(&sb);
+	if (!getconfs("datadir", &sb))
 		die("cannot get datadir directory name.");
-	strlimcpy(datadir, strbuf_value(sb), sizeof(datadir));
-	strbuf_reset(sb);
-	if (!getconfs("localstatedir", sb))
+	strlimcpy(datadir, strbuf_value(&sb), sizeof(datadir));
+	strbuf_reset(&sb);
+	if (!getconfs("localstatedir", &sb))
 		die("cannot get localstatedir directory name.");
-	strlimcpy(localstatedir, strbuf_value(sb), sizeof(localstatedir));
+	strlimcpy(localstatedir, strbuf_value(&sb), sizeof(localstatedir));
 	if (getconfn("ncol", &n)) {
 		if (n < 1 || n > 10)
 			warning("parameter 'ncol' ignored because the value (=%d) is too large or too small.", n);
@@ -1280,164 +1276,162 @@ configuration(int argc, char *const *argv)
 		else
 			tabs = n;
 	}
-	strbuf_reset(sb);
-	if (getconfs("gzipped_suffix", sb))
-		gzipped_suffix = check_strdup(strbuf_value(sb));
-	strbuf_reset(sb);
-	if (getconfs("normal_suffix", sb))
-		normal_suffix = check_strdup(strbuf_value(sb));
+	strbuf_reset(&sb);
+	if (getconfs("gzipped_suffix", &sb))
+		gzipped_suffix = check_strdup(strbuf_value(&sb));
+	strbuf_reset(&sb);
+	if (getconfs("normal_suffix", &sb))
+		normal_suffix = check_strdup(strbuf_value(&sb));
 	if (getconfb("no_order_list"))
 		no_order_list = 1;
-	strbuf_reset(sb);
-	if (getconfs("prolog_script", sb))
-		prolog_script = check_strdup(strbuf_value(sb));
-	strbuf_reset(sb);
-	if (getconfs("epilog_script", sb))
-		epilog_script = check_strdup(strbuf_value(sb));
+	strbuf_reset(&sb);
+	if (getconfs("prolog_script", &sb))
+		prolog_script = check_strdup(strbuf_value(&sb));
+	strbuf_reset(&sb);
+	if (getconfs("epilog_script", &sb))
+		epilog_script = check_strdup(strbuf_value(&sb));
 	if (getconfb("colorize_warned_line"))
 		colorize_warned_line = 1;
-	strbuf_reset(sb);
-	if (getconfs("script_alias", sb)) {
-		p = check_strdup(strbuf_value(sb));
+	strbuf_reset(&sb);
+	if (getconfs("script_alias", &sb)) {
+		p = check_strdup(strbuf_value(&sb));
 		/* remove the last '/' */
 		q = p + strlen(p) - 1;
 		if (*q == '/')
 			*q = '\0';
 		script_alias = p;
 	}
-	strbuf_reset(sb);
-	if (getconfs("body_begin", sb)) {
-		p = check_strdup(strbuf_value(sb));
-		strbuf_reset(sb);
-		if (getconfs("body_end", sb)) {
-			q = check_strdup(strbuf_value(sb));
+	strbuf_reset(&sb);
+	if (getconfs("body_begin", &sb)) {
+		p = check_strdup(strbuf_value(&sb));
+		strbuf_reset(&sb);
+		if (getconfs("body_end", &sb)) {
+			q = check_strdup(strbuf_value(&sb));
 			body_begin = p;
 			body_end = q;
 		} else {
 			free(p);
 		}
 	}
-	strbuf_reset(sb);
-	if (getconfs("table_begin", sb)) {
-		p = check_strdup(strbuf_value(sb));
-		strbuf_reset(sb);
-		if (getconfs("table_end", sb)) {
-			q = check_strdup(strbuf_value(sb));
+	strbuf_reset(&sb);
+	if (getconfs("table_begin", &sb)) {
+		p = check_strdup(strbuf_value(&sb));
+		strbuf_reset(&sb);
+		if (getconfs("table_end", &sb)) {
+			q = check_strdup(strbuf_value(&sb));
 			table_begin = p;
 			table_end = q;
 		} else {
 			free(p);
 		}
 	}
-	strbuf_reset(sb);
-	if (getconfs("title_begin", sb)) {
-		p = check_strdup(strbuf_value(sb));
-		strbuf_reset(sb);
-		if (getconfs("title_end", sb)) {
-			q = check_strdup(strbuf_value(sb));
+	strbuf_reset(&sb);
+	if (getconfs("title_begin", &sb)) {
+		p = check_strdup(strbuf_value(&sb));
+		strbuf_reset(&sb);
+		if (getconfs("title_end", &sb)) {
+			q = check_strdup(strbuf_value(&sb));
 			title_begin = p;
 			title_end = q;
 		} else {
 			free(p);
 		}
 	}
-	strbuf_reset(sb);
-	if (getconfs("comment_begin", sb)) {
-		p = check_strdup(strbuf_value(sb));
-		strbuf_reset(sb);
-		if (getconfs("comment_end", sb)) {
-			q = check_strdup(strbuf_value(sb));
+	strbuf_reset(&sb);
+	if (getconfs("comment_begin", &sb)) {
+		p = check_strdup(strbuf_value(&sb));
+		strbuf_reset(&sb);
+		if (getconfs("comment_end", &sb)) {
+			q = check_strdup(strbuf_value(&sb));
 			comment_begin = p;
 			comment_end = q;
 		} else {
 			free(p);
 		}
 	}
-	strbuf_reset(sb);
-	if (getconfs("sharp_begin", sb)) {
-		p = check_strdup(strbuf_value(sb));
-		strbuf_reset(sb);
-		if (getconfs("sharp_end", sb)) {
-			q = check_strdup(strbuf_value(sb));
+	strbuf_reset(&sb);
+	if (getconfs("sharp_begin", &sb)) {
+		p = check_strdup(strbuf_value(&sb));
+		strbuf_reset(&sb);
+		if (getconfs("sharp_end", &sb)) {
+			q = check_strdup(strbuf_value(&sb));
 			sharp_begin = p;
 			sharp_end = q;
 		} else {
 			free(p);
 		}
 	}
-	strbuf_reset(sb);
-	if (getconfs("brace_begin", sb)) {
-		p = check_strdup(strbuf_value(sb));
-		strbuf_reset(sb);
-		if (getconfs("brace_end", sb)) {
-			q = check_strdup(strbuf_value(sb));
+	strbuf_reset(&sb);
+	if (getconfs("brace_begin", &sb)) {
+		p = check_strdup(strbuf_value(&sb));
+		strbuf_reset(&sb);
+		if (getconfs("brace_end", &sb)) {
+			q = check_strdup(strbuf_value(&sb));
 			brace_begin = p;
 			brace_end = q;
 		} else {
 			free(p);
 		}
 	}
-	strbuf_reset(sb);
-	if (getconfs("reserved_begin", sb)) {
-		p = check_strdup(strbuf_value(sb));
-		strbuf_reset(sb);
-		if (getconfs("reserved_end", sb)) {
-			q = check_strdup(strbuf_value(sb));
+	strbuf_reset(&sb);
+	if (getconfs("reserved_begin", &sb)) {
+		p = check_strdup(strbuf_value(&sb));
+		strbuf_reset(&sb);
+		if (getconfs("reserved_end", &sb)) {
+			q = check_strdup(strbuf_value(&sb));
 			reserved_begin = p;
 			reserved_end = q;
 		} else {
 			free(p);
 		}
 	}
-	strbuf_reset(sb);
-	if (getconfs("position_begin", sb)) {
-		p = check_strdup(strbuf_value(sb));
-		strbuf_reset(sb);
-		if (getconfs("position_end", sb)) {
-			q = check_strdup(strbuf_value(sb));
+	strbuf_reset(&sb);
+	if (getconfs("position_begin", &sb)) {
+		p = check_strdup(strbuf_value(&sb));
+		strbuf_reset(&sb);
+		if (getconfs("position_end", &sb)) {
+			q = check_strdup(strbuf_value(&sb));
 			position_begin = p;
 			position_end = q;
 		} else {
 			free(p);
 		}
 	}
-	strbuf_reset(sb);
-	if (getconfs("warned_line_begin", sb)) {
-		p = check_strdup(strbuf_value(sb));
-		strbuf_reset(sb);
-		if (getconfs("warned_line_end", sb)) {
-			q = check_strdup(strbuf_value(sb));
+	strbuf_reset(&sb);
+	if (getconfs("warned_line_begin", &sb)) {
+		p = check_strdup(strbuf_value(&sb));
+		strbuf_reset(&sb);
+		if (getconfs("warned_line_end", &sb)) {
+			q = check_strdup(strbuf_value(&sb));
 			warned_line_begin = p;
 			warned_line_end = q;
 		} else {
 			free(p);
 		}
 	}
-	strbuf_reset(sb);
-	if (getconfs("include_file_suffixes", sb))
-		include_file_suffixes = check_strdup(strbuf_value(sb));
-	strbuf_reset(sb);
-	if (getconfs("langmap", sb))
-		langmap = check_strdup(strbuf_value(sb));
-	strbuf_reset(sb);
-	if (getconfs("xhtml_version", sb))
-		xhtml_version = check_strdup(strbuf_value(sb));
+	strbuf_reset(&sb);
+	if (getconfs("include_file_suffixes", &sb))
+		include_file_suffixes = check_strdup(strbuf_value(&sb));
+	strbuf_reset(&sb);
+	if (getconfs("langmap", &sb))
+		langmap = check_strdup(strbuf_value(&sb));
+	strbuf_reset(&sb);
+	if (getconfs("xhtml_version", &sb))
+		xhtml_version = check_strdup(strbuf_value(&sb));
 	/* insert htags_options into the head of ARGSV array. */
-	strbuf_reset(sb);
-	if (getconfs("htags_options", sb))
-		htags_options = check_strdup(strbuf_value(sb));
-	strbuf_close(sb);
+	strbuf_reset(&sb);
+	if (getconfs("htags_options", &sb))
+		htags_options = check_strdup(strbuf_value(&sb));
 }
 /**
  * save_environment: save configuration data and arguments.
  */
-static void
-save_environment(int argc, char *const *argv)
+static void save_environment(int argc, char *const *argv)
 {
 	char command[MAXFILLEN];
-	STRBUF *sb = strbuf_open(0);
-	STRBUF *save_c = strbuf_open(0);
-	STRBUF *save_a = strbuf_open(0);
+	STRBUF sb;
+	STRBUF save_c;
+	STRBUF save_a;
 	int i;
 	const char *p;
 	FILE *ip;
@@ -1448,24 +1442,21 @@ save_environment(int argc, char *const *argv)
 	snprintf(command, sizeof(command), PQUOTE "%s --config" PQUOTE, quote_shell(gtags_path));
 	if ((ip = popen(command, "r")) == NULL)
 		die("cannot execute '%s'.", command);
-	while (strbuf_fgets(sb, ip, STRBUF_NOCRLF) != NULL) {
-		for (p = strbuf_value(sb); *p; p++) {
+	while (strbuf_fgets(&sb, ip, STRBUF_NOCRLF) != NULL) {
+		for (p = strbuf_value(&sb); *p; p++) {
 			if (*p == '\'') {
-				strbuf_putc(save_c, '\'');
-				strbuf_putc(save_c, '"');
-				strbuf_putc(save_c, '\'');
-				strbuf_putc(save_c, '"');
-				strbuf_putc(save_c, '\'');
+				strbuf_putc(&save_c, '\'');
+				strbuf_putc(&save_c, '"');
+				strbuf_putc(&save_c, '\'');
+				strbuf_putc(&save_c, '"');
+				strbuf_putc(&save_c, '\'');
 			} else
-				strbuf_putc(save_c, *p);
+				strbuf_putc(&save_c, *p);
 		}
 	}
 	if (pclose(ip) != 0)
 		die("cannot execute '%s'.", command);
-	strbuf_close(sb);
-	save_config = strbuf_value(save_c);
-	/* doesn't close string buffer for save config. */
-	/* strbuf_close(save_c); */
+	save_config = check_strdup(strbuf_value(&save_c));
 
 	/*
 	 * save arguments.
@@ -1486,24 +1477,22 @@ save_environment(int argc, char *const *argv)
 				continue;
 			}
 			blank = locatestring(argv[i], " ", MATCH_FIRST);
-			strbuf_putc(save_a, ' ');
+			strbuf_putc(&save_a, ' ');
 			if (blank)
-				strbuf_putc(save_a, '\'');
-			strbuf_puts(save_a, argv[i]);
+				strbuf_putc(&save_a, '\'');
+			strbuf_puts(&save_a, argv[i]);
 			if (blank)
-				strbuf_putc(save_a, '\'');
+				strbuf_putc(&save_a, '\'');
 		}
 	}
-	save_argv = strbuf_value(save_a);
-	/* doesn't close string buffer for save arguments. */
-	/* strbuf_close(save_a); */
+	save_argv = check_strdup(strbuf_value(&save_a));
 }
 
 char **
 append_options(int *argc, char *const *argv)
 {
 
-	STRBUF *sb = strbuf_open(0);
+	STRBUF *sb = new STRBUF;
 	const char *p, *opt = check_strdup(htags_options);
 	int count = 1;
 	int quote = 0;
@@ -1807,23 +1796,22 @@ main(int argc, char **argv)
 	 * Invokes gtags beforehand.
 	 */
 	if (gflag) {
-		STRBUF *sb = strbuf_open(0);
-
-		strbuf_puts(sb, gtags_path);
+		STRBUF sb;
+		strbuf_puts(&sb, gtags_path);
 		if (vflag)
-			strbuf_puts(sb, " -v");
+			strbuf_puts(&sb, " -v");
 		if (wflag)
-			strbuf_puts(sb, " -w");
+			strbuf_puts(&sb, " -w");
 		if (suggest2 && enable_idutils && usable("mkid"))
-			strbuf_puts(sb, " -I");
+			strbuf_puts(&sb, " -I");
 		if (arg_dbpath[0]) {
-			strbuf_putc(sb, ' ');
-			strbuf_puts(sb, arg_dbpath);
+			strbuf_putc(&sb, ' ');
+			strbuf_puts(&sb, arg_dbpath);
 		}
-		if (system(strbuf_value(sb)))
+		if (system(strbuf_value(&sb)))
 			die("cannot execute gtags(1) command.");
-		strbuf_close(sb);
 	}
+
 	/*
 	 * get dbpath.
 	 */
@@ -1872,7 +1860,7 @@ main(int argc, char **argv)
 	 * Site key management for center CGI.
 	 */
 	if (Sflag) {
-		STRBUF *sb = strbuf_open(0);
+		STRBUF sb;
 		static char saction[MAXBUFLEN];
 		static char completion_saction[MAXBUFLEN];
 		char path[MAXBUFLEN];
@@ -1899,12 +1887,12 @@ main(int argc, char **argv)
 
 			if (ip == NULL)
 				die("cannot open file '%s'.", path);
-			strbuf_fgets(sb, ip, STRBUF_NOCRLF);
+			strbuf_fgets(&sb, ip, STRBUF_NOCRLF);
 			fclose(ip);
 		}
 		if (!test("f", path))
 			try_writing = 1;
-		else if (!strcmp(distpath, strbuf_value(sb)))
+		else if (!strcmp(distpath, strbuf_value(&sb)))
 			; /* nothing to do */
 		else if (overwrite_key == 0)
 			die("The site key '%s' is not unique, please change it or use --overwrite-key option.", sitekey);
@@ -1926,7 +1914,6 @@ main(int argc, char **argv)
 					die("cannot chmod file '%s'(errno = %d).", path, errno);
 			}
 		}
-		strbuf_close(sb);
 	}
 	/*
 	 * Existence check of tag files.
@@ -2158,8 +2145,8 @@ main(int argc, char **argv)
 		makesearchindex("search.html");
 	}
 	{
-		STRBUF *defines = strbuf_open(0);
-		STRBUF *files = strbuf_open(0);
+		STRBUF defines;
+		STRBUF files;
 
 		/*
 		 * (5) make definition index (defines.html and defines/)
@@ -2167,7 +2154,7 @@ main(int argc, char **argv)
 		 */
 		message("[%s] (5) making definition index ...", now());
 		tim = statistics_time_start("Time of making definition index");
-		func_total = makedefineindex("defines.html", func_total, defines);
+		func_total = makedefineindex("defines.html", func_total, &defines);
 		statistics_time_end(tim);
 		message("Total %d functions.", func_total);
 		/*
@@ -2177,7 +2164,7 @@ main(int argc, char **argv)
 		message("[%s] (6) making file index ...", now());
 		init_inc();
 		tim = statistics_time_start("Time of making file index");
-		file_total = makefileindex("files.html", files);
+		file_total = makefileindex("files.html", &files);
 		statistics_time_end(tim);
 		message("Total %d files.", file_total);
 		html_count += file_total;
@@ -2207,10 +2194,7 @@ main(int argc, char **argv)
 		 *     USING @defines @files
 		 */
 		message("[%s] (#) making a common part ...", now());
-		index = makecommonpart(title, strbuf_value(defines), strbuf_value(files));
-
-		strbuf_close(defines);
-		strbuf_close(files);
+		index = makecommonpart(title, strbuf_value(&defines), strbuf_value(&files));
 	}
 	/*
 	 * (7)make index file (index.html)

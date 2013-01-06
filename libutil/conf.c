@@ -181,16 +181,16 @@ includelabel(STRBUF *sb, const char *label, int	level)
 	if (!(savep = p = readrecord(label)))
 		die("label '%s' not found.", label);
 	while ((q = locatestring(p, ":include=", MATCH_FIRST)) || (q = locatestring(p, ":tc=", MATCH_FIRST))) {
-		STRBUF *inc = strbuf_open(0);
+		STRBUF inc;
 
 		strbuf_nputs(sb, p, q - p);
 		q = locatestring(q, "=", MATCH_FIRST) + 1;
 		for (; *q && *q != ':'; q++)
-			strbuf_putc(inc, *q);
-		includelabel(sb, strbuf_value(inc), level);
+			strbuf_putc(&inc, *q);
+		includelabel(sb, strbuf_value(&inc), level);
 		p = q;
-		strbuf_close(inc);
 	}
+
 	strbuf_puts(sb, p);
 	free((void *)savep);
 }
@@ -241,7 +241,6 @@ configpath(void)
 void
 openconf(void)
 {
-	STRBUF *sb;
 	const char *config;
 	extern int vflag;
 
@@ -283,36 +282,35 @@ openconf(void)
 			die("cannot open '%s'.", config);
 		if (vflag)
 			fprintf(stderr, " Using config file '%s'.\n", config);
-		ib = strbuf_open(MAXBUFLEN);
-		sb = strbuf_open(0);
-		includelabel(sb, label, 0);
-		confline = check_strdup(strbuf_value(sb));
-		strbuf_close(ib);
-		strbuf_close(sb);
+		ib = new STRBUF(MAXBUFLEN);
+		STRBUF sb;
+		includelabel(&sb, label, 0);
+		confline = check_strdup(strbuf_value(&sb));
+		delete ib;
 		fclose(fp);
 	}
+
 	/*
 	 * make up required variables.
 	 */
-	sb = strbuf_open(0);
-	strbuf_puts(sb, confline);
-	strbuf_unputc(sb, ':');
+	STRBUF sb;
+	strbuf_puts(&sb, confline);
+	strbuf_unputc(&sb, ':');
 
 	if (!getconfs("langmap", NULL)) {
-		strbuf_puts(sb, ":langmap=");
-		strbuf_puts(sb, quote_chars(DEFAULTLANGMAP, ':'));
+		strbuf_puts(&sb, ":langmap=");
+		strbuf_puts(&sb, quote_chars(DEFAULTLANGMAP, ':'));
 	}
 	if (!getconfs("skip", NULL)) {
-		strbuf_puts(sb, ":skip=");
-		strbuf_puts(sb, DEFAULTSKIP);
+		strbuf_puts(&sb, ":skip=");
+		strbuf_puts(&sb, DEFAULTSKIP);
 	}
-	strbuf_unputc(sb, ':');
-	strbuf_putc(sb, ':');
-	confline = check_strdup(strbuf_value(sb));
-	strbuf_close(sb);
+	strbuf_unputc(&sb, ':');
+	strbuf_putc(&sb, ':');
+	confline = check_strdup(strbuf_value(&sb));
 	trim(confline);
-	return;
 }
+
 /**
  * getconfn: get property number
  *

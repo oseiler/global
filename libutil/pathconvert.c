@@ -119,17 +119,17 @@ convert_pathname(CONVERT *cv, const char *path)
 		 * make absolute path name.
 		 * 'path + 1' means skipping "." at the head.
 		 */
-		strbuf_setlen(cv->abspath, cv->start_point);
-		strbuf_puts(cv->abspath, path + 1);
+		strbuf_setlen(&cv->abspath, cv->start_point);
+		strbuf_puts(&cv->abspath, path + 1);
 		/*
 		 * print path name with converting.
 		 */
 		switch (cv->type) {
 		case PATH_ABSOLUTE:
-			path = strbuf_value(cv->abspath);
+			path = strbuf_value(&cv->abspath);
 			break;
 		case PATH_RELATIVE:
-			a = strbuf_value(cv->abspath);
+			a = strbuf_value(&cv->abspath);
 			b = cv->basedir;
 #if defined(_WIN32) || defined(__DJGPP__)
 			while (*a != '/')
@@ -396,13 +396,12 @@ convert_put_using(CONVERT *cv, const char *tag, const char *path, int lineno, co
 }
 
 CONVERT::CONVERT(int type, int format, const char *root, const char *cwd, const char *dbpath, FILE *op, int db) :
-  op(op), type(type), format(format), abspath(NULL), start_point(0), db(db)
+  op(op), type(type), format(format), abspath(MAXPATHLEN), start_point(0), db(db)
 {
   // set base directory.
-  abspath = strbuf_open(MAXPATHLEN);
-  strbuf_puts(abspath, root);
-  strbuf_unputc(abspath, '/');
-  start_point = strbuf_getlen(abspath);
+  strbuf_puts(&abspath, root);
+  strbuf_unputc(&abspath, '/');
+  start_point = strbuf_getlen(&abspath);
 
   // copy elements.
   if (strlen(cwd) > MAXPATHLEN) {
@@ -417,6 +416,5 @@ CONVERT::CONVERT(int type, int format, const char *root, const char *cwd, const 
 }
 
 CONVERT::~CONVERT() {
-  strbuf_close(abspath);
   gpath_close();
 }

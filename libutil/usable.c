@@ -54,7 +54,6 @@ static const char *suffix[] = {".exe", ".com", ".bat",};
 char *
 usable(const char *command)
 {
-	STRBUF *sb;
 	char *p;
 	const char *dir;
 	static char path[MAXPATHLEN];
@@ -84,9 +83,9 @@ usable(const char *command)
 	*path = 0;
 	/* Don't use fixed length buffer for environment variable
 	 * because it brings buffer overflow. */
-	sb = strbuf_open(0);
-	strbuf_puts(sb, getenv("PATH"));
-	p = strbuf_value(sb);
+	STRBUF sb;
+	strbuf_puts(&sb, getenv("PATH"));
+	p = strbuf_value(&sb);
 	while (p) {
 		dir = p;
 		if ((p = locatestring(p, PATHSEP, MATCH_FIRST)) != NULL)
@@ -104,6 +103,5 @@ usable(const char *command)
 #endif
 	}
 finish:
-	strbuf_close(sb);
 	return *path ? path : NULL;
 }

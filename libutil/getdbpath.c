@@ -284,7 +284,6 @@ setupdbpath(int verbose)
 		 */
 		do {
 			FILE *fp;
-			STRBUF *sb;
 			const char *s, *path;
 
 			path = makepath(root, "GTAGSROOT", NULL);
@@ -297,8 +296,8 @@ setupdbpath(int verbose)
 					fprintf(stderr, "'%s' ignored because it cannot be opened.\n", path);
 				break;
 			}
-			sb = strbuf_open(0);
-			s = strbuf_fgets(sb, fp, STRBUF_NOCRLF);
+			STRBUF sb;
+			s = strbuf_fgets(&sb, fp, STRBUF_NOCRLF);
 			if (!test("d", s)) {
 				if (verbose)
 					fprintf(stderr, "'%s' ignored because it doesn't include existent directory name.\n", path);
@@ -312,7 +311,6 @@ setupdbpath(int verbose)
 				strlimcpy(root, s, MAXPATHLEN);
 			}
 			fclose(fp);
-			strbuf_close(sb);
 			break;
 		} while (0);
 	}

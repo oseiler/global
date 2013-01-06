@@ -31,6 +31,9 @@
 #ifdef HAVE_HOME_ETC_H
 #include <home_etc.h>
 #endif
+#ifdef HAVE_PUTENV
+#include "checkalloc.h"
+#endif
 
 #include "die.h"
 #include "env.h"
@@ -46,22 +49,16 @@ extern char **environ;
  *
  * Machine independent version of @XREF{setenv,3}.
  */
-void
-set_env(const char *var, const char *val)
-{
-/*
- * sparc-sun-solaris2.6 doesn't have setenv(3).
- */
+void set_env(const char *var, const char *val) {
 #ifdef HAVE_PUTENV
-	STRBUF *sb = strbuf_open(0);
-
-	strbuf_sprintf(sb, "%s=%s", var, val);
-	putenv(strbuf_value(sb));
-	/* Don't free memory. putenv(3) require it. */
+  STRBUF sb;
+  strbuf_sprintf(&sb, "%s=%s", var, val);
+  putenv(check_strdup(strbuf_value(&sb)));
 #else
-	setenv(var, val, 1);
+  setenv(var, val, 1);
 #endif
 }
+
 /**
  * get_home_directory: get environment dependent home directory.
  *

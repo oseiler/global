@@ -193,24 +193,24 @@ realpath(const char *in_path, char *out_path)
 int
 makedirectories(const char *base, const char *rest, int verbose)
 {
-	STRBUF *sb;
 	const char *p, *q;
 
 	if (!test("d", base))
 		return -1;
 	if (!test("drw", base))
 		return -2;
-	sb = strbuf_open(0);
-	strbuf_puts(sb, base);
+
+	STRBUF sb;
+	strbuf_puts(&sb, base);
 	if (*rest == SEP)
 		rest++;
 	for (q = rest; *q;) {
 		p = q;
 		while (*q && *q != SEP)
 			q++;
-		strbuf_putc(sb, SEP);
-		strbuf_nputs(sb, p, q - p);
-		p = strbuf_value(sb);
+		strbuf_putc(&sb, SEP);
+		strbuf_nputs(&sb, p, q - p);
+		p = strbuf_value(&sb);
 		if (!test("d", p)) {
 			if (verbose)
 				fprintf(stderr, " Making directory '%s'.\n", p);
@@ -219,14 +219,12 @@ makedirectories(const char *base, const char *rest, int verbose)
 #else
 			if (mkdir(p, 0775) < 0) {
 #endif /* WIN32 */
-				strbuf_close(sb);
 				return -3;
 			}
 		}
 		if (*q == SEP)
 			q++;
 	}
-	strbuf_close(sb);
 	return 0;
 }
 /**

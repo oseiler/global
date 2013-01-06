@@ -213,7 +213,6 @@ setcom(int c)
 int
 decide_tag_by_context(const char *tag, const char *file, int lineno)
 {
-	STRBUF *sb = NULL;
 	char path[MAXPATHLEN], s_fid[MAXFIDLEN];
 	const char *tagline, *p;
 	DBOP *dbop;
@@ -302,9 +301,9 @@ finish:
 		char libdbpath[MAXPATHLEN];
 		char *libdir = NULL, *nextp = NULL;
 
-		sb = strbuf_open(0);
-		strbuf_puts(sb, getenv("GTAGSLIBPATH"));
-		for (libdir = strbuf_value(sb); libdir; libdir = nextp) {
+		STRBUF sb;
+		strbuf_puts(&sb, getenv("GTAGSLIBPATH"));
+		for (libdir = strbuf_value(&sb); libdir; libdir = nextp) {
 			 if ((nextp = locatestring(libdir, PATHSEP, MATCH_FIRST)) != NULL)
                                 *nextp++ = 0;
 			if (!gtagsexist(libdir, libdbpath, sizeof(libdbpath), 0))
@@ -321,8 +320,8 @@ finish:
 				break;
 			}
 		}
-		strbuf_close(sb);
 	}
+
 	return db;
 }
 int
@@ -621,17 +620,17 @@ main(int argc, char **argv)
 	 * incremental update of tag files.
 	 */
 	if (uflag) {
-		STRBUF	*sb = strbuf_open(0);
+		STRBUF sb;
 		char *gtags_path = usable("gtags");
 
 		if (!gtags_path)
 			die("gtags command not found.");
 		if (chdir(root) < 0)
 			die("cannot change directory to '%s'.", root);
-		strbuf_puts(sb, quote_shell(gtags_path));
-		strbuf_puts(sb, " -i");
+		strbuf_puts(&sb, quote_shell(gtags_path));
+		strbuf_puts(&sb, " -i");
 		if (vflag)
-			strbuf_puts(sb, " -v");
+			strbuf_puts(&sb, " -v");
 		if (single_update) {
 			if (!isabspath(single_update)) {
 				static char regular_path_name[MAXPATHLEN];
@@ -640,16 +639,15 @@ main(int argc, char **argv)
 					die("rel2abs failed.");
 				single_update = regular_path_name;
 			}
-			strbuf_puts(sb, " --single-update=");
-			strbuf_putc(sb, '"');
-			strbuf_puts(sb, single_update);
-			strbuf_putc(sb, '"');
+			strbuf_puts(&sb, " --single-update=");
+			strbuf_putc(&sb, '"');
+			strbuf_puts(&sb, single_update);
+			strbuf_putc(&sb, '"');
 		}
-		strbuf_putc(sb, ' ');
-		strbuf_puts(sb, dbpath);
-		if (system(strbuf_value(sb)))
+		strbuf_putc(&sb, ' ');
+		strbuf_puts(&sb, dbpath);
+		if (system(strbuf_value(&sb)))
 			exit(1);
-		strbuf_close(sb);
 		exit(0);
 	}
 	/*
@@ -689,18 +687,17 @@ main(int argc, char **argv)
 	 * local prefix must starts with './' and ends with '/'.
 	 */
 	if (lflag) {
-		STRBUF *sb = strbuf_open(0);
+		STRBUF sb;
 
-		strbuf_putc(sb, '.');
+		strbuf_putc(&sb, '.');
 		if (strcmp(root, cwd) != 0) {
 			const char *p = cwd + strlen(root);
 			if (*p != '/')
-				strbuf_putc(sb, '/');
-			strbuf_puts(sb, p);
+				strbuf_putc(&sb, '/');
+			strbuf_puts(&sb, p);
 		}
-		strbuf_putc(sb, '/');
-		localprefix = check_strdup(strbuf_value(sb));
-		strbuf_close(sb);
+		strbuf_putc(&sb, '/');
+		localprefix = check_strdup(strbuf_value(&sb));
 #ifdef DEBUG
 		fprintf(stderr, "root=%s\n", root);
 		fprintf(stderr, "cwd=%s\n", cwd);
@@ -785,7 +782,7 @@ completion_tags(const char *dbpath, const char *root, const char *prefix, int db
 		 * expression and prefix read for performance. It is done
 		 * by connecting two prefix reading.
 		 */
-		STRBUF *sb = strbuf_open(0);
+		STRBUF sb;
 		regex_t	preg;
 		int i, firstchar[2];
 
@@ -794,9 +791,9 @@ completion_tags(const char *dbpath, const char *root, const char *prefix, int db
 		/*
 		 * make regular expression.
 		 */
-		strbuf_putc(sb, '^');
-		strbuf_puts(sb, prefix);
-		if (regcomp(&preg, strbuf_value(sb), REG_ICASE) != 0)
+		strbuf_putc(&sb, '^');
+		strbuf_puts(&sb, prefix);
+		if (regcomp(&preg, strbuf_value(&sb), REG_ICASE) != 0)
 			die("invalid regular expression.");
 		/*
 		 * Two prefix reading:
@@ -812,9 +809,9 @@ completion_tags(const char *dbpath, const char *root, const char *prefix, int db
 		else
 			firstchar[0] = toupper(firstchar[0]);
 		for (i = 0; i < 2; i++) {
-			strbuf_reset(sb);
-			strbuf_putc(sb, firstchar[i]);
-			for (gtp = gtags_first(gtop, strbuf_value(sb), flags); gtp; gtp = gtags_next(gtop)) {
+			strbuf_reset(&sb);
+			strbuf_putc(&sb, firstchar[i]);
+			for (gtp = gtags_first(gtop, strbuf_value(&sb), flags); gtp; gtp = gtags_next(gtop)) {
 				if (regexec(&preg, gtp->tag, 0, 0, 0) == 0) {
 					fputs(gtp->tag, stdout);
 					fputc('\n', stdout);
@@ -822,7 +819,6 @@ completion_tags(const char *dbpath, const char *root, const char *prefix, int db
 				}
 			}
 		}
-		strbuf_close(sb);
 	} else {
 		flags |= GTOP_NOREGEX;
 		if (prefix)
@@ -857,14 +853,14 @@ completion(const char *dbpath, const char *root, const char *prefix, int db)
 	 * search in library path.
 	 */
 	if (db == GTAGS && getenv("GTAGSLIBPATH") && (count == 0 || Tflag) && !lflag) {
-		STRBUF *sb = strbuf_open(0);
+		STRBUF sb;
 		char *libdir, *nextp = NULL;
 
-		strbuf_puts(sb, getenv("GTAGSLIBPATH"));
+		strbuf_puts(&sb, getenv("GTAGSLIBPATH"));
 		/*
 		* search for each tree in the library path.
 		*/
-		for (libdir = strbuf_value(sb); libdir; libdir = nextp) {
+		for (libdir = strbuf_value(&sb); libdir; libdir = nextp) {
 			if ((nextp = locatestring(libdir, PATHSEP, MATCH_FIRST)) != NULL)
 				*nextp++ = 0;
 			if (!gtagsexist(libdir, libdbpath, sizeof(libdbpath), 0))
@@ -881,10 +877,9 @@ completion(const char *dbpath, const char *root, const char *prefix, int db)
 			if (count > 0 && !Tflag)
 				break;
 		}
-		strbuf_close(sb);
 	}
-	/* return total; */
 }
+
 /**
  * completion_idutils: print completion list of specified @a prefix
  *
@@ -896,7 +891,7 @@ void
 completion_idutils(const char *dbpath, const char *root, const char *prefix)
 {
 	FILE *ip;
-	STRBUF *sb = strbuf_open(0);
+	STRBUF sb;
 	const char *lid = usable("lid");
 	char *line, *p;
 
@@ -908,23 +903,23 @@ completion_idutils(const char *dbpath, const char *root, const char *prefix)
 	 */
 	if (!lid)
 		die("lid(idutils) not found.");
-	strbuf_puts(sb, lid);
-	strbuf_sprintf(sb, " --file='%s/ID'", dbpath);
-	strbuf_puts(sb, " --key=token");
+	strbuf_puts(&sb, lid);
+	strbuf_sprintf(&sb, " --file='%s/ID'", dbpath);
+	strbuf_puts(&sb, " --key=token");
 	if (iflag)
-		strbuf_puts(sb, " --ignore-case");
-	strbuf_putc(sb, ' ');
-	strbuf_putc(sb, '"');
-	strbuf_putc(sb, '^');
-	strbuf_puts(sb, prefix);
-	strbuf_putc(sb, '"');
+		strbuf_puts(&sb, " --ignore-case");
+	strbuf_putc(&sb, ' ');
+	strbuf_putc(&sb, '"');
+	strbuf_putc(&sb, '^');
+	strbuf_puts(&sb, prefix);
+	strbuf_putc(&sb, '"');
 	if (debug)
-		fprintf(stderr, "completion_idutils: %s\n", strbuf_value(sb));
+		fprintf(stderr, "completion_idutils: %s\n", strbuf_value(&sb));
 	if (chdir(root) < 0)
 		die("cannot move to '%s' directory.", root);
-	if (!(ip = popen(strbuf_value(sb), "r")))
-		die("cannot execute '%s'.", strbuf_value(sb));
-	while ((line = strbuf_fgets(sb, ip, STRBUF_NOCRLF)) != NULL) {
+	if (!(ip = popen(strbuf_value(&sb), "r")))
+		die("cannot execute '%s'.", strbuf_value(&sb));
+	while ((line = strbuf_fgets(&sb, ip, STRBUF_NOCRLF)) != NULL) {
 		for (p = line; *p && *p != ' '; p++)
 			;
 		if (*p == '\0') {
@@ -935,7 +930,6 @@ completion_idutils(const char *dbpath, const char *root, const char *prefix)
 		puts(line);
 	}
 	fclose(ip);
-	strbuf_close(sb);
 }
 /**
  * completion_path: print candidate path list.
@@ -1062,29 +1056,29 @@ void idutils(const char *pattern, const char *dbpath) {
    * make lid command line.
    * Invoke lid with the --result=grep option to generate grep format.
    */
-  STRBUF *ib = strbuf_open(0);
-  strbuf_puts(ib, lid);
-  strbuf_sprintf(ib, " --file='%s/ID'", dbpath);
-  strbuf_puts(ib, " --separator=newline");
+  STRBUF ib;
+  strbuf_puts(&ib, lid);
+  strbuf_sprintf(&ib, " --file='%s/ID'", dbpath);
+  strbuf_puts(&ib, " --separator=newline");
   if (format == FORMAT_PATH) {
-    strbuf_puts(ib, " --result=filenames --key=none");
+    strbuf_puts(&ib, " --result=filenames --key=none");
   } else {
-    strbuf_puts(ib, " --result=grep");
+    strbuf_puts(&ib, " --result=grep");
   }
 
   if (iflag) {
-    strbuf_puts(ib, " --ignore-case");
+    strbuf_puts(&ib, " --ignore-case");
   }
-  strbuf_putc(ib, ' ');
-  strbuf_puts(ib, quote_string(pattern));
+  strbuf_putc(&ib, ' ');
+  strbuf_puts(&ib, quote_string(pattern));
 
   if (debug) {
-    fprintf(stderr, "idutils: %s\n", strbuf_value(ib));
+    fprintf(stderr, "idutils: %s\n", strbuf_value(&ib));
   }
 
   FILE* ip = NULL;
-  if (!(ip = popen(strbuf_value(ib), "r"))) {
-    die("cannot execute '%s'.", strbuf_value(ib));
+  if (!(ip = popen(strbuf_value(&ib), "r"))) {
+    die("cannot execute '%s'.", strbuf_value(&ib));
   }
 
   CONVERT cv(type, format, root, cwd, dbpath, stdout, NOTAGS);
@@ -1092,7 +1086,7 @@ void idutils(const char *pattern, const char *dbpath) {
   char path[MAXPATHLEN];
   strcpy(path, "./");
   char* grep = NULL;
-  while ((grep = strbuf_fgets(ib, ip, STRBUF_NOCRLF)) != NULL) {
+  while ((grep = strbuf_fgets(&ib, ip, STRBUF_NOCRLF)) != NULL) {
     char* q = path + 2;
 
     /* extract path name */
@@ -1151,7 +1145,6 @@ void idutils(const char *pattern, const char *dbpath) {
   if (pclose(ip) < 0) {
     die("terminated abnormally.");
   }
-  strbuf_close(ib);
   if (vflag) {
     print_count(count);
     fprintf(stderr, " (using idutils index in '%s').\n", dbpath);
@@ -1224,7 +1217,7 @@ void grep(const char *pattern, char *const *argv, const char *dbpath) {
     user_specified = 0;
   }
 
-  STRBUF *ib = strbuf_open(MAXBUFLEN);
+  STRBUF ib(MAXBUFLEN);
   const char* path = NULL;
   while ((path = args_read()) != NULL) {
     if (user_specified) {
@@ -1256,7 +1249,7 @@ void grep(const char *pattern, char *const *argv, const char *dbpath) {
 
       int linenum = 0;
       const char* buffer = NULL;
-      while ((buffer = strbuf_fgets(ib, fp, STRBUF_NOCRLF)) != NULL) {
+      while ((buffer = strbuf_fgets(&ib, fp, STRBUF_NOCRLF)) != NULL) {
 	int result = regexec(&preg, buffer, 0, 0, 0);
 	linenum++;
 	if ((!Vflag && result == 0) || (Vflag && result != 0)) {
@@ -1276,7 +1269,6 @@ void grep(const char *pattern, char *const *argv, const char *dbpath) {
   }
 
   args_close();
-  strbuf_close(ib);
   if (literal == 0) {
     regfree(&preg);
   }
@@ -1487,14 +1479,14 @@ void parsefile(char *const *argv, const char *cwd, const char *root, const char 
     flags |= PARSER_DEBUG;
 
   char *langmap = NULL;
-  STRBUF *sb = strbuf_open(0);
-  if (getconfs("langmap", sb))
-    langmap = check_strdup(strbuf_value(sb));
-  strbuf_reset(sb);
+  STRBUF sb;
+  if (getconfs("langmap", &sb))
+    langmap = check_strdup(strbuf_value(&sb));
+  strbuf_reset(&sb);
 
   const char* plugin_parser = NULL;
-  if (getconfs("gtags_parser", sb))
-    plugin_parser = strbuf_value(sb);
+  if (getconfs("gtags_parser", &sb))
+    plugin_parser = strbuf_value(&sb);
 
   if (gpath_open(dbpath, 0) < 0)
     die("GPATH not found.");
@@ -1569,7 +1561,6 @@ void parsefile(char *const *argv, const char *cwd, const char *root, const char 
    * Settlement
    */
   gpath_close();
-  strbuf_close(sb);
 
   if (vflag) {
     print_count(count);
@@ -1603,19 +1594,19 @@ int search(const char *pattern, const char *root, const char *cwd, const char *d
   CONVERT cv(type, format, root, cwd, dbpath, stdout, db);
 
   // search through tag file.
-  STRBUF* sb = NULL;
-  STRBUF* ib = NULL;
+  std::auto_ptr<STRBUF> sb;
+  std::auto_ptr<STRBUF> ib;
   int flags = 0;
   if (nofilter & SORT_FILTER) {
     flags |= GTOP_NOSORT;
   }
   if (iflag) {
     if (!isregex(pattern)) {
-      sb = strbuf_open(0);
-      strbuf_putc(sb, '^');
-      strbuf_puts(sb, pattern);
-      strbuf_putc(sb, '$');
-      pattern = strbuf_value(sb);
+      sb.reset(new STRBUF);
+      strbuf_putc(sb.get(), '^');
+      strbuf_puts(sb.get(), pattern);
+      strbuf_putc(sb.get(), '$');
+      pattern = strbuf_value(sb.get());
     }
 
     flags |= GTOP_IGNORECASE;
@@ -1627,7 +1618,7 @@ int search(const char *pattern, const char *root, const char *cwd, const char *d
     flags |= GTOP_PATH;
   }
   if (gtop->format & GTAGS_COMPACT) {
-    ib = strbuf_open(0);
+    ib.reset(new STRBUF);
   }
 
   int count = 0;
@@ -1720,7 +1711,7 @@ int search(const char *pattern, const char *root, const char *cwd, const char *d
 
 	  if (last_lineno != n && fp) {
 	    while (lineno < n) {
-	      if (!(src = strbuf_fgets(ib, fp, STRBUF_NOCRLF))) {
+	      if (!(src = strbuf_fgets(ib.get(), fp, STRBUF_NOCRLF))) {
 		src = "";
 		fclose(fp);
 		fp = NULL;
@@ -1755,7 +1746,7 @@ int search(const char *pattern, const char *root, const char *cwd, const char *d
 
 	  if (last_lineno != n && fp) {
 	    while (lineno < n) {
-	      if (!(src = strbuf_fgets(ib, fp, STRBUF_NOCRLF))) {
+	      if (!(src = strbuf_fgets(ib.get(), fp, STRBUF_NOCRLF))) {
 		src = "";
 		fclose(fp);
 		fp = NULL;
@@ -1816,12 +1807,6 @@ int search(const char *pattern, const char *root, const char *cwd, const char *d
     }
   }
 
-  if (sb) {
-    strbuf_close(sb);
-  }
-  if (ib) {
-    strbuf_close(ib);
-  }
   if (fp) {
     fclose(fp);
   }
@@ -1854,14 +1839,14 @@ tagsearch(const char *pattern, const char *cwd, const char *root, const char *db
 	 * search in library path.
 	 */
 	if (db == GTAGS && getenv("GTAGSLIBPATH") && (count == 0 || Tflag) && !lflag) {
-		STRBUF *sb = strbuf_open(0);
+		STRBUF sb;
 		char *libdir, *nextp = NULL;
 
-		strbuf_puts(sb, getenv("GTAGSLIBPATH"));
+		strbuf_puts(&sb, getenv("GTAGSLIBPATH"));
 		/*
 		 * search for each tree in the library path.
 		 */
-		for (libdir = strbuf_value(sb); libdir; libdir = nextp) {
+		for (libdir = strbuf_value(&sb); libdir; libdir = nextp) {
 			if ((nextp = locatestring(libdir, PATHSEP, MATCH_FIRST)) != NULL)
 				*nextp++ = 0;
 			if (!gtagsexist(libdir, libdbpath, sizeof(libdbpath), 0))
@@ -1881,7 +1866,6 @@ tagsearch(const char *pattern, const char *cwd, const char *root, const char *db
 				break;
 			}
 		}
-		strbuf_close(sb);
 	}
 	if (vflag) {
 		print_count(total);

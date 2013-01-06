@@ -142,7 +142,6 @@ static regex_t *
 prepare_source(void)
 {
 	static regex_t suff_area;
-	STRBUF *sb = strbuf_open(0);
 	char *sufflist = NULL;
 	char *langmap = NULL;
 	int flags = REG_EXTENDED;
@@ -158,45 +157,47 @@ prepare_source(void)
 	/*
 	 * make suffix list.
 	 */
-	strbuf_reset(sb);
-	if (getconfs("langmap", sb)) {
-		langmap =  check_strdup(strbuf_value(sb));
+	STRBUF sb;
+	if (getconfs("langmap", &sb)) {
+		langmap =  check_strdup(strbuf_value(&sb));
 	}
-	strbuf_reset(sb);
-	make_suffixes(langmap ? langmap : DEFAULTLANGMAP, sb);
-	sufflist = check_strdup(strbuf_value(sb));
+	strbuf_reset(&sb);
+	make_suffixes(langmap ? langmap : DEFAULTLANGMAP, &sb);
+	sufflist = check_strdup(strbuf_value(&sb));
 	trim(sufflist);
 	{
 		const char *suffp;
 
-		strbuf_reset(sb);
-		strbuf_puts(sb, "\\.(");       /* ) */
+		strbuf_reset(&sb);
+		strbuf_puts(&sb, "\\.(");       /* ) */
 		for (suffp = sufflist; suffp; ) {
 			const char *p;
 
 			for (p = suffp; *p && *p != ','; p++) {
 				if (!isalnum((unsigned char)*p))
-					strbuf_putc(sb, '\\');
-				strbuf_putc(sb, *p);
+					strbuf_putc(&sb, '\\');
+				strbuf_putc(&sb, *p);
 			}
 			if (!*p)
 				break;
 			assert(*p == ',');
-			strbuf_putc(sb, '|');
+			strbuf_putc(&sb, '|');
 			suffp = ++p;
 		}
-		strbuf_puts(sb, ")$");
+		strbuf_puts(&sb, ")$");
+
 		/*
 		 * compile regular expression.
 		 */
-		if (regcomp(&suff_area, strbuf_value(sb), flags) != 0)
+		if (regcomp(&suff_area, strbuf_value(&sb), flags) != 0)
 			die("cannot compile regular expression.");
 	}
-	strbuf_close(sb);
+
 	if (langmap)
 		free(langmap);
 	if (sufflist)
 		free(sufflist);
+
 	return &suff_area;
 }
 /**
@@ -213,7 +214,6 @@ prepare_skip(void)
 {
 	static regex_t skip_area;
 	char *skiplist;
-	STRBUF *reg = strbuf_open(0);
 	char *p, *q;
 	int flags = REG_EXTENDED|REG_NEWLINE;
 
@@ -229,7 +229,7 @@ prepare_skip(void)
 	 * initialize common data.
 	 */
 	if (!list)
-		list = strbuf_open(0);
+		list = new STRBUF;
 	else
 		strbuf_reset(list);
 	list_count = 0;
@@ -239,17 +239,19 @@ prepare_skip(void)
 	/*
 	 * load skip data.
 	 */
-	if (!getconfs("skip", reg)) {
-		strbuf_close(reg);
+	STRBUF reg;
+	if (!getconfs("skip", &reg)) {
 		return NULL;
 	}
-	skiplist = check_strdup(strbuf_value(reg));
+	skiplist = check_strdup(strbuf_value(&reg));
 	trim(skiplist);
-	strbuf_reset(reg);
+	strbuf_reset(&reg);
+
 	/*
 	 * construct regular expression.
 	 */
-	strbuf_putc(reg, '(');	/* ) */
+	strbuf_putc(&reg, '(');	/* ) */
+
 	/*
 	 * Hard coded skip files:
 	 * (1) files which start with '.'
@@ -257,14 +259,14 @@ prepare_skip(void)
 	 */
 	/* skip files which start with '.' e.g. .cvsignore */
 	if (!accept_dotfiles) {
-		strbuf_puts(reg, "/\\.[^/]+$|");
-		strbuf_puts(reg, "/\\.[^/]+/|");
+		strbuf_puts(&reg, "/\\.[^/]+$|");
+		strbuf_puts(&reg, "/\\.[^/]+/|");
 	}
 	/* skip tag files */
-	strbuf_puts(reg, "/GTAGS$|");
-	strbuf_puts(reg, "/GRTAGS$|");
-	strbuf_puts(reg, "/GSYMS$|");
-	strbuf_puts(reg, "/GPATH$|");
+	strbuf_puts(&reg, "/GTAGS$|");
+	strbuf_puts(&reg, "/GRTAGS$|");
+	strbuf_puts(&reg, "/GSYMS$|");
+	strbuf_puts(&reg, "/GPATH$|");
 	for (p = skiplist; p; ) {
 		char *skipf = p;
 		if ((p = locatestring(p, ",", MATCH_FIRST)) != NULL)
@@ -273,24 +275,24 @@ prepare_skip(void)
 			list_count++;
 			strbuf_puts0(list, skipf);
 		} else {
-			strbuf_putc(reg, '/');
+			strbuf_putc(&reg, '/');
 			for (q = skipf; *q; q++) {
 				if (isregexchar(*q))
-					strbuf_putc(reg, '\\');
-				strbuf_putc(reg, *q);
+					strbuf_putc(&reg, '\\');
+				strbuf_putc(&reg, *q);
 			}
 			if (*(q - 1) != '/')
-				strbuf_putc(reg, '$');
+				strbuf_putc(&reg, '$');
 			if (p)
-				strbuf_putc(reg, '|');
+				strbuf_putc(&reg, '|');
 		}
 	}
-	strbuf_unputc(reg, '|');
-	strbuf_putc(reg, ')');
+	strbuf_unputc(&reg, '|');
+	strbuf_putc(&reg, ')');
 	/*
 	 * compile regular expression.
 	 */
-	if (regcomp(&skip_area, strbuf_value(reg), flags) != 0)
+	if (regcomp(&skip_area, strbuf_value(&reg), flags) != 0)
 		die("cannot compile regular expression.");
 	if (list_count > 0) {
 		int i;
@@ -301,7 +303,6 @@ prepare_skip(void)
 			p += strlen(p) + 1;
 		}
 	}
-	strbuf_close(reg);
 	free(skiplist);
 
 	return &skip_area;
@@ -526,7 +527,7 @@ find_open(const char *start)
 	curp = reinterpret_cast<stack_entry*>(varray_assign(stack, current_entry, 1));
 	strlimcpy(dir, start, sizeof(dir));
 	curp->dirp = dir + strlen(dir);
-	curp->sb = strbuf_open(0);
+	curp->sb = new STRBUF;
 	curp->real = getrealpath(dir);
 	if (getdirs(dir, curp->sb) < 0)
 		die("Work is given up.");
@@ -661,12 +662,12 @@ find_read_traverse(void)
 				return val;
 			}
 			if (type == 'd') {
-				STRBUF *sb = strbuf_open(0);
+				STRBUF *sb = new STRBUF;
 				char *dirp = curp->dirp;
 				strcat(dirp, unit);
 				strcat(dirp, "/");
 				if (getdirs(dir, sb) < 0) {
-					strbuf_close(sb);
+					delete sb;
 					*(curp->dirp) = 0;
 					continue;
 				}
@@ -681,7 +682,7 @@ find_read_traverse(void)
 				curp->end   = curp->start + strbuf_getlen(sb);
 			}
 		}
-		strbuf_close(curp->sb);
+		delete curp->sb;
 		curp->sb = NULL;
 		free(curp->real);
 		curp->real = NULL;
