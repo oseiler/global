@@ -99,9 +99,9 @@ decode_path(const char *path)
 			c2 = *++p;
 			if (outofrange(c1) || outofrange(c2))
 				die("decode_path: unexpected character. (%%%c%c)", c1, c2);
-			strbuf_putc(sb, h2int(c1) * 16 + h2int(c2));
+			sb->push_back(h2int(c1) * 16 + h2int(c2));
 		} else
-			strbuf_putc(sb, *p);
+			sb->push_back(*p);
 	}
 
 	return sb->c_str();

@@ -502,13 +502,13 @@ load_with_replace(const char *file, STRBUF *result, int place)
 	/*
 	 * construct regular expression.
 	 */
-	strbuf_putc(&sb, '(');
+	sb += '(';
 	for (i = 0; i < tabsize; i++) {
 		sb += tab[i].name;
-		strbuf_putc(&sb, '|');
+		sb += '|';
 	}
 	strbuf_unputc(&sb, '|');
-	strbuf_putc(&sb, ')');
+	sb += ')';
 	if (regcomp(&preg, sb.c_str(), REG_EXTENDED) != 0)
 		die("cannot compile regular expression.");
 	/*
@@ -540,7 +540,7 @@ load_with_replace(const char *file, STRBUF *result, int place)
 
 			/* print before macro */
 			for (i = 0; i < pmatch[0].rm_so; i++)
-				strbuf_putc(result, p[i]);
+				result->push_back(p[i]);
 			for (i = 0; i < tabsize; i++)
 				if (!strncmp(start, tab[i].name, length))
 					break;
@@ -554,10 +554,10 @@ load_with_replace(const char *file, STRBUF *result, int place)
 				 */
 				for (q = tab[i].value; *q; q++) {
 					if (*q == '"')
-						strbuf_putc(result, '\\');
+						result->push_back('\\');
 					else if (*q == '\n')
-						strbuf_putc(result, '\\');
-					strbuf_putc(result, *q);
+						result->push_back('\\');
+					result->push_back(*q);
 				}
 			}
 		}
@@ -1445,13 +1445,9 @@ static void save_environment(int argc, char *const *argv)
 	while (strbuf_fgets(&sb, ip, STRBUF_NOCRLF) != NULL) {
 		for (p = sb.c_str(); *p; p++) {
 			if (*p == '\'') {
-				strbuf_putc(&save_c, '\'');
-				strbuf_putc(&save_c, '"');
-				strbuf_putc(&save_c, '\'');
-				strbuf_putc(&save_c, '"');
-				strbuf_putc(&save_c, '\'');
+				save_c += "'\"'\"";
 			} else
-				strbuf_putc(&save_c, *p);
+				save_c += *p;
 		}
 	}
 	if (pclose(ip) != 0)
@@ -1477,12 +1473,12 @@ static void save_environment(int argc, char *const *argv)
 				continue;
 			}
 			blank = locatestring(argv[i], " ", MATCH_FIRST);
-			strbuf_putc(&save_a, ' ');
+			save_a += ' ';
 			if (blank)
-				strbuf_putc(&save_a, '\'');
+				save_a += '\'';
 			save_a += argv[i];
 			if (blank)
-				strbuf_putc(&save_a, '\'');
+				save_a += '\'';
 		}
 	}
 	save_argv = check_strdup(save_a.c_str());
@@ -1510,19 +1506,19 @@ append_options(int *argc, char *const *argv)
 			if (quote == c)
 				quote = 0;
 			else
-				strbuf_putc(sb, c);
+				sb->push_back(c);
 		} else if (c == '\\') {
-			strbuf_putc(sb, c);
+			sb->push_back(c);
 		} else if (c == '\'' || c == '"') {
 			quote = c;
 		} else if (isspace(c)) {
-			strbuf_putc(sb, '\0');
+			sb->push_back('\0');
 			count++;
 			while (*p && isspace(*p))
 				p++;
 			p--;
 		} else {
-			strbuf_putc(sb, *p);
+			sb->push_back(*p);
 		}
 	}
 	newargv = (const char **)check_malloc(sizeof(char *) * (*argc + count + 1));
@@ -1805,7 +1801,7 @@ main(int argc, char **argv)
 		if (suggest2 && enable_idutils && usable("mkid"))
 			sb += " -I";
 		if (arg_dbpath[0]) {
-			strbuf_putc(&sb, ' ');
+			sb += ' ';
 			sb += arg_dbpath;
 		}
 		if (system(sb.c_str()))

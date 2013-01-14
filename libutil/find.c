@@ -173,13 +173,13 @@ prepare_source(void)
 
 			for (p = suffp; *p && *p != ','; p++) {
 				if (!isalnum((unsigned char)*p))
-					strbuf_putc(&sb, '\\');
-				strbuf_putc(&sb, *p);
+					sb += '\\';
+				sb += *p;
 			}
 			if (!*p)
 				break;
 			assert(*p == ',');
-			strbuf_putc(&sb, '|');
+			sb += '|';
 			suffp = ++p;
 		}
 		sb += ")$";
@@ -248,7 +248,7 @@ prepare_skip(void)
 	/*
 	 * construct regular expression.
 	 */
-	strbuf_putc(&reg, '(');	/* ) */
+	reg += '(';	/* ) */
 
 	/*
 	 * Hard coded skip files:
@@ -273,20 +273,20 @@ prepare_skip(void)
 			list_count++;
 			strbuf_puts0(list, skipf);
 		} else {
-			strbuf_putc(&reg, '/');
+			reg += '/';
 			for (q = skipf; *q; q++) {
 				if (isregexchar(*q))
-					strbuf_putc(&reg, '\\');
-				strbuf_putc(&reg, *q);
+					reg += '\\';
+				reg += *q;
 			}
 			if (*(q - 1) != '/')
-				strbuf_putc(&reg, '$');
+				reg += '$';
 			if (p)
-				strbuf_putc(&reg, '|');
+				reg += '|';
 		}
 	}
 	strbuf_unputc(&reg, '|');
-	strbuf_putc(&reg, ')');
+	reg += ')';
 	/*
 	 * compile regular expression.
 	 */
@@ -481,13 +481,13 @@ getdirs(const char *dir, STRBUF *sb)
 			continue;
 		}
 		if (S_ISDIR(st.st_mode))
-			strbuf_putc(sb, 'd');
+			sb->push_back('d');
 		else if (S_ISREG(st.st_mode))
-			strbuf_putc(sb, 'f');
+			sb->push_back('f');
 		else
-			strbuf_putc(sb, ' ');
+			sb->push_back(' ');
 		sb->append(dp->d_name);
-		strbuf_putc(sb, '\0');
+		sb->push_back('\0');
 	}
 	(void)closedir(dirp);
 	return 0;

@@ -154,9 +154,9 @@ make_suffixes(const char *langmap, STRBUF *sb)
 				if (first_dot)
 					first_dot = 0;
 				else
-					strbuf_putc(sb, ',');
+					sb->push_back(',');
 			} else 
-				strbuf_putc(sb, *p);
+				sb->push_back(*p);
 		}
 	}
 	if (onsuffix == 0)

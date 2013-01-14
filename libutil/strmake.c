@@ -53,7 +53,7 @@ strmake(const char *p, const char *lim)
 		for (const char* c = lim; *c; c++)
 			if (*p == *c)
 				goto end;
-		strbuf_putc(sb,*p);
+		sb->push_back(*p);
 	}
 
 end:
@@ -104,10 +104,10 @@ strtrim(const char *p, int flag, int *len)
 			if (flag != TRIM_ALL) {
 				if (cut_off == -1 && flag != TRIM_HEAD)
 					cut_off = sb->length();
-				strbuf_putc(sb,*p);
+				sb->push_back(*p);
 			}
 		} else {
-			strbuf_putc(sb,*p);
+			sb->push_back(*p);
 			cut_off = -1;
 		}
 	}

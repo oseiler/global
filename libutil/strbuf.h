@@ -98,6 +98,17 @@ struct STRBUF {
   }
 
   void append(const char* s);
+
+  inline void push_back(char ch) {
+    reserve(length()+1);
+    *curp++ = ch;
+  }
+
+  inline STRBUF& operator+=(char ch) {
+    push_back(ch);
+    return *this;
+  }
+
   inline STRBUF& operator+=(const char* s) {
     append(s);
     return *this;
@@ -154,14 +165,9 @@ void strbuf_sprintf(STRBUF *, const char *, ...)
 void strbuf_vsprintf(STRBUF *, const char *, va_list)
 	__attribute__ ((__format__ (__printf__, 2, 0)));
 
-inline void strbuf_putc(STRBUF* sb, char c) {
-  sb->reserve(sb->length() + 1);
-  *sb->curp++ = c;		     
-}
-
 inline void strbuf_puts0(STRBUF* sb, const char* s) {
   sb->append(s);
-  strbuf_putc(sb, '\0');
+  sb->push_back('\0');
 }
 
 #endif /* ! _STRBUF_H */

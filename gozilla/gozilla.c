@@ -483,7 +483,7 @@ convertpath(const char *dbpath, const char *htmldir, const char *path, STRBUF *s
 	 * old style.
 	 */
 	for (p = path + 1; *p; p++)
-		strbuf_putc(sb, (*p == '/') ? ' ' : *p);
+		sb->push_back((*p == '/') ? ' ' : *p);
 	for (i = 0; i < lim; i++) {
 		int tag = sb->length();
 		sb->append(suffix[i]);
@@ -523,8 +523,8 @@ makefileurl(const char *path, int line, STRBUF *url)
 	 * copy drive name. (c: -> c|)
 	 */
 	if (isalpha(*path) && *(path+1) == ':') {
-		strbuf_putc(url, *path);
-		strbuf_putc(url, '|');
+		url->push_back(*path);
+		url->push_back('|');
 		path += 2;
 	}
 #endif

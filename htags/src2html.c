@@ -151,7 +151,7 @@ static int last_lineno;
 void
 echoc(int c)
 {
-        strbuf_putc(outbuf, c);
+        outbuf->push_back(c);
 }
 /**
  * Put a string to HTML as is.
@@ -224,7 +224,7 @@ fill_anchor(const char *root, const char *path)
 		sb->append(gen_href_begin("../files", path2fid(path), HTML, NULL));
 		sb->append(unit);
 		sb->append(gen_href_end());
-		strbuf_putc(sb, '/');
+		sb->push_back('/');
 	}
         return sb->c_str();
 }
@@ -289,7 +289,7 @@ fixed_guide_link_format(int ref[A_LIMIT], const char *anchors)
 
 	sb->append("<!-- beginning of fixed guide -->\n");
 	sb->append(guide_begin);
-	strbuf_putc(sb, '\n');
+	sb->push_back('\n');
 	for (int i = 0; i < A_LIMIT; i++) {
 		if (i == A_PREV || i == A_NEXT)
 			continue;
@@ -327,14 +327,14 @@ fixed_guide_link_format(int ref[A_LIMIT], const char *anchors)
 			strbuf_sprintf(sb, "[%s]", anchor_label[i]);
 		sb->append(gen_href_end());
 		sb->append(guide_unit_end);
-		strbuf_putc(sb, '\n');
+		sb->push_back('\n');
 	}
 	sb->append(guide_path_begin);
 	sb->append(anchors);
 	sb->append(guide_path_end);
-	strbuf_putc(sb, '\n');
+	sb->push_back('\n');
 	sb->append(guide_end);
-	strbuf_putc(sb, '\n');
+	sb->push_back('\n');
 	sb->append("<!-- end of fixed guide -->\n");
 
 	return sb->c_str();
@@ -358,7 +358,7 @@ generate_guide(int lineno)
 	sb->clear();
 	if (i > 0)
 		for (; i > 0; i--)
-			strbuf_putc(sb, ' ');
+			sb->push_back(' ');
 	strbuf_sprintf(sb, "%s/* ", comment_begin);
 	sb->append(link_format(anchor_getlinks(lineno)));
 	if (show_position)
@@ -394,7 +394,7 @@ tooltip(int type, int lno, const char *opt)
 			sb->append("Used at");
 		else
 			sb->append("Referred from");
-		strbuf_putc(sb, ' ');
+		sb->push_back(' ');
 		strbuf_putn(sb, lno);
 		if (opt) {
 			sb->append(" in ");
@@ -410,12 +410,12 @@ tooltip(int type, int lno, const char *opt)
 			sb->append("used in");
 		else
 			sb->append("referred from");
-		strbuf_putc(sb, ' ');
+		sb->push_back(' ');
 		sb->append(opt);
-		strbuf_putc(sb, ' ');
+		sb->push_back(' ');
 		sb->append("places");
 	}
-	strbuf_putc(sb, '.');
+	sb->push_back('.');
 	return sb->c_str();
 }
 /**
@@ -462,7 +462,7 @@ put_anchor(char *name, int type, int lineno)
 				sb->clear();
 
 				sb->append(action);
-				strbuf_putc(sb, '?');
+				sb->push_back('?');
 				sb->append("pattern=");
 				sb->append(name);
 				sb->append(quote_amp);
@@ -642,7 +642,7 @@ put_char(int c)
 	if (quoted)
 		outbuf->append(quoted);
 	else
-		strbuf_putc(outbuf, c);
+		outbuf->push_back(c);
 }
 /**
  * Put a string with HTML quoting.
@@ -747,11 +747,11 @@ encode(STRBUF *sb, const char *url)
 
 	while ((c = (unsigned char)*url++) != '\0') {
 		if (isurlchar(c)) {
-			strbuf_putc(sb, c);
+			sb->push_back(c);
 		} else {
-			strbuf_putc(sb, '%');
-			strbuf_putc(sb, "0123456789abcdef"[c >> 4]);
-			strbuf_putc(sb, "0123456789abcdef"[c & 0x0f]);
+			sb->push_back('%');
+			sb->push_back("0123456789abcdef"[c >> 4]);
+			sb->push_back("0123456789abcdef"[c & 0x0f]);
 		}
 	}
 }
@@ -774,7 +774,7 @@ get_cvs_module(const char *file, const char **basename)
 		strbuf_nputs(dir, file, p - file);
 		p++;
 	} else {
-		strbuf_putc(dir, '.');
+		dir->push_back('.');
 		p = file;
 	}
 	if (basename != NULL)
@@ -849,7 +849,7 @@ src2html(const char *src, const char *html, int notsource)
 		if (use_cvs_module
 		 && (module = get_cvs_module(src, &basename)) != NULL) {
 			encode(sb, module);
-			strbuf_putc(sb, '/');
+			sb->push_back('/');
 			encode(sb, basename);
 		} else {
 			encode(sb, src);

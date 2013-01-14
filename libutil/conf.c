@@ -186,7 +186,7 @@ includelabel(STRBUF *sb, const char *label, int	level)
 		strbuf_nputs(sb, p, q - p);
 		q = locatestring(q, "=", MATCH_FIRST) + 1;
 		for (; *q && *q != ':'; q++)
-			strbuf_putc(&inc, *q);
+			inc += *q;
 		includelabel(sb, inc.c_str(), level);
 		p = q;
 	}
@@ -306,7 +306,7 @@ openconf(void)
 		sb += DEFAULTSKIP;
 	}
 	strbuf_unputc(&sb, ':');
-	strbuf_putc(&sb, ':');
+	sb += ':';
 	confline = check_strdup(sb.c_str());
 	trim(confline);
 }
@@ -358,13 +358,13 @@ getconfs(const char *name, STRBUF *sb)
 	p = confline;
 	while ((p = locatestring(p, buf, MATCH_FIRST)) != NULL) {
 		if (exist && sb)
-			strbuf_putc(sb, ',');		
+			sb->push_back(',');		
 		exist = 1;
 		for (p += strlen(buf); *p && *p != ':'; p++) {
 			if (*p == '\\')	/* quoted character */
 				p++;
 			if (sb)
-				strbuf_putc(sb, *p);
+				sb->push_back(*p);
 		}
 		if (!all)
 			break;

@@ -1198,7 +1198,7 @@ string->append(LEXTEXT);
 case 17:
 YY_RULE_SETUP
 #line 177 "php.l"
-strbuf_putc(string, LEXTEXT[0]);
+string->push_back(LEXTEXT[0]);
 	YY_BREAK
 /* Literal */
 case 18:
@@ -1224,7 +1224,7 @@ string->append(LEXTEXT);
 case 21:
 YY_RULE_SETUP
 #line 188 "php.l"
-strbuf_putc(string, LEXTEXT[0]);
+string->push_back(LEXTEXT[0]);
 	YY_BREAK
 /* Here document */
 case 22:

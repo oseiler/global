@@ -315,7 +315,7 @@ sed(FILE *ip, int place)
 	STATIC_STRBUF(sb);
 	sb->clear();
 	while ((c = fgetc(ip)) != EOF) {
-		strbuf_putc(sb, c);
+		sb->push_back(c);
 		if (c == '@') {
 			int curpos = sb->length();
 			if (start_position == -1) {
@@ -579,30 +579,30 @@ gen_href_begin_with_title_target(const char *dir, const char *file, const char *
 	if (file) {
 		if (dir) {
 			sb->append(dir);
-			strbuf_putc(sb, '/');
+			sb->push_back('/');
 		}
 		sb->append(file);
 		if (suffix) {
-			strbuf_putc(sb, '.');
+			sb->push_back('.');
 			sb->append(suffix);
 		}
 	}
 	if (key) {
-		strbuf_putc(sb, '#');
+		sb->push_back('#');
 		/*
 		 * If the key starts with a digit, it assumed line number.
 		 * XHTML 1.1 profibits number as an anchor.
 		 */
 		if (isdigit(*key))
-			strbuf_putc(sb, 'L');
+			sb->push_back('L');
 		sb->append(key);
 	}
-	strbuf_putc(sb, '\'');
+	sb->push_back('\'');
 	if (Fflag && target)
 		strbuf_sprintf(sb, " target='%s'", fix_attr_value(target));
 	if (title)
 		strbuf_sprintf(sb, " title='%s'", fix_attr_value(title));
-	strbuf_putc(sb, '>');
+	sb->push_back('>');
 	return sb->c_str();
 }
 /**
@@ -731,7 +731,7 @@ gen_list_body(const char *srcdir, const char *ctags_x, const char *fid)	/* virtu
 				sb->append(quote_space);
 				sb->append(quote_space);
 			} else
-				strbuf_putc(sb, c);
+				sb->push_back(c);
 		}
 		sb->append("</td>");
 		sb->append(current_row_end);
@@ -746,7 +746,7 @@ gen_list_body(const char *srcdir, const char *ctags_x, const char *fid)	/* virtu
 
 		/* print line number */
 		for (const char* p = ptable.part[PART_TAG].end; p < ptable.part[PART_PATH].start; p++)
-			strbuf_putc(sb, *p);
+			sb->push_back(*p);
 		/* print file name */
 		sb->append(path);
 		/* print the rest */
@@ -760,7 +760,7 @@ gen_list_body(const char *srcdir, const char *ctags_x, const char *fid)	/* virtu
 			else if (c == '>')
 				sb->append(quote_great);
 			else
-				strbuf_putc(sb, c);
+				sb->push_back(c);
 		}
 		sb->append(current_line_end);
 	}
@@ -919,7 +919,7 @@ fix_attr_value(const char *value)
 		if(c == ATTR_DELIM)
 			sb->append("&#39;");
 		else
-			strbuf_putc(sb, c);
+			sb->push_back(c);
 		++cptr;
 	}
 

@@ -639,12 +639,11 @@ main(int argc, char **argv)
 					die("rel2abs failed.");
 				single_update = regular_path_name;
 			}
-			sb += " --single-update=";
-			strbuf_putc(&sb, '"');
+			sb += " --single-update=\"";
 			sb += single_update;
-			strbuf_putc(&sb, '"');
+			sb += '"';
 		}
-		strbuf_putc(&sb, ' ');
+		sb += ' ';
 		sb += dbpath;
 		if (system(sb.c_str()))
 			exit(1);
@@ -689,14 +688,14 @@ main(int argc, char **argv)
 	if (lflag) {
 		STRBUF sb;
 
-		strbuf_putc(&sb, '.');
+		sb += '.';
 		if (strcmp(root, cwd) != 0) {
 			const char *p = cwd + strlen(root);
 			if (*p != '/')
-				strbuf_putc(&sb, '/');
+				sb += '/';
 			sb += p;
 		}
-		strbuf_putc(&sb, '/');
+		sb += '/';
 		localprefix = check_strdup(sb.c_str());
 #ifdef DEBUG
 		fprintf(stderr, "root=%s\n", root);
@@ -791,7 +790,7 @@ completion_tags(const char *dbpath, const char *root, const char *prefix, int db
 		/*
 		 * make regular expression.
 		 */
-		strbuf_putc(&sb, '^');
+		sb += '^';
 		sb += prefix;
 		if (regcomp(&preg, sb.c_str(), REG_ICASE) != 0)
 			die("invalid regular expression.");
@@ -810,7 +809,7 @@ completion_tags(const char *dbpath, const char *root, const char *prefix, int db
 			firstchar[0] = toupper(firstchar[0]);
 		for (i = 0; i < 2; i++) {
 			sb.clear();
-			strbuf_putc(&sb, firstchar[i]);
+			sb += firstchar[i];
 			for (gtp = gtags_first(gtop, sb.c_str(), flags); gtp; gtp = gtags_next(gtop)) {
 				if (regexec(&preg, gtp->tag, 0, 0, 0) == 0) {
 					fputs(gtp->tag, stdout);
@@ -909,11 +908,9 @@ completion_idutils(const char *dbpath, const char *root, const char *prefix)
 	sb += " --key=token";
 	if (iflag)
 		sb += " --ignore-case";
-	strbuf_putc(&sb, ' ');
-	strbuf_putc(&sb, '"');
-	strbuf_putc(&sb, '^');
+	sb += " \"^";
 	sb += prefix;
-	strbuf_putc(&sb, '"');
+	sb += '"';
 	if (debug)
 		fprintf(stderr, "completion_idutils: %s\n", sb.c_str());
 	if (chdir(root) < 0)
@@ -1070,7 +1067,7 @@ void idutils(const char *pattern, const char *dbpath) {
   if (iflag) {
     ib += " --ignore-case";
   }
-  strbuf_putc(&ib, ' ');
+  ib += ' ';
   ib += quote_string(pattern);
 
   if (debug) {
@@ -1604,9 +1601,9 @@ int search(const char *pattern, const char *root, const char *cwd, const char *d
   if (iflag) {
     if (!isregex(pattern)) {
       sb.reset(new STRBUF);
-      strbuf_putc(sb.get(), '^');
+      sb->push_back('^');
       sb->append(pattern);
-      strbuf_putc(sb.get(), '$');
+      sb->push_back('$');
       pattern = sb->c_str();
     }
 

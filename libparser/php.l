@@ -174,7 +174,7 @@ WORD		{ALPHA}{ALPHANUM}*
 				return PHP_STRING;
 			}
 <STRING>\\.		string->append(LEXTEXT);
-<STRING>.		strbuf_putc(string, LEXTEXT[0]);
+<STRING>.		string->push_back(LEXTEXT[0]);
 
  /* Literal */
 <PHP>\'			{ string->clear(); BEGIN LITERAL; }
@@ -185,7 +185,7 @@ WORD		{ALPHA}{ALPHANUM}*
 				return PHP_STRING;
 			}
 <LITERAL>\\.		string->append(LEXTEXT);
-<LITERAL>.		strbuf_putc(string, LEXTEXT[0]);
+<LITERAL>.		string->push_back(LEXTEXT[0]);
 
  /* Here document */
 <PHP><<<{WORD}		{

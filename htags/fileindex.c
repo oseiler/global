@@ -253,7 +253,7 @@ appendslash(const char *path)
 	STATIC_STRBUF(sb);
 	sb->clear();
 	sb->append(path);
-	strbuf_putc(sb, '/');
+	sb->push_back('/');
 	return sb->c_str();
 }
 /**
@@ -489,7 +489,7 @@ print_directory_header(FILE *op, int level, const char *dir)
 	STATIC_STRBUF(sb);
 	sb->clear();
 	sb->append(removedotslash(dir));
-	strbuf_putc(sb, '/');
+	sb->push_back('/');
 	fputs_nl(gen_page_begin(sb->c_str(), SUBDIR), op);
 	fputs_nl(body_begin, op);
 
@@ -646,7 +646,7 @@ print_file_name(int level, const char *path)
 		sb->append(item_end);
 	else
 		sb->append(br);
-	strbuf_putc(sb, '\n');
+	sb->push_back('\n');
 	return sb->c_str();
 }
 /**
@@ -686,7 +686,7 @@ print_directory_name(int level, const char *path, int count)
 		sb->append(item_end);
 	else
 		sb->append(br);
-	strbuf_putc(sb, '\n');
+	sb->push_back('\n');
 	return sb->c_str();
 }
 /**
@@ -730,10 +730,10 @@ makefileindex(const char *file, STRBUF *a_files)
 
 		while ((c = (unsigned char)*p++) != '\0') {
 			if (isregexchar(c))
-				strbuf_putc(sb, '\\');
+				sb->push_back('\\');
 			else if (c == ',')
 				c = '|';
-			strbuf_putc(sb, c);
+			sb->push_back(c);
 		}
 	}
 	sb->append(")$");

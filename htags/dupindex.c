@@ -79,7 +79,7 @@ makedupindex(void)
 		 */
 		command.clear();
 #if defined(_WIN32) && !defined(__CYGWIN__)
-		strbuf_putc(&command, '"');
+		command += '"';
 #endif
 		strbuf_sprintf(&command, "%s -x%s --result=ctags-xid --encode-path=\" \t\" --nofilter=path", quote_shell(global_path), option);
 		/*
@@ -92,7 +92,7 @@ makedupindex(void)
 		}
 		command += " \".*\"";
 #if defined(_WIN32) && !defined(__CYGWIN__)
-		strbuf_putc(&command, '"');
+		command += '"';
 #endif
 		if ((ip = popen(command.c_str(), "r")) == NULL)
 			die("cannot execute command '%s'.", command.c_str());
@@ -119,9 +119,9 @@ makedupindex(void)
 					 * cache record: " <fid>\0<entry number>\0"
 					 */
 					tmp.clear();
-					strbuf_putc(&tmp, ' ');
+					tmp += ' ';
 					strbuf_putn(&tmp, count - 1);
-					strbuf_putc(&tmp, '\0');
+					tmp += '\0';
 					strbuf_putn(&tmp, entry_count);
 					cache_put(db, prev, tmp.c_str(), tmp.length() + 1);
 				}				
@@ -133,7 +133,7 @@ makedupindex(void)
 
 					tmp.clear();
 					strbuf_puts_withterm(&tmp, lno, ' ');
-					strbuf_putc(&tmp, '\0');
+					tmp += '\0';
 					tmp += fid;
 					cache_put(db, prev, tmp.c_str(), tmp.length() + 1);
 				}
@@ -188,9 +188,9 @@ makedupindex(void)
 			 * cache record: " <fid>\0<entry number>\0"
 			 */
 			tmp.clear();
-			strbuf_putc(&tmp, ' ');
+			tmp += ' ';
 			strbuf_putn(&tmp, count);
-			strbuf_putc(&tmp, '\0');
+			tmp += '\0';
 			strbuf_putn(&tmp, entry_count);
 			cache_put(db, prev, tmp.c_str(), tmp.length() + 1);
 		}
@@ -201,7 +201,7 @@ makedupindex(void)
 
 			tmp.clear();
 			strbuf_puts_withterm(&tmp, lno, ' ');
-			strbuf_putc(&tmp, '\0');
+			tmp += '\0';
 			tmp += fid;
 			cache_put(db, prev, tmp.c_str(), tmp.length() + 1);
 		}

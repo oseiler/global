@@ -194,12 +194,12 @@ compress(const char *in, const char *name)
 		}
 		if (spaces > 0) {
 			if (spaces >= 10) {
-				strbuf_putc(sb, '@');
-				strbuf_putc(sb, '{');
+				sb->push_back('@');
+				sb->push_back('{');
 				strbuf_putn(sb, spaces);
-				strbuf_putc(sb, '}');
+				sb->push_back('}');
 			} else if (spaces > 3) {
-				strbuf_putc(sb, '@');
+				sb->push_back('@');
 				strbuf_putn(sb, spaces);
 			} else {
 				strbuf_nputc(sb, ' ', spaces);
@@ -218,18 +218,18 @@ compress(const char *in, const char *name)
 
 			for (i = 0; i < limit; i++) {
 				if (!strncmp(p, ab[i].name, ab[i].length)) {
-					strbuf_putc(sb, '@');
-					strbuf_putc(sb, ab[i].c);
+					sb->push_back('@');
+					sb->push_back(ab[i].c);
 					p += ab[i].length;
 					break;
 				}
 			}
 			if (i >= limit) {
-				strbuf_putc(sb, *p);
+				sb->push_back(*p);
 				p++;
 			}
 		} else {
-			strbuf_putc(sb, *p);
+			sb->push_back(*p);
 			p++;
 		}
 	}
@@ -237,13 +237,13 @@ compress(const char *in, const char *name)
 		if (spaces < 4) {
 			strbuf_nputc(sb, ' ', spaces);
 		} else if (spaces < 10) {
-			strbuf_putc(sb, '@');
+			sb->push_back('@');
 			strbuf_putn(sb, spaces);
 		} else {
-			strbuf_putc(sb, '@');
-			strbuf_putc(sb, '{');
+			sb->push_back('@');
+			sb->push_back('{');
 			strbuf_putn(sb, spaces);
-			strbuf_putc(sb, '}');
+			sb->push_back('}');
 		}
 	}
 
@@ -269,7 +269,7 @@ uncompress(const char *in, const char *name)
 
 			switch (*++p) {
 			case '@':
-				strbuf_putc(sb, '@');
+				sb->push_back('@');
 				break;
 			case 'n':
 				sb->append(name);
@@ -301,7 +301,7 @@ uncompress(const char *in, const char *name)
                         }
 			strbuf_nputc(sb, ' ', spaces);
                 } else {
-			strbuf_putc(sb, *p);
+			sb->push_back(*p);
 		}
 	}
 

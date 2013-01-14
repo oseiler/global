@@ -168,10 +168,10 @@ repeat_find_next(void)
 	} else {\
 		if (xp->verbose)\
 			xp->verbose(path + 2, xp->seqno, 0);\
-		strbuf_putc(&comline, ' ');\
-		strbuf_putc(&comline, QUOTE);\
+		comline += ' ';\
+		comline += QUOTE;\
 		comline += path;\
-		strbuf_putc(&comline, QUOTE);\
+		comline += QUOTE;\
 		count++;\
 	}\
 }
@@ -205,7 +205,7 @@ execute_command(XARGS *xp)
 	 */
 
 	if (*xp->command == '"')
-		strbuf_putc(&comline, '"');
+		comline += '"';
 #endif
 	/*
 	 * Copy the part before '%s' of the command skeleton.
@@ -259,12 +259,12 @@ execute_command(XARGS *xp)
 	 * Copy the left part of the command skeleton.
 	 */
 	if (meta_p) {
-		strbuf_putc(&comline, ' ');
+		comline += ' ';
 		comline += (meta_p+2);
 	}
 #if defined(_WIN32) && !defined(__CYGWIN__)
 	if (*xp->command == '"')
-		strbuf_putc(&comline, '"');
+		comline += '"';
 #endif
 	if (count > 0) {
 		pipe = popen(comline.c_str(), "r");

@@ -55,7 +55,7 @@ Function call                           Memory status
                                          v
 sb = new STRBUF;                        []
                                           v
-strbuf_putc(sb, 'a');                   [a]
+sb->push_back('a');                     [a]
                                           v
 const char *s = sb->c_str();            [a\0]           s == "a"
                                             v
@@ -102,7 +102,7 @@ strbuf_nputs(STRBUF *sb, const char *s, int len)
  *	@param[in]	c	character
  *	@param[in]	len	number of times to put @a c
  *
- *	@see strbuf_putc()
+ *	@see STRBUF::push_back()
  */
 void
 strbuf_nputc(STRBUF *sb, int c, int len)
@@ -155,7 +155,7 @@ void
 strbuf_putn(STRBUF *sb, int n)
 {
 	if (n == 0) {
-		strbuf_putc(sb, '0');
+		sb->push_back('0');
 	} else {
 		char num[128];
 		int i = 0;
@@ -167,7 +167,7 @@ strbuf_putn(STRBUF *sb, int n)
 			n = n / 10;
 		}
 		while (--i >= 0)
-			strbuf_putc(sb, num[i]);
+			sb->push_back(num[i]);
 	}
 }
 /**
@@ -298,7 +298,7 @@ strbuf_vsprintf(STRBUF *sb, const char *s, va_list ap)
 			 * '%%' means '%'.
 			 */
 			if (c == '%') {
-				strbuf_putc(sb, c);
+				sb->push_back(c);
 			}
 			/*
 			 * If the optional number is specified then

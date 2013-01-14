@@ -79,8 +79,8 @@ quote_string(const char *s)
 
 	for (; *s; s++) {
 		if (!isalnum((unsigned char)*s))
-			strbuf_putc(sb, '\\');
-		strbuf_putc(sb, *s);
+			sb->push_back('\\');
+		sb->push_back(*s);
 	}
 
 	return sb->c_str();
@@ -101,8 +101,8 @@ quote_chars(const char *s, unsigned int c)
 
 	for (; *s; s++) {
 		if ((unsigned char)*s == c)
-			strbuf_putc(sb, '\\');
-		strbuf_putc(sb, *s);
+			sb->push_back('\\');
+		sb->push_back(*s);
 	}
 
 	return sb->c_str();
@@ -127,20 +127,20 @@ quote_shell(const char *s)
 	STATIC_STRBUF(sb);
 	sb->clear();
 
-	strbuf_putc(sb, SHELL_QUOTE);
+	sb->push_back(SHELL_QUOTE);
 #if defined(__DJGPP__) || (defined(_WIN32) && !defined(__CYGWIN__))
 	sb->append(s);
 #else
 	for (; *s; s++) {
 		if (*s == SHELL_QUOTE) {
-			strbuf_putc(sb, SHELL_QUOTE);
-			strbuf_putc(sb, '\\');
-			strbuf_putc(sb, SHELL_QUOTE);
-			strbuf_putc(sb, SHELL_QUOTE);
+			sb->push_back(SHELL_QUOTE);
+			sb->push_back('\\');
+			sb->push_back(SHELL_QUOTE);
+			sb->push_back(SHELL_QUOTE);
 		} else
-			strbuf_putc(sb, *s);
+			sb->push_back(*s);
 	}
 #endif
-	strbuf_putc(sb, SHELL_QUOTE);
+	sb->push_back(SHELL_QUOTE);
 	return sb->c_str();
 }

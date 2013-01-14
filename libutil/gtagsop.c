@@ -507,11 +507,11 @@ gtags_put_using(GTOP *gtop, const char *tag, int lno, const char *fid, const cha
 	}
 	gtop->sb->clear();
 	gtop->sb->append(fid);
-	strbuf_putc(gtop->sb, ' ');
+	gtop->sb->push_back(' ');
 	gtop->sb->append((gtop->format & GTAGS_COMPNAME) ? compress(tag, key) : tag);
-	strbuf_putc(gtop->sb, ' ');
+	gtop->sb->push_back(' ');
 	strbuf_putn(gtop->sb, lno);
-	strbuf_putc(gtop->sb, ' ');
+	gtop->sb->push_back(' ');
 	gtop->sb->append((gtop->format & GTAGS_COMPRESS) ? compress(img, key) : img);
 	dbop_put(gtop->dbop, key, gtop->sb->c_str());
 }
@@ -847,13 +847,13 @@ flush_pool(GTOP *gtop, const char *s_fid)
 
 		gtop->sb->clear();
 		gtop->sb->append(s_fid);
-		strbuf_putc(gtop->sb, ' ');
+		gtop->sb->push_back(' ');
 		if (gtop->format & GTAGS_COMPNAME) {
 			gtop->sb->append(compress(entry->name, key));
 		} else {
 			gtop->sb->append(entry->name);
 		}
-		strbuf_putc(gtop->sb, ' ');
+		gtop->sb->push_back(' ');
 		header_offset = gtop->sb->length();
 		/*
 		 * If GTAGS_COMPLINE flag is set, each line number is expressed as the
@@ -884,12 +884,12 @@ flush_pool(GTOP *gtop, const char *s_fid)
 					 * Range expression. ex: 10-2 means 10 11 12
 					 */
 					if (cont) {
-						strbuf_putc(gtop->sb, '-');
+						gtop->sb->push_back('-');
 						strbuf_putn(gtop->sb, last - cont);
 						cont = 0;
 					}
 					if (gtop->sb->length() > header_offset) {
-						strbuf_putc(gtop->sb, ',');
+						gtop->sb->push_back(',');
 						strbuf_putn(gtop->sb, n - last);
 					} else {
 						strbuf_putn(gtop->sb, n);
@@ -902,7 +902,7 @@ flush_pool(GTOP *gtop, const char *s_fid)
 				last = n;
 			}
 			if (cont) {
-				strbuf_putc(gtop->sb, '-');
+				gtop->sb->push_back('-');
 				strbuf_putn(gtop->sb, last - cont);
 			}
 		} else {
@@ -916,7 +916,7 @@ flush_pool(GTOP *gtop, const char *s_fid)
 				if (n == last)
 					continue;
 				if (gtop->sb->length() > header_offset)
-					strbuf_putc(gtop->sb, ',');
+					gtop->sb->push_back(',');
 				strbuf_putn(gtop->sb, n);
 				if (gtop->sb->length() > DBOP_PAGESIZE / 4) {
 					dbop_put(gtop->dbop, key, gtop->sb->c_str());

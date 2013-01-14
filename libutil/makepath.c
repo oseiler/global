@@ -85,12 +85,12 @@ makepath(const char *dir, const char *file, const char *suffix)
 #endif
 		sb->append(dir);
 		strbuf_unputc(sb, sep);
-		strbuf_putc(sb, sep);
+		sb->push_back(sep);
 	}
 	sb->append(file);
 	if (suffix) {
 		if (*suffix != '.')
-			strbuf_putc(sb, '.');
+			sb->push_back('.');
 		sb->append(suffix);
 	}
 	if ((length = strlen(sb->c_str())) > MAXPATHLEN)
