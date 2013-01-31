@@ -82,23 +82,6 @@ delete sb;                              (not exist)
 */
 
 /**
- * strbuf_nputc: Put a character, @a len (number) times
- *
- *	@param[in]	sb	string buffer
- *	@param[in]	c	character
- *	@param[in]	len	number of times to put @a c
- *
- *	@see STRBUF::push_back()
- */
-void
-strbuf_nputc(STRBUF *sb, int c, int len)
-{
-	sb->reserve(sb->length() + len);
-	while (len-- > 0)
-		*sb->curp++ = c;
-}
-
-/**
  * strbuf_puts_withterm: Put string until the terminator
  *
  *	@param[in]	sb	string buffer
@@ -347,6 +330,14 @@ void STRBUF::append(const char* s, size_t len) {
   reserve(length() + len);
   while (len-- > 0) {
     *curp++ = *s++;
+  }
+}
+
+void STRBUF::append(size_t n, char c)
+{
+  reserve(length() + n);
+  while (n-- > 0) {
+    *curp++ = c;
   }
 }
 

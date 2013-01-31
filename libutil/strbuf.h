@@ -99,6 +99,7 @@ struct STRBUF {
 
   void append(const char* s);
   void append(const char* s, size_t len);
+  void append(size_t n, char c);
 
   inline void push_back(char ch) {
     reserve(length()+1);
@@ -153,7 +154,6 @@ struct STRBUF {
  */
 #define STATIC_STRBUF(sb) static STRBUF sb##_instance; STRBUF* sb = & sb##_instance
 
-void strbuf_nputc(STRBUF *, int, int);
 void strbuf_puts_withterm(STRBUF *, const char *, int);
 void strbuf_puts_nl(STRBUF *, const char *);
 void strbuf_putn(STRBUF *, int);
