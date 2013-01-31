@@ -409,7 +409,7 @@ gen_page_generic_begin(const char *title, int place, int use_frameset, const cha
 		 * write the declaration as long as XHTML1.1 is not required.
 		 */
 		if (strict_xhtml) {
-			strbuf_puts_nl(sb, "<?xml version='1.0' encoding='ISO-8859-1'?>");
+			sb->append("<?xml version='1.0' encoding='ISO-8859-1'?>\n");
 			strbuf_sprintf(sb, "<?xml-stylesheet type='text/css' href='%sstyle.css'?>\n", dir);
 		}
 		/*
@@ -421,11 +421,11 @@ gen_page_generic_begin(const char *title, int place, int use_frameset, const cha
 		 * else 'XHTML 1.0 Transitional'.
 		 */
 		if (use_frameset)
-			strbuf_puts_nl(sb, "<!DOCTYPE html PUBLIC '-//W3C//DTD XHTML 1.0 Frameset//EN' 'http://www.w3.org/TR/xhtml1/DTD/xhtml1-frameset.dtd'>");
+			sb->append("<!DOCTYPE html PUBLIC '-//W3C//DTD XHTML 1.0 Frameset//EN' 'http://www.w3.org/TR/xhtml1/DTD/xhtml1-frameset.dtd'>\n");
 		else if (!Fflag && strict_xhtml)
-			strbuf_puts_nl(sb, "<!DOCTYPE html PUBLIC '-//W3C//DTD XHTML 1.1//EN' 'http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd'>");
+			sb->append("<!DOCTYPE html PUBLIC '-//W3C//DTD XHTML 1.1//EN' 'http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd'>\n");
 		else
-			strbuf_puts_nl(sb, "<!DOCTYPE html PUBLIC '-//W3C//DTD XHTML 1.0 Transitional//EN' 'http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd'>");
+			sb->append("<!DOCTYPE html PUBLIC '-//W3C//DTD XHTML 1.0 Transitional//EN' 'http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd'>\n");
 	}
 	strbuf_puts_nl(sb, html_begin);
 	strbuf_puts_nl(sb, html_head_begin);

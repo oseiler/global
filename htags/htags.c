@@ -731,34 +731,34 @@ makesearchpart(const char *target)
 	sb->append(gen_input(NULL, "Reset", "reset"));
 	strbuf_puts_nl(sb, br);
 	sb->append(gen_input_radio("type", "definition", 1, "Retrieve the definition place of the specified symbol."));
-	strbuf_puts_nl(sb, target ? "Def" : "Definition");
+	sb->append(target ? "Def\n" : "Definition\n");
 	sb->append(gen_input_radio("type", "reference", 0, "Retrieve the reference place of the specified symbol."));
-	strbuf_puts_nl(sb, target ? "Ref" : "Reference");
+	sb->append(target ? "Ref\n" : "Reference\n");
 	sb->append(gen_input_radio("type", "symbol", 0, "Retrieve the place of the specified symbol is used."));
-	strbuf_puts_nl(sb, target ? "Sym" : "Other symbol");
+	sb->append(target ? "Sym\n" : "Other symbol\n");
 	sb->append(gen_input_radio("type", "path", 0, "Look for path name which matches to the specified pattern."));
-	strbuf_puts_nl(sb, target ? "Path" : "Path name");
+	sb->append(target ? "Path\n" : "Path name\n");
 	if (enable_grep) {
 		sb->append(gen_input_radio("type", "grep", 0, "Retrieve lines which matches to the specified pattern."));
-		strbuf_puts_nl(sb, target ? "Grep" : "Grep pattern");
+		sb->append(target ? "Grep\n" : "Grep pattern\n");
 	}
 	if (enable_idutils && test("f", makepath(dbpath, "ID", NULL))) {
 		sb->append(gen_input_radio("type", "idutils", 0, "Retrieve lines which matches to the specified pattern using idutils(1)."));
-		strbuf_puts_nl(sb, target ? "Id" : "Id pattern");
+		sb->append(target ? "Id\n" : "Id pattern\n");
 	}
 	strbuf_puts_nl(sb, br);
 	sb->append(gen_input_checkbox("icase", NULL, "Ignore case distinctions in the pattern."));
-	strbuf_puts_nl(sb, target ? "Icase" : "Ignore case");
+	sb->append(target ? "Icase\n" : "Ignore case\n");
 	if (other_files) {
 		sb->append(gen_input_checkbox("other", NULL, "Files other than the source code are also retrieved."));
-		strbuf_puts_nl(sb, target ? "Other" : "Other files");
+		sb->append(target ? "Other\n" : "Other files\n");
 	}
 	if (other_files && !target) {
 		strbuf_puts_nl(sb, br);
 		sb->append("('Other files' is effective only to 'Path name'");
 		if (enable_grep)
 			sb->append(" and 'Grep pattern'");
-		strbuf_puts_nl(sb, ".)");
+		sb->append(".)\n");
 	}
 	strbuf_puts_nl(sb, gen_form_end());
 	return sb->c_str();
@@ -1065,13 +1065,13 @@ makecommonpart(const char *title, const char *defines, const char *files)
 				strbuf_puts_nl(&sb, caution_begin);
 				strbuf_sprintf(&sb, "<font size='+2' color='red'>CAUTION</font>%s\n", br);
 				strbuf_sprintf(&sb, "This hypertext consist of %d files.\n", html_count);
-				strbuf_puts_nl(&sb, "Please don't download whole hypertext using hypertext copy tools.");
-				strbuf_puts_nl(&sb, "Our network cannot afford such traffic.");
-				strbuf_puts_nl(&sb, "Instead, you can generate same thing in your computer using");
+				sb.append("Please don't download whole hypertext using hypertext copy tools.\n");
+				sb.append("Our network cannot afford such traffic.\n");
+				sb.append("Instead, you can generate same thing in your computer using\n");
 				sb += gen_href_begin_with_title_target(NULL, www, NULL, NULL, NULL, "_top");
 				sb += "GLOBAL source code tag system";
 				strbuf_puts_nl(&sb, gen_href_end());
-				strbuf_puts_nl(&sb, "Thank you.");
+				sb.append("Thank you.\n");
 				strbuf_puts_nl(&sb, caution_end);
 				strbuf_sprintf(&sb, "\n%s\n", hr);
 			}
@@ -2013,7 +2013,7 @@ main(int argc, char **argv)
 	if (auto_completion || tree_view) {
 		STATIC_STRBUF(sb);
 		sb->clear();
-		strbuf_puts_nl(sb, "<script type='text/javascript' src='js/jquery.js'></script>");
+		sb->append("<script type='text/javascript' src='js/jquery.js'></script>\n");
 		if (auto_completion)
 			loadfile("jscode_suggest", sb);
 		if (tree_view)
