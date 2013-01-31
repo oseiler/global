@@ -529,7 +529,7 @@ put_anchor_force(char *name, int length, int lineno)
 
 	STATIC_STRBUF(sb);
 	sb->clear();
-	strbuf_nputs(sb, name, length);
+	sb->append(name, length);
 	wflag = 0;
 	put_anchor(sb->c_str(), 'R', lineno);
 	wflag = saveflag;
@@ -771,7 +771,7 @@ get_cvs_module(const char *file, const char **basename)
 	dir->clear();
 	const char* p = locatestring(file, "/", MATCH_LAST);
 	if (p != NULL) {
-		strbuf_nputs(dir, file, p - file);
+		dir->append(file, p - file);
 		p++;
 	} else {
 		dir->push_back('.');

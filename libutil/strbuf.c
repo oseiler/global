@@ -82,20 +82,6 @@ delete sb;                              (not exist)
 */
 
 /**
- * strbuf_nputs: Put string with length
- *
- *	@param[in]	sb	string buffer
- *	@param[in]	s	string
- *	@param[in]	len	length of string
- */
-void
-strbuf_nputs(STRBUF *sb, const char *s, int len)
-{
-	sb->reserve(sb->length() + len);
-	while (len-- > 0)
-		*sb->curp++ = *s++;
-}
-/**
  * strbuf_nputc: Put a character, @a len (number) times
  *
  *	@param[in]	sb	string buffer
@@ -286,7 +272,7 @@ strbuf_vsprintf(STRBUF *sb, const char *s, va_list ap)
 			for (p = s; *p && *p != '%'; p++)
 				;
 			if (p > s) {
-				strbuf_nputs(sb, s, p - s);
+				sb->append(s, p - s);
 				s = p;
 			}
 		}
@@ -353,6 +339,13 @@ STRBUF::~STRBUF() {
 void STRBUF::append(const char* s) {
   while (*s) {
     reserve(length()+1);
+    *curp++ = *s++;
+  }
+}
+
+void STRBUF::append(const char* s, size_t len) {
+  reserve(length() + len);
+  while (len-- > 0) {
     *curp++ = *s++;
   }
 }

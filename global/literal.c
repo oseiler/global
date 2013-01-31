@@ -177,7 +177,7 @@ literal_search(CONVERT *cv, const char *file)
 			} else {
 				STATIC_STRBUF(sb);
 				sb->clear();
-				strbuf_nputs(sb, linep, p - linep);
+				sb->append(linep, p - linep);
 				strbuf_unputc(sb, '\n');
 				strbuf_unputc(sb, '\r');
 				convert_put_using(cv, encoded_pattern, file, lineno, sb->c_str(), NULL);

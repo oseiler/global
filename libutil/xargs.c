@@ -213,7 +213,7 @@ execute_command(XARGS *xp)
 	 */
 	meta_p = locatestring(xp->command, "%s", MATCH_FIRST);
 	if (meta_p) {
-		strbuf_nputs(&comline, xp->command, meta_p - xp->command);
+		comline.append(xp->command, meta_p - xp->command);
 		limit = exec_line_limit(strlen(meta_p + 2));
 	} else {
 		comline += xp->command;

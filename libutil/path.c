@@ -209,7 +209,7 @@ makedirectories(const char *base, const char *rest, int verbose)
 		while (*q && *q != SEP)
 			q++;
 		sb += SEP;
-		strbuf_nputs(&sb, p, q - p);
+		sb.append(p, q - p);
 		p = sb.c_str();
 		if (!test("d", p)) {
 			if (verbose)

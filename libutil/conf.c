@@ -183,7 +183,7 @@ includelabel(STRBUF *sb, const char *label, int	level)
 	while ((q = locatestring(p, ":include=", MATCH_FIRST)) || (q = locatestring(p, ":tc=", MATCH_FIRST))) {
 		STRBUF inc;
 
-		strbuf_nputs(sb, p, q - p);
+		sb->append(p, q - p);
 		q = locatestring(q, "=", MATCH_FIRST) + 1;
 		for (; *q && *q != ':'; q++)
 			inc += *q;
@@ -388,7 +388,7 @@ getconfs(const char *name, STRBUF *sb)
 			else {
 				const char *name = strrchr(_pgmptr, '\\');
 				if (name)
-					strbuf_nputs(sb, _pgmptr, name+1 - _pgmptr);
+					sb->append(_pgmptr, name+1 - _pgmptr);
 				sb->append("..\\share");
 			}
 #else
