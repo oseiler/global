@@ -960,7 +960,7 @@ src2html(const char *src, const char *html, int notsource)
 				define_index->append(gen_href_begin_with_title(NULL, NULL, NULL, tmp, tooltip('R', ancref->lineno, NULL)));
 				define_index->append(gettag(ancref));
 				define_index->append(gen_href_end());
-				strbuf_puts_nl(define_index, item_end);
+				*define_index << item_end << '\n';
 			}
 		}
 		if (!define_index->empty()) {

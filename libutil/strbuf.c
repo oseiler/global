@@ -97,23 +97,7 @@ strbuf_puts_withterm(STRBUF *sb, const char *s, int c)
 		*sb->curp++ = *s++;
 	}
 }
-/**
- * strbuf_puts_nl: Put string with a new line
- *
- *	@param[in]	sb	string buffer
- *	@param[in]	s	string
- */
-void
-strbuf_puts_nl(STRBUF *sb, const char *s)
-{
-	while (*s) {
-		sb->reserve(sb->length() + 1);
-		*sb->curp++ = *s++;
-	}
 
-	sb->reserve(sb->length() + 1);
-	*sb->curp++ = '\n';
-}
 /**
  * strbuf_putn: put digit string at the last of buffer.
  *

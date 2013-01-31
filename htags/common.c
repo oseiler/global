@@ -427,11 +427,11 @@ gen_page_generic_begin(const char *title, int place, int use_frameset, const cha
 		else
 			sb->append("<!DOCTYPE html PUBLIC '-//W3C//DTD XHTML 1.0 Transitional//EN' 'http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd'>\n");
 	}
-	strbuf_puts_nl(sb, html_begin);
-	strbuf_puts_nl(sb, html_head_begin);
+	*sb << html_begin << '\n';
+	*sb << html_head_begin << '\n';
 	sb->append(html_title_begin);
 	sb->append(title);
-	strbuf_puts_nl(sb, html_title_end);
+	*sb << html_title_end << '\n';
 	strbuf_sprintf(sb, "<meta name='robots' content='noindex,nofollow'%s>\n", empty_element);
 	strbuf_sprintf(sb, "<meta name='generator' content='GLOBAL-%s'%s>\n", get_version(), empty_element);
 	if (enable_xhtml) {

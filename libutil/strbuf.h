@@ -125,6 +125,16 @@ struct STRBUF {
   void reserve(size_t new_capacity);
 };
 
+inline STRBUF& operator<<(STRBUF& sb, const char* s) {
+  sb += s;
+  return sb;
+}
+
+inline STRBUF& operator<<(STRBUF& sb, char c) {
+  sb += c;
+  return sb;
+}
+
 /**
  * STATIC_STRBUF(sb):
  *
@@ -155,7 +165,6 @@ struct STRBUF {
 #define STATIC_STRBUF(sb) static STRBUF sb##_instance; STRBUF* sb = & sb##_instance
 
 void strbuf_puts_withterm(STRBUF *, const char *, int);
-void strbuf_puts_nl(STRBUF *, const char *);
 void strbuf_putn(STRBUF *, int);
 int strbuf_unputc(STRBUF *, int);
 void strbuf_trim(STRBUF *);

@@ -118,7 +118,7 @@ makedefineindex(const char *file, int total, STRBUF *defines)
 				snprintf(tmp, sizeof(tmp), "%d %s", alpha_count, msg);
 				defines->append(gen_href_begin_with_title("defines", alpha_f, HTML, NULL, tmp));
 				strbuf_sprintf(defines, "[%s]", alpha);
-				strbuf_puts_nl(defines, gen_href_end());
+				*defines << gen_href_end() << '\n';
 				alpha_count = 0;
 				if (!no_order_list)
 					fputs_nl(list_end, ALPHA);
@@ -252,7 +252,7 @@ makedefineindex(const char *file, int total, STRBUF *defines)
 		snprintf(tmp, sizeof(tmp), "%d %s", alpha_count, msg);
 		defines->append(gen_href_begin_with_title("defines", alpha_f, HTML, NULL, tmp));
 		strbuf_sprintf(defines, "[%s]", alpha);
-		strbuf_puts_nl(defines, gen_href_end());
+		*defines << gen_href_end() << '\n';
 		if (!no_order_list)
 			fputs_nl(list_end, ALPHA);
 		else
