@@ -510,7 +510,7 @@ gtags_put_using(GTOP *gtop, const char *tag, int lno, const char *fid, const cha
 	gtop->sb->push_back(' ');
 	gtop->sb->append((gtop->format & GTAGS_COMPNAME) ? compress(tag, key) : tag);
 	gtop->sb->push_back(' ');
-	strbuf_putn(gtop->sb, lno);
+	*gtop->sb << lno;
 	gtop->sb->push_back(' ');
 	gtop->sb->append((gtop->format & GTAGS_COMPRESS) ? compress(img, key) : img);
 	dbop_put(gtop->dbop, key, gtop->sb->c_str());
@@ -875,7 +875,7 @@ flush_pool(GTOP *gtop, const char *s_fid)
 						 * Don't use range expression at the head.
 						 */
 						if (gtop->sb->length() == header_offset)
-							strbuf_putn(gtop->sb, n);
+							*gtop->sb << n;
 						else
 							cont = last;
 					}
@@ -885,14 +885,14 @@ flush_pool(GTOP *gtop, const char *s_fid)
 					 */
 					if (cont) {
 						gtop->sb->push_back('-');
-						strbuf_putn(gtop->sb, last - cont);
+						*gtop->sb << (last - cont);
 						cont = 0;
 					}
 					if (gtop->sb->length() > header_offset) {
 						gtop->sb->push_back(',');
-						strbuf_putn(gtop->sb, n - last);
+						*gtop->sb << (n - last);
 					} else {
-						strbuf_putn(gtop->sb, n);
+						*gtop->sb << n;
 					}
 					if (gtop->sb->length() > DBOP_PAGESIZE / 4) {
 						dbop_put(gtop->dbop, key, gtop->sb->c_str());
@@ -903,7 +903,7 @@ flush_pool(GTOP *gtop, const char *s_fid)
 			}
 			if (cont) {
 				gtop->sb->push_back('-');
-				strbuf_putn(gtop->sb, last - cont);
+				*gtop->sb << (last - cont);
 			}
 		} else {
 			/*
@@ -917,7 +917,7 @@ flush_pool(GTOP *gtop, const char *s_fid)
 					continue;
 				if (gtop->sb->length() > header_offset)
 					gtop->sb->push_back(',');
-				strbuf_putn(gtop->sb, n);
+				*gtop->sb << n;
 				if (gtop->sb->length() > DBOP_PAGESIZE / 4) {
 					dbop_put(gtop->dbop, key, gtop->sb->c_str());
 					gtop->sb->resize(header_offset);

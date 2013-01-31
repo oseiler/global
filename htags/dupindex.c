@@ -120,9 +120,9 @@ makedupindex(void)
 					 */
 					tmp.clear();
 					tmp += ' ';
-					strbuf_putn(&tmp, count - 1);
+					tmp << (count - 1);
 					tmp += '\0';
-					strbuf_putn(&tmp, entry_count);
+					tmp << entry_count;
 					cache_put(db, prev, tmp.c_str(), tmp.length() + 1);
 				}				
 				/* single entry */
@@ -189,9 +189,9 @@ makedupindex(void)
 			 */
 			tmp.clear();
 			tmp += ' ';
-			strbuf_putn(&tmp, count);
+			tmp << count;
 			tmp += '\0';
-			strbuf_putn(&tmp, entry_count);
+			tmp << entry_count;
 			cache_put(db, prev, tmp.c_str(), tmp.length() + 1);
 		}
 		if (first_line[0]) {

@@ -531,7 +531,7 @@ makefileurl(const char *path, int line, STRBUF *url)
 	url->append(path);
 	if (line) {
 		url->append("#L");
-		strbuf_putn(url, line);
+		*url << line;
 	}
 }
 /**

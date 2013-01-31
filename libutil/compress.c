@@ -196,11 +196,11 @@ compress(const char *in, const char *name)
 			if (spaces >= 10) {
 				sb->push_back('@');
 				sb->push_back('{');
-				strbuf_putn(sb, spaces);
+				*sb << spaces;
 				sb->push_back('}');
 			} else if (spaces > 3) {
 				sb->push_back('@');
-				strbuf_putn(sb, spaces);
+				*sb << spaces;
 			} else {
 				sb->append(spaces, ' ');
 			}
@@ -238,11 +238,11 @@ compress(const char *in, const char *name)
 			sb->append(spaces, ' ');
 		} else if (spaces < 10) {
 			sb->push_back('@');
-			strbuf_putn(sb, spaces);
+			*sb << spaces;
 		} else {
 			sb->push_back('@');
 			sb->push_back('{');
-			strbuf_putn(sb, spaces);
+			*sb << spaces;
 			sb->push_back('}');
 		}
 	}

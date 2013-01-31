@@ -395,7 +395,7 @@ tooltip(int type, int lno, const char *opt)
 		else
 			sb->append("Referred from");
 		sb->push_back(' ');
-		strbuf_putn(sb, lno);
+		*sb << lno;
 		if (opt) {
 			sb->append(" in ");
 			sb->append(opt);

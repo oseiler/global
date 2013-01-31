@@ -135,6 +135,8 @@ inline STRBUF& operator<<(STRBUF& sb, char c) {
   return sb;
 }
 
+STRBUF& operator<<(STRBUF& sb, int n);
+
 /**
  * STATIC_STRBUF(sb):
  *
@@ -165,7 +167,6 @@ inline STRBUF& operator<<(STRBUF& sb, char c) {
 #define STATIC_STRBUF(sb) static STRBUF sb##_instance; STRBUF* sb = & sb##_instance
 
 void strbuf_puts_withterm(STRBUF *, const char *, int);
-void strbuf_putn(STRBUF *, int);
 int strbuf_unputc(STRBUF *, int);
 void strbuf_trim(STRBUF *);
 char *strbuf_fgets(STRBUF *, FILE *, int);

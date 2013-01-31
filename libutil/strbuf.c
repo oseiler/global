@@ -99,31 +99,6 @@ strbuf_puts_withterm(STRBUF *sb, const char *s, int c)
 }
 
 /**
- * strbuf_putn: put digit string at the last of buffer.
- *
- *	@param[in]	sb	#STRBUF structure
- *	@param[in]	n	number
- */
-void
-strbuf_putn(STRBUF *sb, int n)
-{
-	if (n == 0) {
-		sb->push_back('0');
-	} else {
-		char num[128];
-		int i = 0;
-
-		while (n) {
-			if (i >= sizeof(num))
-				die("Too big integer value.");
-			num[i++] = n % 10 + '0';
-			n = n / 10;
-		}
-		while (--i >= 0)
-			sb->push_back(num[i]);
-	}
-}
-/**
  * strbuf_unputc: remove specified char from the last of buffer
  *
  *	@param[in]	sb	#STRBUF structure
@@ -282,7 +257,7 @@ strbuf_vsprintf(STRBUF *sb, const char *s, va_list ap)
 			} else if (c == 's') {
 				sb->append(va_arg(ap, char *));
 			} else if (c == 'd') {
-				strbuf_putn(sb, va_arg(ap, int));
+				*sb << va_arg(ap, int);
 			} else {
 				die("Unsupported control character '%c'.", c);
 			}
@@ -342,4 +317,26 @@ void STRBUF::reserve(size_t new_capacity) {
 
   curp = sbuf+count;
   endp = sbuf+sbufsize;
+}
+
+STRBUF& operator<<(STRBUF& sb, int n)
+{
+  if (n == 0) {
+    sb.push_back('0');
+  } else {
+    char num[128];
+    int i = 0;
+    while (n) {
+      if (i >= sizeof(num))
+	die("Too big integer value.");
+      num[i++] = n % 10 + '0';
+      n = n / 10;
+    }
+
+    while (--i >= 0) {
+      sb.push_back(num[i]);
+    }
+  }
+
+  return sb;
 }
